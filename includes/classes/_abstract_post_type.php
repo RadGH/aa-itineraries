@@ -193,24 +193,6 @@ abstract class Class_Abstract_Post_Type {
 	
 	
 	/**
-	 * Return a query with all items
-	 *
-	 * @return WP_Query
-	 */
-	public function query_posts( $custom_args = null ) {
-		$args = array(
-			'post_type' => $this->post_type,
-		);
-		
-		if ( $custom_args !== null ) {
-			$args = wp_parse_args( $args, $custom_args );
-		}
-		
-		return new WP_Query( $args );
-	}
-	
-	
-	/**
 	 * Get post type
 	 *
 	 * @return null
