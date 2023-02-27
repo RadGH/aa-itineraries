@@ -19,7 +19,7 @@ function shortcode_ah_invoices( $atts, $content = '', $shortcode_name = 'ah_invo
 			<tr>
 				<th class="col col-id">ID</th>
 				<th class="col col-status">Status</th>
-				<th class="col col-amount">Amount</th>
+				<th class="col col-amount">Amount Due</th>
 				<th class="col col-actions">Actions</th>
 			</tr>
 		</thead>
@@ -28,12 +28,13 @@ function shortcode_ah_invoices( $atts, $content = '', $shortcode_name = 'ah_invo
 			<?php
 			foreach( $invoices->posts as $post ) {
 				$status = ah_get_invoice_status( $post->ID );
-				$amount = ah_get_payment_amount( $post->ID, true );
+				
+				$amount = ah_get_invoice_remaining_balance( $post->ID );
 				
 				$invoice_url = ah_get_invoice_page_url( $post->ID );
 				
-				// Awaiting Payment, Processing, Paid, Payment Failed
-				// awaiting-payment, processing, paid, payment-failed
+				// Awaiting Payment, Paid
+				// awaiting-payment, paid
 				$status_slug = sanitize_title_with_dashes( strtolower( $status) );
 				$status_indicator = ah_get_invoice_status_indicator( $post->ID );
 				
@@ -49,7 +50,7 @@ function shortcode_ah_invoices( $atts, $content = '', $shortcode_name = 'ah_invo
 						);
 					?></td>
 					<td class="col col-status"><?php echo $status_indicator; ?> <?php echo $status; ?></td>
-					<td class="col col-amount"><?php echo $amount; ?></td>
+					<td class="col col-amount"><?php echo ah_format_price( $amount ); ?></td>
 					<td class="col col-actions"><?php
 						
 						// Action: View

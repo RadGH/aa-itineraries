@@ -34,8 +34,8 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		
 		'tour_date'         => 6,
 		
-		'payment_amount'    => 9, // currency number input
-		'price'             => 11, // calculated from payment_amount
+		'amount_paid'       => 9, // currency number input
+		'price'             => 11, // calculated from amount_paid
 		'credit_card'       => 10,
 		
 	);
@@ -73,9 +73,6 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		
 		// Fill default values for GF
 		add_filter( 'shortcode_atts_gravityforms', array( $this, 'gf_fill_field_values' ), 20, 4 );
-		
-		// When status changes to Processing, start a timer to automatically mark as Payment Failed after some duration
-		add_filter( 'acf/update_value/name=status', array( $this, 'acf_set_processing_start_date' ), 40, 3 );
 		
 	}
 	
@@ -154,7 +151,8 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 				echo $this->get_invoice_status( $post_id );
 				break;
 			case 'ah_amount':
-				echo $this->get_payment_amount( $post_id, true );
+				$amount = $this->get_amount_paid( $post_id );
+				echo ah_format_price( $amount );
 				break;
 			case 'ah_name':
 				echo get_field( 'first_name', $post_id );
@@ -207,9 +205,6 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 			$invoice_id = $this->create_invoice();
 			if ( ! $invoice_id ) aa_die( 'Could not create invoice for this payment. Your payment may still be processed. Please contact us for support', compact('entry'));
 			
-			// Set invoice status as processing
-			$this->set_invoice_status( $invoice_id, 'Processing' );
-			
 		}else{
 			
 			// Verify the existing invoice
@@ -249,10 +244,10 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		
 		// Save the payment amount to the invoice
 		$post_id = $this->get_invoice_id_from_entry_id( $entry );
-		$payment_amount = $this->get_entry_value($entry, 'payment_amount');
+		$amount_paid = $this->get_entry_value($entry, 'amount_paid');
 		
-		if ( $post_id && $payment_amount ) {
-			$this->apply_payment_amount( $post_id, $payment_amount );
+		if ( $post_id && $amount_paid ) {
+			$this->apply_payment( $post_id, $amount_paid );
 		}
 	}
 	
@@ -315,31 +310,6 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		return $atts;
 	}
 	
-	
-	/**
-	 * When status changes to Processing, start a timer to automatically mark as Payment Failed after some duration
-	 *
-	 * @param $value
-	 * @param $object_id
-	 * @param $field
-	 *
-	 * @return void
-	 */
-	public function acf_set_processing_start_date( $value, $object_id, $field ) {
-		$info = acf_get_post_id_info( $object_id );
-		if ( $info['type'] != 'post' ) return $value;
-		
-		$post_id = $info['id'];
-		if ( get_post_type( $post_id ) != $this->get_post_type() ) return $value;
-		
-		if ( $value == 'Processing' ) {
-			// Store the date this started processing. Mark as payment failed after a certain amount of time.
-			update_post_meta( $post_id, 'processing_start_date', date('Y-m-d H:i:s') );
-		}else{
-			delete_post_meta( $post_id, 'processing_start_date' );
-		}
-	}
-	
 	/**
 	 * Set the status of an invoice. Also starts a timer if the status is processing, or ends the timer otherwise.
 	 *
@@ -363,13 +333,6 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 			$this->add_log_message( $post_id, 'Invoice status set to "' . $new_status . '" and was previously "' . $current_status . '"' );
 		}
 		
-		// Save the date that processing started, or clear it otherwise.
-		if ( $new_status == 'Processing' ) {
-			update_post_meta( $post_id, 'processing_start_date', date('Y-m-d H:i:s') );
-		}else{
-			delete_post_meta( $post_id, 'processing_start_date' );
-		}
-		
 		return true;
 	}
 	
@@ -387,30 +350,39 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	}
 	
 	public function set_amount_due( $invoice_id, $amount ) { update_field( 'amount_due', $amount, $invoice_id ); }
-	public function get_amount_due( $invoice_id ) { return (float) get_field( 'amount_due', $invoice_id ); }
+	public function get_amount_due( $post_id ) { return (float) get_post_meta( $post_id, 'amount_due', true ); }
 	
+	public function set_amount_paid( $invoice_id, $amount ) { update_field( 'amount_paid', $amount, $invoice_id ); }
+	public function get_amount_paid( $post_id ) { return (float) get_post_meta( $post_id, 'amount_paid', true ); }
+
+	// Remaining balance cannot be changed directly
+	// public function set_get_remaining_balance( $invoice_id, $amount ) { exit; }
+	public function get_remaining_balance( $post_id ) {
+		$due = $this->get_amount_due( $post_id );
+		$paid = $this->get_amount_paid( $post_id );
+		return $due - $paid;
+	}
+
 	public function set_due_date( $invoice_id, $due_date ) { update_field( 'due_date', $due_date, $invoice_id ); }
-	public function get_due_date( $invoice_id ) { return get_field( 'due_date', $invoice_id ); }
 	
-	public function set_payment_amount( $invoice_id, $amount ) { update_field( 'payment_amount', $amount, $invoice_id ); }
-	 
 	/**
-	 * Get the payment amount of an invoice.
-	 * If $currency_format is true, returns formatted as USD currency.
+	 * Get the due date of an invoice
 	 *
-	 * @param int $post_id
-	 * @param bool $currency_format
+	 * @param int $invoice_id
+	 * @param null|string $format  PHP date format
 	 *
 	 * @return string|false
 	 */
-	public function get_payment_amount( $post_id, $currency_format = false ) {
-		$amount = get_post_meta( $post_id, 'payment_amount', true );
+	public function get_due_date( $invoice_id, $format = null ) {
+		$date_ymd = get_field( 'due_date', $invoice_id );
+		if ( ! $date_ymd ) $date_ymd = current_time('Y-m-d'); // date is required, due today if blank
 		
-		if ( $amount && $currency_format ) {
-			$amount = '$' . number_format(  (float) $amount, 2 );
+		if ( $format === null ) {
+			return $date_ymd;
+		}else{
+			$ts = strtotime( $date_ymd );
+			return date( $format, $ts );
 		}
-		
-		return $amount ?: false;
 	}
 	
 	/**
@@ -568,7 +540,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		// Save default custom fields
 		$this->set_invoice_status( $post_id, 'Awaiting Payment', false );
 		$this->set_amount_due( $post_id, 0 );
-		$this->set_payment_amount( $post_id, 0 );
+		$this->set_amount_paid( $post_id, 0 );
 		$this->set_due_date( $post_id, ah_adjust_date( '+30 days', 'Y-m-d' ) );
 		
 		// Add log message
@@ -659,7 +631,6 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		
 		$status = $this->get_invoice_status( $post_id );
 		if ( $status == 'Paid' ) return false;
-		if ( $status == 'Processing' ) return false; // may need payment if the payment does not go through
 		
 		return true;
 	}
@@ -669,18 +640,18 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	 * If not paid in full, status changes back to Awaiting Payment.
 	 *
 	 * @param $invoice_id
-	 * @param $payment_amount
+	 * @param $amount_paid
 	 *
 	 * @return void
 	 */
-	public function apply_payment_amount( $invoice_id, $payment_amount ) {
+	public function apply_payment( $invoice_id, $amount_paid ) {
 		// Get amount due and amount currently paid
 		$total_due = (float) get_field( 'amount_due', $invoice_id, false );
-		$total_paid = (float) get_field( 'payment_amount', $invoice_id, false );
+		$total_paid = (float) get_field( 'amount_paid', $invoice_id, false );
 		
 		// Add the payment to the amount paid
-		$total_paid += $payment_amount;
-		update_field( 'payment_amount', $total_paid, $invoice_id );
+		$total_paid += $amount_paid;
+		update_field( 'amount_paid', $total_paid, $invoice_id );
 		
 		// Show a message in the log about that payment
 		$total_paid_formatted = '$' . number_format(  (float) $total_paid, 2 );

@@ -117,6 +117,7 @@ class Class_AH_Plugin {
 		// ----------------------------------------
 		// 6. Include other functions
 		include_once( AH_PATH . '/includes/functions/general.php' );
+		include_once( AH_PATH . '/includes/functions/utility.php' );
 		
 		// ----------------------------------------
 		// 7. Shortcodes

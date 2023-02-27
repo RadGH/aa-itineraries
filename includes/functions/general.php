@@ -67,33 +67,45 @@ function ah_get_invoice_status_indicator( $invoice_id ) {
 
 /**
  * Get the payment amount of an invoice.
- * If $currency_format is true, returns formatted as USD currency.
  *
  * @param int $invoice_id
- * @param bool $currency_format
  *
- * @return string|false
+ * @return float
  */
-function ah_get_payment_amount( $invoice_id, $currency_format = false ) {
-	return AH_Plugin()->Invoice->get_payment_amount( $invoice_id, $currency_format );
+function ah_get_invoice_amount_due( $invoice_id ) {
+	return AH_Plugin()->Invoice->get_amount_due( $invoice_id );
 }
 
 /**
- * Adjust a date such as "+30 days" with standard php date formatting.
+ * Get the payment amount of an invoice.
  *
- * @param string $offset           "+30 days" or "-1 month"
- * @param string $format           "Y-m-d" or "timestamp"
- * @param null|int $current_time   timestamp, defaults to current time in server timezone
+ * @param int $invoice_id
  *
- * @return string|int
+ * @return string|false
  */
-function ah_adjust_date( $offset, $format, $current_time = null ) {
-	if ( $current_time === null ) $current_time = current_time( 'timestamp' );
-	
-	$ts = strtotime( $offset, $current_time );
-	
-	if ( $format === 'timestamp' )
-		return $ts;
-	else
-		return date( $format, $ts );
+function ah_get_invoice_amount_paid( $invoice_id ) {
+	return AH_Plugin()->Invoice->get_amount_paid( $invoice_id );
+}
+
+/**
+ * Get the payment amount of an invoice.
+ *
+ * @param int $invoice_id
+ *
+ * @return string|false
+ */
+function ah_get_invoice_remaining_balance( $invoice_id ) {
+	return AH_Plugin()->Invoice->get_remaining_balance( $invoice_id );
+}
+
+/**
+ * Get the due date of an invoice
+ *
+ * @param int $invoice_id
+ * @param null|string $format  PHP date format
+ *
+ * @return string|false
+ */
+function ah_get_invoice_due_date( $invoice_id, $format = null ) {
+	return AH_Plugin()->Invoice->get_due_date( $invoice_id, $format );
 }
