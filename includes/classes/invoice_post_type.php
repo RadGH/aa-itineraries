@@ -165,8 +165,6 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	}
 	
 	public function restrict_invoice_access() {
-		pre_dump(is_singular( $this->get_post_type() ));
-		exit;
 		
 		// Only affect singular invoice page
 		if ( ! is_singular( $this->get_post_type() ) ) return;
