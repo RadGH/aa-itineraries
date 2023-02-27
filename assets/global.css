@@ -1,0 +1,89 @@
+
+/*
+Start: Login Form
+*/
+#ah-login-form p {
+	margin: 0 0 20px;
+}
+
+#ah-login-form > p:last-child {
+	margin-bottom: 0;
+}
+
+#ah-login-form label {
+	font-family: Montserrat;
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1.35;
+	margin: 0 0 5px;
+}
+
+#ah-login-form p.login-remember label {
+	font-weight: 400;
+}
+
+#ah-login-form input[type="text"],
+#ah-login-form input[type="password"] {
+	margin: 0;
+}
+
+#ah-login-form input[type="checkbox"] {
+	margin: 0 5px 0 0;
+}
+
+#ah-login-form input[type="submit"] {
+	margin: 0 !important;
+}
+/*
+End: Login Form
+*/
+
+
+
+/*
+Start: Login Form - Blue Box Theme
+*/
+#ah-login-form {
+	display: inline-block;
+	background: #204f66;
+	margin: 0;
+	padding: 25px;
+	text-align: center;
+}
+
+#ah-login-form label {
+	color: #fff;
+}
+
+#ah-login-form input[type="text"],
+#ah-login-form input[type="password"] {
+	background: #fff;
+	border-color: #fff;
+	color: #3b3d3d;
+	width: 100%;
+}
+
+#ah-login-form p.login-username label,
+#ah-login-form p.login-password label {
+	text-align: left;
+}
+
+#ah-login-form input[type="checkbox"] {
+}
+
+#ah-login-form input[type="submit"]:hover {
+	background-color: #fff;
+	border-color: #fff;
+	color: #204f66;
+}
+
+@media ( min-width: 500px ) {
+	#ah-login-form {
+		width: 500px;
+		max-width: 100%;
+		padding: 25px 40px;
+	}
+}
+/*
+End: Login Form - Blue Box Theme
+*/
