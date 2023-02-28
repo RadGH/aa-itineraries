@@ -37,6 +37,7 @@ class Class_AH_Plugin {
 	public Class_AH_Admin               $Admin;
 	public Class_AH_Enqueue             $Enqueue;
 	public Class_AH_Rewrites            $Rewrites;
+	public Class_AH_Reminders           $Reminders;
 	public Class_AH_Smartsheet          $Smartsheet;
 	public Class_Account_Page_Post_Type $Account_Page;
 	public Class_Invoice_Post_Type      $Invoice;
@@ -93,6 +94,9 @@ class Class_AH_Plugin {
 		
 		include_once( __DIR__ . '/includes/classes/enqueue.php' );
 		$this->Enqueue = new Class_AH_Enqueue();
+		
+		include_once( __DIR__ . '/includes/classes/reminders.php' );
+		$this->Reminders = new Class_AH_Reminders();
 		
 		include_once( __DIR__ . '/includes/classes/rewrites.php' );
 		$this->Rewrites = new Class_AH_Rewrites();

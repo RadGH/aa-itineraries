@@ -102,10 +102,9 @@ function ah_get_invoice_remaining_balance( $invoice_id ) {
  * Get the due date of an invoice
  *
  * @param int $invoice_id
- * @param null|string $format  PHP date format
  *
- * @return string|false
+ * @return string
  */
-function ah_get_invoice_due_date( $invoice_id, $format = null ) {
-	return AH_Plugin()->Invoice->get_due_date( $invoice_id, $format );
+function ah_get_invoice_due_date( $invoice_id ) {
+	return AH_Plugin()->Invoice->get_due_date( $invoice_id );
 }

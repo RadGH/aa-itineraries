@@ -62,6 +62,9 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		// Only allow access to invoice if you own the invoice
 		add_action( 'template_redirect', array( $this, 'restrict_invoice_access' ) );
 		
+		// Calculate reminder notifications when due date changes
+		add_action( 'acf/save_post', array( $this, 'save_post_recalculate_reminders' ), 40 );
+		
 		// When an entry is created, create or update an invoice
 		add_action( 'gform_entry_created', array( $this, 'gf_entry_create_or_edit_invoice' ), 5, 2 );
 		
@@ -183,6 +186,19 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		get_template_part( '404' );
 		exit;
 		
+	}
+	
+	/**
+	 * Calculate reminder notifications when due date changes
+	 *
+	 * @param $post_id
+	 *
+	 * @return void
+	 */
+	public function save_post_recalculate_reminders( $post_id ) {
+		if ( ! $this->is_valid_invoice( $post_id ) ) return;
+		
+		$this->setup_reminder_notifications( $post_id );
 	}
 	
 	/**
@@ -369,20 +385,13 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	 * Get the due date of an invoice
 	 *
 	 * @param int $invoice_id
-	 * @param null|string $format  PHP date format
 	 *
-	 * @return string|false
+	 * @return string
 	 */
-	public function get_due_date( $invoice_id, $format = null ) {
+	public function get_due_date( $invoice_id ) {
 		$date_ymd = get_field( 'due_date', $invoice_id );
 		if ( ! $date_ymd ) $date_ymd = current_time('Y-m-d'); // date is required, due today if blank
-		
-		if ( $format === null ) {
-			return $date_ymd;
-		}else{
-			$ts = strtotime( $date_ymd );
-			return date( $format, $ts );
-		}
+		return date('Y-m-d', strtotime($date_ymd)); // reformat "Ymd" to "Y-m-d" for consistency
 	}
 	
 	/**
@@ -546,7 +555,17 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		// Add log message
 		$this->add_log_message( $post_id, 'Invoice created' );
 		
+		// Set up reminder dates
+		$this->setup_reminder_notifications( $post_id );
+		
 		return (int) $post_id;
+	}
+	
+	/**
+	 * Alias of @see Class_AH_Reminders::setup_reminder_notifications
+	 */
+	public function setup_reminder_notifications( $invoice_id ) {
+		AH_Plugin()->Reminders->setup_reminder_notifications( $invoice_id );
 	}
 	
 	/**

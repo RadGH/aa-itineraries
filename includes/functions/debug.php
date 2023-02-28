@@ -411,9 +411,32 @@ function rad_20235927_11593() {
 	$brandi_user_id = 21; // brandi@brandibernoskie.com
 	$alchemy_user_id = 2; // alchemyandaim
 	
-	AH_Plugin()->Invoice->set_owner( $invoice_id, $brandi_user_id );
+	AH_Plugin()->Invoice->set_owner( $invoice_id, $alchemy_user_id );
 	
 	$new_owner = AH_Plugin()->Invoice->get_owner( $invoice_id );
+	
+	/*
+	delete_post_meta( $invoice_id, 'reminder_1_enabled' );
+	delete_post_meta( $invoice_id, 'reminder_1_sent' );
+	delete_post_meta( $invoice_id, 'reminder_1_date' );
+	delete_post_meta( $invoice_id, 'reminder_1_notes' );
+	delete_post_meta( $invoice_id, 'reminder_2_enabled' );
+	delete_post_meta( $invoice_id, 'reminder_2_sent' );
+	delete_post_meta( $invoice_id, 'reminder_2_date' );
+	delete_post_meta( $invoice_id, 'reminder_2_notes' );
+	delete_post_meta( $invoice_id, 'reminder_3_enabled' );
+	delete_post_meta( $invoice_id, 'reminder_3_sent' );
+	delete_post_meta( $invoice_id, 'reminder_3_date' );
+	delete_post_meta( $invoice_id, 'reminder_3_notes' );
+	delete_post_meta( $invoice_id, 'reminder_4_enabled' );
+	delete_post_meta( $invoice_id, 'reminder_4_sent' );
+	delete_post_meta( $invoice_id, 'reminder_4_date' );
+	delete_post_meta( $invoice_id, 'reminder_4_notes' );
+	
+	AH_Plugin()->Invoice->setup_reminder_notifications( $invoice_id );
+	*/
+	
+	AH_Plugin()->Reminders->send_daily_reminders();
 	
 	echo '<pre>';
 	var_dump(compact( 'new_owner' ));
