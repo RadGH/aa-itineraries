@@ -62,14 +62,46 @@ Start: Invoice list table for ah_invoices shortcode
 html .ah-invoices .col-actions .button {
 	margin: 0 5px 0 0 !important;
 }
-
-.ah-invoices .col-actions .button-small {
-	font-size: 12px;
-	padding: 1px 5px;
-}
 /*
 End: Invoice list table for ah_invoices shortcode
 */
+
+
+/*
+Start: Custom buttons
+*/
+html .ah-button.button {
+	font-size: 14px;
+	padding: 10px 20px;
+
+	background: #aa4a3a;
+	color: #fff;
+	border: 1px solid #aa4a3a;
+}
+
+html .ah-button.button:hover,
+html .ah-button.button:active {
+	background: #204f66;
+	color: #fff;
+	border: 1px solid #204f66;
+}
+
+html .ah-button.button-secondary {
+	background: transparent;
+	color: #aa4a3a;
+	border: 1px solid #aa4a3a;
+}
+html .ah-button.button-secondary:hover,
+html .ah-button.button-secondary:active {
+	background: #dee5e8;
+	color: #204f66;
+	border: 1px solid #204f66;
+}
+
+/*
+End: Custom buttons
+*/
+
 /*
 Start: Invoice singular page
 */
@@ -78,4 +110,70 @@ Start: Invoice singular page
 }
 /*
 End: Invoice singular page
+*/
+
+/*
+Start: Account Sidebar
+*/
+.account-sidebar {
+	background: #f1f1f1;
+	padding: 40px 30px;
+}
+
+nav.ah-account-menu-nav ul,
+nav.ah-account-menu-nav li {
+	display: block;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+nav.ah-account-menu-nav {
+	font-size: 14px;
+	text-transform: uppercase;
+	font-family: Montserrat, sans-serif;
+	font-weight: 500;
+	line-height: 1.35;
+}
+
+nav.ah-account-menu-nav ul {
+}
+
+nav.ah-account-menu-nav li {
+	margin: 0 0 15px;
+}
+
+nav.ah-account-menu-nav li a {
+}
+/*
+End: Account Sidebar
+*/
+
+/*
+Start: Stylized Table <table class="ah-table"></table>
+*/
+table.ah-table thead th {
+	font-size: 12px;
+	font-family: 'Montserrat', sans-serif;
+	color: #204f66;
+	font-weight: 600;
+}
+
+table.ah-table th,
+table.ah-table td {
+	padding: 20px 30px 20px 0;
+	border-bottom: 1px solid #bfc9c8;
+}
+
+table.ah-table thead th {
+	padding-top: 5px;
+	padding-bottom: 10px;
+}
+
+table.ah-table :last-child > tr:last-child > th,
+table.ah-table :last-child > tr:last-child > td {
+	border-bottom: none;
+}
+/*
+End: Stylized Table
 */

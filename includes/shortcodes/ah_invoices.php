@@ -14,7 +14,7 @@ function shortcode_ah_invoices( $atts, $content = '', $shortcode_name = 'ah_invo
 	?>
 <div class="ah-invoices">
 	
-	<table class="ah-invoice-table">
+	<table class="ah-table ah-invoice-table" cellspacing="0">
 		<thead>
 			<tr>
 				<th class="col col-id">ID</th>
@@ -55,7 +55,7 @@ function shortcode_ah_invoices( $atts, $content = '', $shortcode_name = 'ah_invo
 						
 						// Action: View
 						printf(
-							'<a href="%s" class="button button-small button-secondary">%s</a>',
+							'<a href="%s" class="button button-secondary ah-button">%s</a>',
 							esc_attr( $invoice_url ),
 							esc_html( 'View' )
 						);
@@ -66,7 +66,7 @@ function shortcode_ah_invoices( $atts, $content = '', $shortcode_name = 'ah_invo
 							$form_url = ah_get_invoice_form_url( $post->ID );
 							
 							printf(
-								'<a href="%s" class="button button-small button-secondary">%s</a>',
+								'<a href="%s" class="button button-primary ah-button">%s</a>',
 								esc_attr( $form_url ),
 								esc_html( 'Pay Invoice' )
 							);
