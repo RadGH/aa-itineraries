@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: A+A - Alpine Hikers Itineraries
-Description: Adds an Itinerary system, deposit form, and integration with the Smartsheet API
+Plugin Name: A+A - Alpine Hikers
+Description: Account pages, Deposit form, Document storage, Itineraries, and Smartsheet integrations
 Author: Radley Sustaire, Alchemy and Aim
-Version: 1.0.0
+Version: 1.1.0
 */
 
 define( 'AH_URL', untrailingslashit( plugin_dir_url( __FILE__ ) ) );
