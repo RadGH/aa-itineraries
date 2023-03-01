@@ -62,6 +62,9 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		// Only allow access to invoice if you own the invoice
 		add_action( 'template_redirect', array( $this, 'restrict_invoice_access' ) );
 		
+		// Make the author match the assigned user for the post
+		add_action( 'acf/save_post', array( $this, 'save_post_reassign_author' ), 40 );
+		
 		// Calculate reminder notifications when due date changes
 		add_action( 'acf/save_post', array( $this, 'save_post_recalculate_reminders' ), 40 );
 		
@@ -165,6 +168,19 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		}
 	}
 	
+	/**
+	 * Remove author metabox, because we use a "User" field instead
+	 *
+	 * @return void
+	 */
+	public function remove_unwanted_meta_boxes() {
+		parent::remove_unwanted_meta_boxes();
+		
+		// Remove author metabox
+		remove_meta_box( 'authordiv', $this->get_post_type(), 'normal' );
+		remove_meta_box( 'authordiv', $this->get_post_type(), 'side' );
+	}
+	
 	public function restrict_invoice_access() {
 		
 		// Only affect singular invoice page
@@ -172,9 +188,14 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		
 		$invoice_id = get_the_ID();
 		
+		// Check if the invoice has an owner.
+		$invoice_user_id = $this->get_owner_user_id( $invoice_id );
+		
+		// Public invoices can be paid by anyone, though they must either log in or create an account
+		if ( ! $invoice_user_id ) return;
+		
 		// Check if the user is the invoice owner
 		$current_user_id = get_current_user_id();
-		$invoice_user_id = $this->get_owner( $invoice_id );
 		
 		// Allow owner to see their own invoice
 		if ( $current_user_id == $invoice_user_id ) return;
@@ -186,6 +207,28 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		get_template_part( '404' );
 		exit;
 		
+	}
+	
+	/**
+	 * Make the post author match the assigned user for the invoice, if set.
+	 * Note that invoices do not need to be assigned to an existing users.
+	 *
+	 * @param $post_id
+	 *
+	 * @return void
+	 */
+	public function save_post_reassign_author( $post_id ) {
+		if ( ! $this->is_valid_invoice( $post_id ) ) return;
+		
+		$post = get_post( $post_id );
+		
+		$author_user_id = $post->post_author;
+		$owner_user_id = $this->get_owner_user_id( $post_id );
+		
+		// If the "User" field is different, set the author to that user
+		if ( $owner_user_id && $author_user_id != $owner_user_id ) {
+			$this->set_owner( $post_id, $owner_user_id );
+		}
 	}
 	
 	/**
@@ -382,16 +425,17 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	public function set_due_date( $invoice_id, $due_date ) { update_field( 'due_date', $due_date, $invoice_id ); }
 	
 	/**
-	 * Get the due date of an invoice
+	 * Get the due date of an invoice, optionally using a PHP date $format
 	 *
 	 * @param int $invoice_id
+	 * @param string $format
 	 *
-	 * @return string
+	 * @return string|false     "Y-m-d" date or false
 	 */
-	public function get_due_date( $invoice_id ) {
+	public function get_due_date( $invoice_id, $format = 'Y-m-d' ) {
 		$date_ymd = get_field( 'due_date', $invoice_id );
-		if ( ! $date_ymd ) $date_ymd = current_time('Y-m-d'); // date is required, due today if blank
-		return date('Y-m-d', strtotime($date_ymd)); // reformat "Ymd" to "Y-m-d" for consistency
+		if ( ! $date_ymd ) return false;
+		return date($format, strtotime($date_ymd)); // reformat "Ymd" to "Y-m-d" for consistency
 	}
 	
 	/**
@@ -427,19 +471,8 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	 *
 	 * @return int|false
 	 */
-	public function get_owner( $invoice_id ) {
+	public function get_owner_user_id( $invoice_id ) {
 		$user_id = get_field( 'user', $invoice_id );
-		
-		// If not defined, use the post author by default
-		if ( empty($user_id) ) {
-			$post = get_post( $invoice_id );
-			if ( ! $post || $post->post_type != $this->get_post_type() ) return false;
-			
-			if ( $post->post_author ) {
-				$user_id = $post->post_author;
-				$this->set_owner( $invoice_id, $user_id );
-			}
-		}
 		
 		return $user_id ?: false;
 	}
@@ -559,6 +592,133 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		$this->setup_reminder_notifications( $post_id );
 		
 		return (int) $post_id;
+	}
+	
+	/**
+	 * Get an array of key:value pairs where the key is a merge tag like [first_name]
+	 *
+	 * @param int|string $invoice_id
+	 *
+	 * @return string[]
+	 */
+	public function get_merge_tags( $invoice_id = null ) {
+		
+		// Variables to use directly
+		if ( $this->is_valid_invoice( $invoice_id ) ) {
+			$invoice_status = $this->get_invoice_status( $invoice_id );
+			$invoice_page_url = $this->get_invoice_page_url( $invoice_id );
+			$invoice_form_url = $this->get_invoice_form_url( $invoice_id );
+			
+			$amount_due = $this->get_amount_due( $invoice_id );
+			$amount_paid = $this->get_amount_paid( $invoice_id );
+			$remaining_balance = $this->get_remaining_balance( $invoice_id );
+			
+			$due_date = $this->get_due_date( $invoice_id, 'm/d/Y' );
+			$remaining_time = human_time_diff( $this->get_due_date( $invoice_id, 'U' ), current_time('U') );
+			
+			$first_name = get_post_meta( $invoice_id, 'first_name', true );
+			$last_name = get_post_meta( $invoice_id, 'last_name', true );
+			$full_name = trim( $first_name . ' ' . $last_name );
+			
+			$email = get_post_meta( $invoice_id, 'email', true );
+			$phone_number = get_post_meta( $invoice_id, 'phone_number', true );
+			
+			$address = get_post_meta( $invoice_id, 'address', true );
+			$address_2 = get_post_meta( $invoice_id, 'address_2', true );
+			$city = get_post_meta( $invoice_id, 'city', true );
+			$state = get_post_meta( $invoice_id, 'state', true );
+			$zip = get_post_meta( $invoice_id, 'zip', true );
+			$country = get_post_meta( $invoice_id, 'country', true );
+			
+			$tour_date = get_post_meta( $invoice_id, 'tour_date', true );
+			
+			// Use the user's first name, last name, and email, if not provided on the invoice
+			$owner_user_id = $this->get_owner_user_id( $invoice_id );
+			
+			if ( $owner_user_id ) {
+				if ( ! $first_name ) $first_name = ah_get_user_field( $owner_user_id, 'first_name');
+				if ( ! $last_name ) $last_name = ah_get_user_field( $owner_user_id, 'last_name');
+				if ( ! $email ) $email = ah_get_user_field( $owner_user_id, 'user_email');
+			}
+			
+			// Format some values
+			$amount_due = ah_format_price( $amount_due );
+			$amount_paid = ah_format_price( $amount_paid );
+			$remaining_balance = ah_format_price( $remaining_balance );
+		}
+		
+		if ( $invoice_id === 'placeholders' ) {
+			
+			$invoice_id        = '5550';
+			$invoice_page_url  = site_url('/account/invoice/ah-invoice-1234567b1470b/');
+			$invoice_form_url  = site_url('/account/payment/?invoice_id=6074');
+			
+			$invoice_status    = 'Awaiting Payment';
+			$amount_due        = '$50';
+			$amount_paid       = '$0';
+			$remaining_balance = '$50';
+			
+			$due_date          = date('m/d/Y', strtotime('+1 week'));
+			$remaining_time    = '1 week';
+			
+			$first_name        = 'John';
+			$last_name         = 'Smith';
+			$full_name         = 'John Smith';
+			
+			$email             = 'jsmith@example.org';
+			$phone_number      = '555-123-4567';
+			
+			$address           = '1234 Example Road';
+			$address_2         = 'Apt 205b';
+			$city              = 'Eugene';
+			$state             = 'OR';
+			$zip               = '97401';
+			$country           = 'United States';
+			
+			$tour_date         = 'Summer 2023';
+			
+		}
+		
+		// Build merge tags array
+		$tags = array(
+			
+			'[invoice_id]'        => $invoice_id         ?? "",
+			'[invoice_page_url]'  => $invoice_page_url   ?? "",
+			'[invoice_form_url]'  => $invoice_form_url   ?? "",
+			
+			'[invoice_status]'    => $invoice_status     ?? "",
+			'[amount_due]'        => $amount_due         ?? "",
+			'[amount_paid]'       => $amount_paid        ?? "",
+			'[remaining_balance]' => $remaining_balance  ?? "",
+			
+			'[due_date]'          => $due_date           ?? "",
+			'[remaining_time]'    => $remaining_time     ?? "",
+			
+			'[first_name]'        => $first_name         ?? "",
+			'[last_name]'         => $last_name          ?? "",
+			'[full_name]'         => $full_name          ?? "",
+			
+			'[email]'             => $email              ?? "",
+			'[phone_number]'      => $phone_number       ?? "",
+			
+			'[address]'           => $address            ?? "",
+			'[address_2]'         => $address_2          ?? "",
+			'[city]'              => $city               ?? "",
+			'[state]'             => $state              ?? "",
+			'[zip]'               => $zip                ?? "",
+			'[country]'           => $country            ?? "",
+			
+			'[tour_date]'         => $tour_date          ?? "",
+			
+		);
+		
+		// Add general merge tags (site_url, etc)
+		$general_tags = ah_get_general_merge_tags();
+		
+		// Merge the merge tag arrays
+		$tags = array_merge( $general_tags, $tags );
+		
+		return $tags;
 	}
 	
 	/**

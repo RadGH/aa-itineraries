@@ -1,1 +1,13 @@
-/* ... */
+/*
+Start: Fix select2 on top of datepickers
+*/
+html .ui-datepicker {
+	z-index: 11000 !important;
+}
+
+html .select2-container {
+	z-index: 10000 !important;
+}
+/*
+End: Fix select2 on top of datepickers
+*/

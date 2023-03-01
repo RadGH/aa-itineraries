@@ -99,12 +99,78 @@ function ah_get_invoice_remaining_balance( $invoice_id ) {
 }
 
 /**
- * Get the due date of an invoice
+ * Get the due date of an invoice, optionally using a PHP date $format
  *
  * @param int $invoice_id
+ * @param string $format
  *
  * @return string
  */
-function ah_get_invoice_due_date( $invoice_id ) {
-	return AH_Plugin()->Invoice->get_due_date( $invoice_id );
+function ah_get_invoice_due_date( $invoice_id, $format = 'Y-m-d' ) {
+	return AH_Plugin()->Invoice->get_due_date( $invoice_id, $format );
+}
+
+/**
+ * Get the owner of an invoice (user ID)
+ *
+ * @param $invoice_id
+ *
+ * @return int|false
+ */
+function ah_get_invoice_owner( $invoice_id ) {
+	return AH_Plugin()->Invoice->get_owner_user_id( $invoice_id );
+}
+
+/**
+ * Get merge tags for an invoice (includes general merge tags)
+ *
+ * @param int|string $invoice_id   Post ID or to use placeholder values specify "placeholders"
+ *
+ * @return string[]
+ */
+function ah_get_invoice_merge_tags( $invoice_id = null ) {
+	return AH_Plugin()->Invoice->get_merge_tags( $invoice_id );
+}
+
+/**
+ * Get generic merge tags that can be used for invoice emails, or other things
+ *
+ * @return string[]
+ */
+function ah_get_general_merge_tags() {
+	$site_url = site_url('/');
+	$account_url = site_url('/account/');
+	
+	return array(
+		'[site_url]' => $site_url,
+		'[account_url]' => $account_url,
+	);
+}
+
+/**
+ * Get the value from a WP_User object based on the user's ID
+ *
+ * @param $user_id
+ * @param $field
+ * @param $default
+ *
+ * @return int|mixed|null
+ */
+function ah_get_user_field( $user_id, $field, $default = null ) {
+	$user = get_user_by( 'id', 'user_id' );
+	
+	return ( $user instanceof WP_User ) ? $user->get( $field ) : $default;
+}
+
+
+/**
+ * Apply merge tags to a string, replacing keys [first_name] with values "Radley". Merge tag keys should include brackets.
+ *
+ * @param string $string
+ * @param array $merge_tags
+ *
+ * @return string
+ */
+function ah_apply_merge_tags( $string, $merge_tags ) {
+	return str_ireplace( array_keys($merge_tags), array_values($merge_tags), $string );
 }

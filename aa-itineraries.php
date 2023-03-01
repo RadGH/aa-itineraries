@@ -125,6 +125,7 @@ class Class_AH_Plugin {
 		
 		// ----------------------------------------
 		// 7. Shortcodes
+		include_once( AH_PATH . '/includes/shortcodes/ah_invoice_merge_tags_preview.php' );
 		include_once( AH_PATH . '/includes/shortcodes/ah_invoices.php' );
 		include_once( AH_PATH . '/includes/shortcodes/ah_login_form.php' );
 		
