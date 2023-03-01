@@ -24,7 +24,7 @@ Start: Account Menus
 	margin-bottom: 0;
 }
 
-@media ( min-width: 981px ) {
+@media ( min-width: 980.1px ) {
 	.account-columns {
 		display: grid;
 		grid-template-columns: 1fr 4fr;
@@ -36,6 +36,11 @@ Start: Account Menus
 	.account-sidebar {
 		margin-bottom: 20px;
 	}
+
+	.account-content .content-block {
+		padding-left: 0 !important;
+		padding-right: 0 !important;
+	}
 }
 /*
 End: Account Menus
@@ -44,6 +49,18 @@ End: Account Menus
 /*
 Start: Invoice list table for ah_invoices shortcode
 */
+html .ah-invoices .col-actions .button {
+	margin: 0 5px 0 0 !important;
+}
+/*
+End: Invoice list table for ah_invoices shortcode
+*/
+
+/*
+Start: Status indicators --- DISABLED 3/1/2023
+*/
+
+/*
 .ah-invoice-status-indicator {
 	display: inline-block;
 	width: 10px;
@@ -58,12 +75,9 @@ Start: Invoice list table for ah_invoices shortcode
 .ah-invoice-status-indicator.status-processing { background: #bcb30d; }
 .ah-invoice-status-indicator.status-payment-failed { background: #d54f10; }
 .ah-invoice-status-indicator.status-paid { background: #c1c1c1; display: none; }
-
-html .ah-invoices .col-actions .button {
-	margin: 0 5px 0 0 !important;
-}
+*/
 /*
-End: Invoice list table for ah_invoices shortcode
+End: Status indicators
 */
 
 
@@ -77,6 +91,13 @@ html .ah-button.button {
 	background: #aa4a3a;
 	color: #fff;
 	border: 1px solid #aa4a3a;
+}
+
+@media ( min-width: 1200px ) {
+	html .ah-button.button {
+		font-size: 16px;
+		padding: 15px 25px;
+	}
 }
 
 html .ah-button.button:hover,
@@ -161,7 +182,7 @@ Start: Account Sidebar (Mobile)
 }
 
 /* Hide mobile features on desktop */
-@media ( min-width: 800px ) {
+@media ( min-width: 980.1px ) {
 	#ah-mobile-nav-toggle,
 	#ah-mobile-nav-label {
 		display: none;
@@ -169,7 +190,7 @@ Start: Account Sidebar (Mobile)
 }
 
 /* Show mobile menu toggle */
-@media ( max-width: 799.9px ) {
+@media ( max-width: 980px ) {
 	.ah-account-menu-nav {
 		padding: 25px 20px 10px;
 	}
@@ -213,7 +234,16 @@ Start: Account Sidebar (Mobile)
 		transform: rotate(135deg);
 	}
 
+	.ah-mobile-account-nav {
+		position: relative;
+	}
+
 	.ah-mobile-account-nav nav {
+		position: absolute;
+		z-index: 100;
+		left: 0;
+		width: 100%;
+
 		display: none;
 		transform: rotateX(90deg);
 		transform-origin: top;
@@ -239,7 +269,9 @@ End: Account Sidebar (Mobile)
 /*
 Start: Stylized Table <table class="ah-table"></table>
 */
-table.ah-table thead th {
+table.ah-table thead th,
+table.ah-table-responsive th[data-mobile-label]::before,
+table.ah-table-responsive td[data-mobile-label]::before {
 	font-size: 12px;
 	font-family: 'Montserrat', sans-serif;
 	color: #204f66;
@@ -260,6 +292,67 @@ table.ah-table thead th {
 table.ah-table :last-child > tr:last-child > th,
 table.ah-table :last-child > tr:last-child > td {
 	border-bottom: none;
+}
+/*
+End: Stylized Table
+*/
+
+/*
+Start: Responsive Table <table class="ah-table ah-table-responsive"></table>
+       I suggest having a label on each: <td data-mobile-label="First Name">Radley</td>
+*/
+@media ( max-width: 724px ) { /* 980 - 256 */
+	table.ah-table-responsive tbody,
+	table.ah-table-responsive tr,
+	table.ah-table-responsive th,
+	table.ah-table-responsive td {
+		display: block;
+		padding: 0;
+		border-bottom: none;
+	}
+
+	table.ah-table-responsive thead,
+	table.ah-table-responsive tfoot {
+		display: none;
+	}
+
+	table.ah-table-responsive {
+		display: block;
+	}
+
+	table.ah-table-responsive th[data-mobile-label],
+	table.ah-table-responsive td[data-mobile-label] {
+		text-align: center;
+		margin: 0 0 20px;
+	}
+
+	table.ah-table-responsive th[data-mobile-label]::before,
+	table.ah-table-responsive td[data-mobile-label]::before {
+		content: attr(data-mobile-label);
+		display: block;
+	}
+
+	table.ah-table-responsive tr {
+		margin: 0 0 20px;
+		padding-bottom: 20px;
+		border-bottom: 1px solid #bfc9c8;
+	}
+
+	table.ah-table-responsive tr:last-child {
+		border-bottom: none;
+		padding-bottom: 0;
+	}
+
+	/* Buttons on one row for invoice table */
+	html .ah-invoices table.ah-invoice-table .col-actions .button {
+		display: block;
+		width: fit-content;
+		margin: 0 auto 15px !important;
+	}
+
+	html .ah-invoices table.ah-invoice-table .col-actions .button:last-child {
+		margin-bottom: 0 !important;
+	}
 }
 /*
 End: Stylized Table

@@ -14,7 +14,7 @@ function shortcode_ah_invoices( $atts, $content = '', $shortcode_name = 'ah_invo
 	?>
 <div class="ah-invoices">
 	
-	<table class="ah-table ah-invoice-table" cellspacing="0">
+	<table class="ah-table ah-table-responsive ah-invoice-table" cellspacing="0">
 		<thead>
 			<tr>
 				<th class="col col-id">ID</th>
@@ -42,15 +42,15 @@ function shortcode_ah_invoices( $atts, $content = '', $shortcode_name = 'ah_invo
 				$classes[] = 'status-' . $status_slug;
 				?>
 				<tr class="<?php echo esc_attr(implode(' ', $classes)); ?>">
-					<td class="col col-id"><?php
+					<td class="col col-id" data-mobile-label="ID"><?php
 						printf(
 							'<a href="%s">%s</a>',
 							esc_attr( $invoice_url ),
 							esc_html( $post->ID )
 						);
 					?></td>
-					<td class="col col-status"><?php echo $status_indicator; ?> <?php echo $status; ?></td>
-					<td class="col col-amount"><?php echo ah_format_price( $amount ); ?></td>
+					<td class="col col-status" data-mobile-label="Status"><?php echo $status_indicator; ?> <?php echo $status; ?></td>
+					<td class="col col-amount" data-mobile-label="Amount Due"><?php echo ah_format_price( $amount ); ?></td>
 					<td class="col col-actions"><?php
 						
 						// Action: View
