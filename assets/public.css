@@ -115,9 +115,9 @@ End: Invoice singular page
 /*
 Start: Account Sidebar
 */
-.account-sidebar {
+.ah-account-menu-nav {
 	background: #f1f1f1;
-	padding: 40px 30px;
+	padding: 40px 30px 25px;
 }
 
 nav.ah-account-menu-nav ul,
@@ -147,6 +147,93 @@ nav.ah-account-menu-nav li a {
 }
 /*
 End: Account Sidebar
+*/
+
+/*
+Start: Account Sidebar (Mobile)
+*/
+/* Hide checkbox */
+#ah-mobile-nav-toggle {
+	position: absolute;
+	z-index: -1;
+	visibility: hidden;
+	top: -1000px;
+}
+
+/* Hide mobile features on desktop */
+@media ( min-width: 800px ) {
+	#ah-mobile-nav-toggle,
+	#ah-mobile-nav-label {
+		display: none;
+	}
+}
+
+/* Show mobile menu toggle */
+@media ( max-width: 799.9px ) {
+	.ah-account-menu-nav {
+		padding: 25px 20px 10px;
+	}
+
+	#ah-mobile-nav-label {
+		margin: 0;
+		padding: 10px 44px 10px 20px;
+
+		background: #054f68;
+		color: #fff;
+		font-size: 16px;
+		font-weight: 600;
+		font-family: Montserrat, sans-serif;
+
+		position: relative;
+	}
+
+	#ah-mobile-nav-label::after {
+		content: '';
+		display: block;
+		width: 10px;
+		height: 10px;
+
+		border-left: 1px solid #fff;
+		border-bottom: 1px solid #fff;
+		border-top: 1px solid transparent;
+		border-right: 1px solid transparent;
+
+		position: absolute;
+		top: 50%;
+		right: 20px;
+		margin-top: -7px;
+		transform: rotate(-45deg);
+		transform-origin: center;
+
+		transition: transform 0.15s linear, margin-top 0.15s linear;
+	}
+
+	input:checked + .ah-mobile-account-nav #ah-mobile-nav-label::after {
+		margin-top: -3px;
+		transform: rotate(135deg);
+	}
+
+	.ah-mobile-account-nav nav {
+		display: none;
+		transform: rotateX(90deg);
+		transform-origin: top;
+		-webkit-backface-visibility: hidden;
+		backface-visibility: hidden;
+	}
+
+	input:checked + .ah-mobile-account-nav nav {
+		display: block;
+		transform: rotateX(0deg);
+		animation: expandDown 0.3s ease-out;
+	}
+}
+
+@keyframes expandDown {
+	0% { transform: rotateX(90deg); }
+	100% { transform: rotateX(0deg); }
+}
+/*
+End: Account Sidebar (Mobile)
 */
 
 /*

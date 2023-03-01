@@ -83,12 +83,22 @@ class Class_Account_Page_Post_Type extends Class_Abstract_Post_Type {
 		
 		if ( $location_name ) {
 			if ( has_nav_menu( $location_name ) ) {
+				
+				echo '<input type="checkbox" class="screen-reader-text" id="ah-mobile-nav-toggle">';
+				
+				echo '<div class="ah-mobile-account-nav">';
+				
+				echo '<label id="ah-mobile-nav-label" for="ah-mobile-nav-toggle">My Account</label>';
+				
 				wp_nav_menu( array(
 					'theme_location' => $location_name,
 					'menu_class' => 'ah-account-menu',
 					'container' => 'nav',
 					'container_class' => 'ah-account-menu-nav',
 				) );
+				
+				echo '</div>';
+				
 			}else{
 				aa_die('Invalid account page menu: ' . $location_name, $menu );
 			}
