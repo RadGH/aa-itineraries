@@ -21,7 +21,13 @@ class Class_AH_Admin {
 		if ( isset($_GET['ah_test_notice']) ) add_action( 'init', array( $this, 'ah_test_notice' ) );
 	}
 	
+	/**
+	 * Add a test notice
+	 *
+	 * @return void
+	 */
 	public function ah_test_notice() {
+		if ( ! current_user_can('administrator') ) aa_die( 'ah_test_notice is admin only' );
 		$type = 'success';
 		$message = 'Hello world!' . "\n\n" . 'This is a message.';
 		$data = array( 'first_name' => 'Radley', 'last_name' => 'Sustaire' );
@@ -51,6 +57,17 @@ class Class_AH_Admin {
 				'parent_slug' 	=> 'edit.php?post_type=ah_invoice',
 				'post_id'       => 'ah_invoices',
 				'slug'          => 'acf-ah-invoices',
+				'autoload'      => false,
+				'capability'    => 'manage_options',
+			));
+			
+			// Theme Settings -> Alpine Hikers
+			acf_add_options_sub_page(array(
+				'page_title' 	=> 'Alpine Hikers (ah_settings)',
+				'menu_title' 	=> 'Alpine Hikers',
+				'parent_slug' 	=> 'theme-general-settings', // 'admin.php?page=theme-general-settings',
+				'post_id'       => 'ah_settings',
+				'slug'          => 'acf-ah-settings',
 				'autoload'      => false,
 				'capability'    => 'manage_options',
 			));

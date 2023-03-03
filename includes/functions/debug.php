@@ -1,6 +1,6 @@
 <?php
 
-// Version 1.6
+// Version 1.7
 
 // Get user IP from cloudflare or remote_addr
 if ( ! function_exists('aa_get_ip_address') ) {
@@ -251,30 +251,47 @@ if ( ! function_exists( 'pre_dump_table' ) ) {
 		echo '<div style="font-family: \'Segoe UI\', Roboto, \'Helvetica Neue\', sans-serif;">';
 		echo '<div style="overflow: auto; font-family: \'Courier New\', monospace; background: #fff; color: #000; font-size: 14px; line-height: 1.35; position: relative; z-index: 10; clear: both; width: fit-content; '. $margin .' padding: 15px; max-width: 65vw;">';
 		
-		echo '<table><tbody>';
+		echo '<table>';
+		
+		// get header rows
+		$header_row = array();
+		foreach( $array as $item ) {
+			foreach( $item as $k => $v ) {
+				$header_row[ $k ] = $k;
+			}
+		}
 		
 		// header row
-		foreach( $array as $item ) {
-			echo '<tr>';
-			foreach( $item as $k => $v ) {
-				echo '<th>', esc_html($k), '</th>';
-			}
-			echo '</tr>';
-			break;
+		echo '<thead>';
+		echo '<tr>';
+		foreach( $header_row as $k ) {
+			echo '<th>', esc_html($k), '</th>';
 		}
+		echo '</tr>';
+		echo '</thead>';
 		
 		// rows
+		echo '<tbody>';
 		foreach( $array as $item ) {
 			echo '<tr>';
 			
 			foreach( $item as $k => $v ) {
-				echo '<td>', esc_html($v), '</td>';
+				echo '<td>';
+				
+				if ( is_array( $v ) ) {
+					echo json_encode($v);
+				}else{
+					print_r( $v );
+				}
+				
+				echo '</td>';
 			}
 			
 			echo '</tr>';
 		}
+		echo '</tbody>';
 		
-		echo '</tbody></table>';
+		echo '</table>';
 		
 		echo '</div>';
 		echo '</div>';
@@ -285,83 +302,6 @@ if ( ! function_exists( 'pre_dump_table' ) ) {
 
 // https://alpinehikerdev.wpengine.com/?rad_20234821_34819
 function rad_20234821_34819() {
-	// settings
-	$api_key = 'fqqgSHk6vetds8djU915DIa5aRlHzHrmoAu31';
-	$auth_header = 'Bearer ' . $api_key;
-	
-	// create api instance
-	$api = new RS_API();
-	
-	// enable debug mode
-	$api->set_debug_mode( true );
-	
-	// apply settings
-	$api->set_authorization_header( 'Bearer ' . $api_key );
-	
-	// perform a request to get all sheets
-	$url = 'https://api.smartsheet.com/2.0/sheets';
-	$result = $api->request( $url );
-	
-	// get the result
-	$body = $api->get_response_body();
-	
-	// display results
-	?>
-<table>
-	<tbody>
-	<tr>
-		<th>Page Number (pageNumber)</th>
-		<td><?php echo $body['pageNumber'] ?? ''; ?></td>
-	</tr>
-	<tr>
-		<th>Page Size (pageSize)</th>
-		<td><?php echo $body['pageSize'] ?? ''; ?></td>
-	</tr>
-	<tr>
-		<th>Total Pages (totalPages)</th>
-		<td><?php echo $body['totalPages'] ?? ''; ?></td>
-	</tr>
-	<tr>
-		<th>Total Sheets (totalCount)</th>
-		<td><?php echo $body['totalCount'] ?? ''; ?></td>
-	</tr>
-	</tbody>
-</table>
-
-<p><strong>Results (data):</strong></p>
-<table>
-	<thead>
-	<tr>
-		<th>id</th>
-		<th>name</th>
-		<th>accessLevel</th>
-		<th>permalink</th>
-		<th>createdAt</th>
-		<th>modifiedAt</th>
-	</tr>
-	</thead>
-	<tbody>
-	<?php
-	foreach( $body['data'] as $row ) {
-		?>
-		<tr>
-			<td><?php echo $row['id']; ?></td>
-			<td><?php echo $row['name']; ?></td>
-			<td><?php echo $row['accessLevel']; ?></td>
-			<td><?php echo $row['permalink']; ?></td>
-			<td><?php echo $row['createdAt']; ?></td>
-			<td><?php echo $row['modifiedAt']; ?></td>
-		</tr>
-		<?php
-	}
-	?>
-	</tbody>
-</table>
-<?php
-	
-	pre_dump(compact('api_key', 'auth_header', 'url', 'result', 'body', 'api'));
-	
-	exit;
 }
 if ( isset($_GET['rad_20234821_34819']) ) add_action( 'init', 'rad_20234821_34819' );
 

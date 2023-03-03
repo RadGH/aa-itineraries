@@ -81,9 +81,13 @@ class Class_AH_Plugin {
 		if ( ! aa_is_developer() ) return;
 		// @TODO: End of restricted access
 		
+		// ----------------------------------------
+		// 3. Include instance classes which can be instantiated multiple times
+		include_once( AH_PATH . '/includes/instances/api.php' );
+		
 		
 		// ----------------------------------------
-		// 3. Include controller classes which must be instantiated once
+		// 4. Include controller classes which must be instantiated once
 		include_once( __DIR__ . '/includes/classes/cron.php' );
 		$this->Cron = new Class_AH_Cron();
 		
@@ -104,10 +108,6 @@ class Class_AH_Plugin {
 		
 		include_once( __DIR__ . '/includes/classes/smartsheet-invoices.php' );
 		$this->Smartsheet_Invoices = new Class_AH_Smartsheet_Invoices();
-		
-		// ----------------------------------------
-		// 4. Include instance classes which can be instantiated multiple times
-		include_once( AH_PATH . '/includes/instances/api.php' );
 		
 		// ----------------------------------------
 		// 5. Custom post types controllers

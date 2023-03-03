@@ -1,17 +1,18 @@
 <?php
 
+/*
+Radley's API Interface
+Version 1.0
+*/
+
 class RS_API {
 	
 	public $endpoint = '';
-	// public $account_sid = null;
-	// public $auth_token = null;
-	// public $phone_number = null;
-	// public $debug_mode = true;
 	
 	private $auth_header = '';
 	private $debug_mode = '';
 	
-	private $response = null;
+	private array $response = array();
 	
 	public function __construct() {
 	
@@ -51,72 +52,39 @@ class RS_API {
 	 * @return string
 	 */
 	public function get_authorization_header() {
-		// return 'Basic ' . base64_encode( $this->account_sid . ':' . $this->auth_token );
 		return $this->auth_header ?: false;
 		
 	}
 	
 	/**
-	 * Send a text
-	 * API endpoint: /Accounts/{AccountSid}/Messages.json
-	 * @see https://www.twilio.com/docs/sms/api/message-resource#create-a-message-resource
+	 * Performs an API request. Returns an array including: <bool> success, <array> data, <string> message, <int> code
 	 *
-	 * @param $to
-	 * @param $message
-	 *
-	 * @return array|WP_Error
-	 */
-	/*
-	public function send_sms( $to, $message ) {
-		
-		if ( !$this->settings_valid() ) {
-			return new WP_Error( 'settings_invalid', 'The Twilio credentials are missing or invalid. The PIW SMS API is disabled.' );
-		}
-		
-		$url = $this->endpoint . "/Accounts/{$this->account_sid}/Messages.json";
-		
-		$args = array(
-			'headers' => array(
-				'Authorization' => $this->get_authorization_header(),
-			),
-			'body'    => array(
-				'From' => $this->phone_number,
-				'To'   => $to,
-				'Body' => $message,
-			),
-		);
-		
-		$result = wp_remote_post( $url, $args );
-		
-		return $result;
-	}
-	*/
-	
-	/**
-	 * Performs an API request. Returns an array including: response_body, response_code, response_message
-	 *
-	 * If "response_code" is null, nothing happened.
-	 * If "response_code" is -1, error occurred but the API request was not sent
-	 * If "response_code" is -2, error occurred during the API request
-	 * If "response_code" is -3, API request was made but did not return a result
+	 * If "code" is null, nothing happened.
+	 * If "code" is -1, error occurred but the API request was not sent
+	 * If "code" is -2, error occurred during the API request
+	 * If "code" is -3, API request was made but did not return a result
 	 *
 	 * @param string $api_url   An API URL which can include certain tags like [list_id] and fill in the value automatically.
 	 * @param string $method    One of: GET POST PUT DELETE, etc.
 	 * @param array $url_args   Array of args to pass as URL parameters
 	 * @param array $body_args  Array of args to pass as body content (like form fields)
+	 * @param array $headers    Array of additional headers
 	 *
-	 * @return array  On success returns an array with parameters: data, response_code, response_message, response
-	 *                On failure, returns false. Failure implies that the request did not submit properly or the response was not a json format -- meaning the connection probably failed.
+	 * @return array  On success returns an array described above
+	 *                On failure, returns the same array structure but ['success'] will be false.
 	 */
-	function request( $api_url, $method = 'GET', $url_args = array(), $body_args = array() ) {
+	function request( $api_url, $method = 'GET', $url_args = array(), $body_args = array(), $headers = array() ) {
 		
 		// Prepare result, filled in as we go
 		$response = array(
+			'success' => false,
+			'data' => null,
+			'message' => '',
+			'code' => 0,
+			
 			'api_url' => $api_url,
-			'response_body' => null,
-			'response_code' => null,
-			'response_message' => null,
-			'response' => null,
+			'request' => null,
+			'debug' => array(),
 		);
 		
 		// Add debug info to the output
@@ -137,10 +105,9 @@ class RS_API {
 		
 		// Require api url
 		if ( empty($api_url) ) {
-			$response['response_body'] = 'Error: API URL was not provided';
-			$response['response_code'] = -1;
-			$this->response = $response;
-			return false;
+			$response['message'] = 'Error: API URL was not provided';
+			$response['code'] = -1;
+			return $response;
 		}
 		
 		$final_url = $api_url;
@@ -151,7 +118,9 @@ class RS_API {
 		}
 		
 		// Prepare headers to send with the request
-		$headers = array();
+		if ( ! is_array($headers) ) {
+			$headers = array();
+		}
 		
 		// Use an authorization header?
 		if ( $auth_header = $this->get_authorization_header() ) {
@@ -178,15 +147,15 @@ class RS_API {
 		switch( $method ) {
 			case 'PATCH':
 				$args['method'] = 'PATCH';
-				$response = wp_remote_request($final_url, $args);
+				$request = wp_remote_request($final_url, $args);
 				break;
 			
 			case 'POST':
-				$response = wp_remote_post($final_url, $args);
+				$request = wp_remote_post($final_url, $args);
 				break;
 			
 			case 'GET':
-				$response = wp_remote_get($final_url, $args);
+				$request = wp_remote_get($final_url, $args);
 				break;
 			
 			default:
@@ -196,27 +165,26 @@ class RS_API {
 		}
 		
 		// Check if WP_Error
-		if ( is_wp_error( $response ) ) {
-			$response['response_body'] = 'WP Error [' . $response->get_error_code() . ']: ' . $response->get_error_message();
-			$response['response_code'] = -2;
+		if ( is_wp_error( $request ) ) {
+			$response['message'] = 'WP Error [' . $request->get_error_code() . ']';
+			$response['data'] = $request->get_error_message();
+			$response['code'] = -2;
 			if ( $this->debug_mode ) $response['debug']['wp_error'] = $response;
-			$this->response = $response;
-			return false;
+			return $response;
 		}
 		
 		// Check if other error
-		if ( ! isset( $response['response'] ) || ! is_array( $response['response'] ) ) {
-			$response['response_body'] = 'Error: Empty API response';
-			$response['response_code'] = -3;
-			if ( $this->debug_mode ) $response['debug']['wp_error'] = $response;
-			$this->response = $response;
-			return false;
+		if ( ! isset( $request['response'] ) || ! is_array( $request['response'] ) ) {
+			$response['message'] = 'Error: Empty API response';
+			$response['code'] = -3;
+			if ( $this->debug_mode ) $response['debug']['wp_error'] = $request;
+			return $response;
 		}
 		
 		// Get response information
-		$response_code = wp_remote_retrieve_response_code( $response );
-		$response_message = wp_remote_retrieve_response_message( $response );
-		$response_body = wp_remote_retrieve_body( $response );
+		$response_code = wp_remote_retrieve_response_code( $request );
+		$response_message = wp_remote_retrieve_response_message( $request );
+		$response_body = wp_remote_retrieve_body( $request );
 		
 		// Decode JSON into an array
 		if ( $response_body ) {
@@ -225,30 +193,13 @@ class RS_API {
 		}
 		
 		// Add response parts
-		$response['response_body'] = $response_body;
-		$response['response_code'] = $response_code;
-		$response['response_message'] = $response_message;
-		$response['response'] = $response;
+		$response['success'] = true;
+		$response['data'] = $response_body;
+		$response['code'] = $response_code;
+		$response['message'] = $response_message;
+		$response['request'] = $request;
 		
-		// Get the final response
-		$this->response = $response;
-		return true;
-	}
-	
-	public function get_response() {
-		return $this->response;
-	}
-	
-	public function get_response_body() {
-		return is_array($this->response) ? $this->response['response_body'] : array();
-	}
-	
-	public function get_response_code() {
-		return is_array($this->response) ? $this->response['response_code'] : 0;
-	}
-	
-	public function get_response_message() {
-		return is_array($this->response) ? $this->response['response_message'] : '';
+		return $response;
 	}
 	
 }
