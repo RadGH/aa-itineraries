@@ -38,6 +38,7 @@ class Class_AH_Plugin {
 	public Class_AH_Rewrites            $Rewrites;
 	public Class_AH_Reminders           $Reminders;
 	public Class_AH_Smartsheet          $Smartsheet;
+	public Class_AH_Smartsheet_Invoices $Smartsheet_Invoices;
 	public Class_Account_Page_Post_Type $Account_Page;
 	public Class_Document_Post_Type     $Document;
 	public Class_Invoice_Post_Type      $Invoice;
@@ -100,6 +101,9 @@ class Class_AH_Plugin {
 		
 		include_once( __DIR__ . '/includes/classes/smartsheet.php' );
 		$this->Smartsheet = new Class_AH_Smartsheet();
+		
+		include_once( __DIR__ . '/includes/classes/smartsheet-invoices.php' );
+		$this->Smartsheet_Invoices = new Class_AH_Smartsheet_Invoices();
 		
 		// ----------------------------------------
 		// 4. Include instance classes which can be instantiated multiple times

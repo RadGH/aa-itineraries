@@ -131,6 +131,8 @@ class Class_AH_Admin {
 			}else{
 				$url = remove_query_arg( 'ah-notice-dismiss' );
 				$url = remove_query_arg( 'ah-ajax', $url );
+				wp_redirect( $url );
+				exit;
 			}
 		}
 	}
