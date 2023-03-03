@@ -136,7 +136,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		return array_merge(
 			array_slice( $columns, 0, 2),
 			array('ah_status' => 'Status'),
-			array('ah_amount' => 'Amount'),
+			array('ah_amount' => 'Remaining Balance'),
 			array('ah_name' => 'Name'),
 			array_slice( $columns, 2, null),
 		);
@@ -157,7 +157,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 				echo $this->get_invoice_status( $post_id );
 				break;
 			case 'ah_amount':
-				$amount = $this->get_amount_paid( $post_id );
+				$amount = $this->get_remaining_balance( $post_id );
 				echo ah_format_price( $amount );
 				break;
 			case 'ah_name':
