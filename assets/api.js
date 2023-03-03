@@ -74,6 +74,46 @@ window.AH_API = new (function() {
 	};
 
 	/**
+	 * Perform an ajax request. The response must be JSON in order to be successful.
+	 *
+	 * @param url               string
+	 * @param args              object    optional
+	 * @param success_callback  function  optional
+	 * @param error_callback    function  optional
+	 */
+	o.ajax = function( url, args, success_callback, error_callback ) {
+		if ( typeof args !== 'object' ) args = {};
+		if ( typeof success_callback !== 'function' ) success_callback = function(){};
+		if ( typeof error_callback !== 'function' ) error_callback = function(){};
+
+		args.url = url;
+
+		jQuery
+			.ajax(args)
+			.always(function( response_text, textStatus, jqXHR ) {
+				let response;
+
+				if ( typeof response_text === 'string' ) {
+					response = jQuery.parseJSON( response_text );
+				}else if ( typeof response_text === 'object' ) {
+					response = response_text;
+					response_text = jQuery.stringify( response );
+				}else{
+					response = false;
+				}
+
+				// @todo: For some reason these don't get called? wwwhhyyy
+				if ( typeof response === 'object' ) {
+					console.log( 'Ajax successful', url, response );
+					success_callback( response, textStatus, jqXHR );
+				}else{
+					console.log( 'Ajax FAILED', url, response_text );
+					error_callback( response_text, textStatus, jqXHR );
+				}
+			});
+	}
+
+	/**
 	 * Aliases for other functions
 	 *
 	 * @type {function}

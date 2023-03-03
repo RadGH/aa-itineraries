@@ -36,3 +36,14 @@ Start: Fix welcome panel (FEEL FREE TO REMOVE THIS IF FIXED ELSEWHERE)
 /*
 End: Fix welcome panel
 */
+
+/*
+Start: Admin notices
+*/
+.ah-admin-notice {
+	padding-right: 38px;
+	position: relative
+}
+/*
+End: Admin notices
+*/
