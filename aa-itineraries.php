@@ -32,7 +32,6 @@ class Class_AH_Plugin {
 	public $missing_plugins = array();
 	
 	// Objects
-	public Class_AH_Billing             $Billing;
 	public Class_AH_Cron                $Cron;
 	public Class_AH_Admin               $Admin;
 	public Class_AH_Enqueue             $Enqueue;
@@ -40,6 +39,7 @@ class Class_AH_Plugin {
 	public Class_AH_Reminders           $Reminders;
 	public Class_AH_Smartsheet          $Smartsheet;
 	public Class_Account_Page_Post_Type $Account_Page;
+	public Class_Document_Post_Type     $Document;
 	public Class_Invoice_Post_Type      $Invoice;
 	
 	/*
@@ -83,9 +83,6 @@ class Class_AH_Plugin {
 		
 		// ----------------------------------------
 		// 3. Include controller classes which must be instantiated once
-		include_once( __DIR__ . '/includes/classes/billing.php' );
-		$this->Billing = new Class_AH_Billing();
-		
 		include_once( __DIR__ . '/includes/classes/cron.php' );
 		$this->Cron = new Class_AH_Cron();
 		
@@ -115,6 +112,9 @@ class Class_AH_Plugin {
 		include_once( __DIR__ . '/includes/classes/account_page_post_type.php' );
 		$this->Account_Page = new Class_Account_Page_Post_Type();
 		
+		include_once( __DIR__ . '/includes/classes/document_post_type.php' );
+		$this->Document = new Class_Document_Post_Type();
+		
 		include_once( __DIR__ . '/includes/classes/invoice_post_type.php' );
 		$this->Invoice = new Class_Invoice_Post_Type();
 		
@@ -125,6 +125,7 @@ class Class_AH_Plugin {
 		
 		// ----------------------------------------
 		// 7. Shortcodes
+		include_once( AH_PATH . '/includes/shortcodes/ah_documents.php' );
 		include_once( AH_PATH . '/includes/shortcodes/ah_invoice_merge_tags_preview.php' );
 		include_once( AH_PATH . '/includes/shortcodes/ah_invoices.php' );
 		include_once( AH_PATH . '/includes/shortcodes/ah_login_form.php' );

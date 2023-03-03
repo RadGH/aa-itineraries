@@ -110,7 +110,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		$args['labels']['view_item'] = 'View Invoice';
 		
 		$args['menu_icon'] = 'dashicons-media-spreadsheet';
-		$args['menu_position'] = 20;
+		$args['menu_position'] = 21;
 		
 		$args['publicly_queryable'] = true;
 		$args['rewrite'] = array(
@@ -202,6 +202,14 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		
 		// Allow admins to see any invoice
 		if ( current_user_can( 'administrator' ) ) return;
+		
+		// If not logged in, go to login page
+		if ( ! is_user_logged_in() ) {
+			$url = site_url('/account/not-logged-in/');
+			$url = add_query_arg(array('redirect_to' => urlencode($_SERVER['REQUEST_URI'])), $url);
+			wp_redirect($url);
+			exit;
+		}
 		
 		// Block any other access
 		get_template_part( '404' );

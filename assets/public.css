@@ -47,16 +47,6 @@ End: Account Menus
 */
 
 /*
-Start: Invoice list table for ah_invoices shortcode
-*/
-html .ah-invoices .col-actions .button {
-	margin: 0 5px 0 0 !important;
-}
-/*
-End: Invoice list table for ah_invoices shortcode
-*/
-
-/*
 Start: Status indicators --- DISABLED 3/1/2023
 */
 
@@ -293,6 +283,10 @@ table.ah-table :last-child > tr:last-child > th,
 table.ah-table :last-child > tr:last-child > td {
 	border-bottom: none;
 }
+
+html .ah-table .col-actions .button {
+	margin: 0 5px 0 0 !important;
+}
 /*
 End: Stylized Table
 */
@@ -344,16 +338,36 @@ Start: Responsive Table <table class="ah-table ah-table-responsive"></table>
 	}
 
 	/* Buttons on one row for invoice table */
-	html .ah-invoices table.ah-invoice-table .col-actions .button {
+	html .ah-table-responsive .col-actions .button {
 		display: block;
 		width: fit-content;
 		margin: 0 auto 15px !important;
 	}
 
-	html .ah-invoices table.ah-invoice-table .col-actions .button:last-child {
+	html .ah-table-responsive .col-actions .button:last-child {
 		margin-bottom: 0 !important;
 	}
 }
 /*
 End: Stylized Table
+*/
+
+/*
+Start: Document Table [ah_documents]
+*/
+.ah-document-table .col-preview img {
+	display: block;
+	max-width: 150px;
+	max-height: 150px;
+	width: auto;
+	height: auto;
+	margin: 0 auto;
+	border-radius: 3px;
+}
+
+.ah-document-table .category-name {
+	font-size: 14px;
+}
+/*
+End: Document Table
 */

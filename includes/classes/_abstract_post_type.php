@@ -6,6 +6,7 @@ abstract class Class_Abstract_Post_Type {
 	public $post_type = null;
 	public $use_custom_title = false;
 	public $use_custom_slug = false;
+	public $custom_slug_prefix = null; // post type if null
 	
 	// Do not override this directly, instead use $this->get_post_type_args()
 	public $default_args = array(
@@ -176,7 +177,11 @@ abstract class Class_Abstract_Post_Type {
 	 * @return string
 	 */
 	public function get_custom_post_slug( $post_id = null ) {
-		return uniqid( str_replace('_', '-', $this->post_type) . '-' );
+		$prefix = $this->custom_slug_prefix;
+		if ( $prefix === null ) $prefix = $this->get_post_type() . '-';
+		if ( $prefix === false ) $prefix = '';
+		
+		return uniqid( $prefix );
 	}
 	
 	

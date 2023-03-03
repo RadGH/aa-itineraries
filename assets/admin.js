@@ -23,7 +23,10 @@ window.AH_Admin = new (function() {
 
 		jQuery('#title').attr('readonly', true).css('opacity', 0.5);
 
-		if ( jQuery('#title').val() === '' ) jQuery('#title').val( 'New Invoice' );
+		let title_value = jQuery('h1.wp-heading-inline').text();
+		title_value = title_value.replace( 'Add New', 'New' );
+
+		if ( jQuery('#title').val() === '' && title_value ) jQuery('#title').val( title_value );
 	};
 
 })();

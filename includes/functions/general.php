@@ -148,29 +148,24 @@ function ah_get_general_merge_tags() {
 }
 
 /**
- * Get the value from a WP_User object based on the user's ID
+ * Get the URL that a document links to
  *
- * @param $user_id
- * @param $field
- * @param $default
- *
- * @return int|mixed|null
- */
-function ah_get_user_field( $user_id, $field, $default = null ) {
-	$user = get_user_by( 'id', 'user_id' );
-	
-	return ( $user instanceof WP_User ) ? $user->get( $field ) : $default;
-}
-
-
-/**
- * Apply merge tags to a string, replacing keys [first_name] with values "Radley". Merge tag keys should include brackets.
- *
- * @param string $string
- * @param array $merge_tags
+ * @param $post_id
  *
  * @return string
  */
-function ah_apply_merge_tags( $string, $merge_tags ) {
-	return str_ireplace( array_keys($merge_tags), array_values($merge_tags), $string );
+function ah_get_document_redirect_url( $post_id ) {
+	return untrailingslashit( get_permalink( $post_id )) . '/download/';
+}
+
+/**
+ * Get the attachment ID of the preview image to use for the document
+ *
+ * @param $post_id
+ *
+ * @return int|false
+ */
+function ah_get_document_preview_image( $post_id ) {
+	$attachment_id = (int) get_field( 'preview_image', $post_id, false );
+	return $attachment_id ?: false;
 }

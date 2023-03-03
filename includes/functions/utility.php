@@ -34,3 +34,56 @@ function ah_format_price( $amount, $remove_zeroes = true ) {
 	if ( $remove_zeroes ) $amount = str_replace( '.00', '', $amount );
 	return $amount;
 }
+
+/**
+ * Get the value from a WP_User object based on the user's ID
+ *
+ * @param $user_id
+ * @param $field
+ * @param $default
+ *
+ * @return int|mixed|null
+ */
+function ah_get_user_field( $user_id, $field, $default = null ) {
+	$user = get_user_by( 'id', 'user_id' );
+	
+	return ( $user instanceof WP_User ) ? $user->get( $field ) : $default;
+}
+
+/**
+ * Apply merge tags to a string, replacing keys [first_name] with values "Radley". Merge tag keys should include brackets.
+ *
+ * @param string $string
+ * @param array $merge_tags
+ *
+ * @return string
+ */
+function ah_apply_merge_tags( $string, $merge_tags ) {
+	return str_ireplace( array_keys($merge_tags), array_values($merge_tags), $string );
+}
+
+/**
+ * Stream a file to the user's browser allowing them to download a file directly.
+ *
+ * @param $attachment_id
+ *
+ * @return void
+ */
+function ah_stream_file_to_browser( $attachment_id ) {
+	$path = get_attached_file( $attachment_id );
+	$mime = mime_content_type( $path );
+	$filename = pathinfo( $path, PATHINFO_BASENAME );
+	$filesize = filesize( $path );
+	
+	ob_clean();
+	header( "Content-type: " . $mime, true, 200 );
+	header( "Content-Transfer-Encoding: Binary" );
+	header( "Content-disposition: attachment;filename=" . esc_attr($filename) );
+	header( "Content-length: " . $filesize );
+	header( "Pragma: no-cache" );
+	header( "Expires: 0" );
+	header( "Cache-Control: no-store, no-cache, must-revalidate" );
+	header( "Cache-Control: post-check=0, pre-check=0", false );
+	echo file_get_contents( $path );
+	exit();
+}

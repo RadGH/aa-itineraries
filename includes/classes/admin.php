@@ -4,7 +4,11 @@ class Class_AH_Admin {
 	
 	public function __construct() {
 		
+		// Register ACF settings pages
 		add_action( 'admin_menu', array( $this, 'register_menus' ), 20 );
+		
+		// Register custom image sizes
+		add_action( 'after_setup_theme', array( $this, 'register_image_sizes' ) );
 		
 	}
 	
@@ -34,6 +38,10 @@ class Class_AH_Admin {
 			));
 			
 		}
+	}
+	
+	public function register_image_sizes() {
+		add_image_size( 'document-preview', 300, 300, false );
 	}
 	
 }
