@@ -44,6 +44,21 @@ Start: Admin notices
 	padding-right: 38px;
 	position: relative
 }
+
+.ah-admin-notice .notice-dismiss {
+	text-decoration: none;
+}
+
+.ah-admin-notice.ah-dismissing .notice-dismiss::before {
+	content: "\f531";
+	animation: ah_spin 0.5s linear infinite;
+	cursor: default;
+}
+
+@keyframes ah_spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(-360deg); }
+}
 /*
 End: Admin notices
 */

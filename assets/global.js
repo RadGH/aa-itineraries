@@ -12,6 +12,8 @@ window.AH_Global = new (function() {
 		o.initialize_module( 'AH_Admin' );
 		o.initialize_module( 'AH_Public' );
 
+		o.add_toggles();
+
 	};
 
 	// Initializes an object
@@ -21,6 +23,22 @@ window.AH_Global = new (function() {
 		ah_log( 'AH: Initializing module ' + module_name, window[ module_name ] );
 
 		window[ module_name ].init();
+	};
+
+	o.add_toggles = function() {
+		jQuery(document.body).on('click', '.ah-toggle', function(e) {
+			let $button = jQuery(this);
+			let target_selector = $button.attr('data-target');
+			let $target = jQuery( target_selector );
+
+			if ( $target.length < 1 ) {
+				ah_log('Could not toggle element, element not found.', 'Selector: ' + target_selector, this);
+			}else{
+				$target.css( 'display', $target.css('display') === 'block' ? 'none' : 'block' );
+			}
+
+			return false;
+		});
 	};
 
 	// Initialize modules after jquery is loaded

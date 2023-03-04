@@ -36,6 +36,17 @@ function ah_format_price( $amount, $remove_zeroes = true ) {
 }
 
 /**
+ * Get the user ID of the author of a post
+ *
+ * @param $post_id
+ *
+ * @return int
+ */
+function ah_get_author_user_id( $post_id ) {
+	return get_post_field( 'post_author', $post_id );
+}
+
+/**
  * Get the value from a WP_User object based on the user's ID
  *
  * @param $user_id
@@ -45,9 +56,27 @@ function ah_format_price( $amount, $remove_zeroes = true ) {
  * @return int|mixed|null
  */
 function ah_get_user_field( $user_id, $field, $default = null ) {
-	$user = get_user_by( 'id', 'user_id' );
+	$cache_key = 'ah-user-' . $user_id;
+	
+	$user = wp_cache_get( $cache_key );
+	
+	if ( !$user ) {
+		$user = get_user_by( 'id', 'user_id' );
+		wp_cache_set( $cache_key, $user );
+	}
 	
 	return ( $user instanceof WP_User ) ? $user->get( $field ) : $default;
+}
+
+/**
+ * Get the user's full name by combining their first and last name.
+ *
+ * @param $user_id
+ *
+ * @return string
+ */
+function ah_get_user_full_name( $user_id ) {
+	return trim( ah_get_user_field( $user_id, 'first_name' ) . ' ' . ah_get_user_field( $user_id, 'last_name' ) );
 }
 
 /**

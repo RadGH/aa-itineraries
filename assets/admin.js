@@ -27,6 +27,8 @@ window.AH_Admin = new (function() {
 			let $notice = $dismiss.closest('.ah-admin-notice');
 			let url = $dismiss.attr('href').replace('ah-ajax=0', 'ah-ajax=1');
 
+			$notice.addClass('ah-dismissing');
+
 			let on_complete = function() {
 				$notice.animate({
 					opacity: 0

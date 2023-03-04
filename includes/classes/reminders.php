@@ -19,6 +19,9 @@ class Class_AH_Reminders {
 		if ( isset($_GET['manually_send_daily_reminders']) ) {
 			add_action( 'init', array( $this, 'manually_send_daily_reminders' ) );
 		}
+		
+		add_action( 'ah_cron/5_minute', array( $this, 'send_daily_reminders' ) );
+		
 	}
 	
 	public function get_reminder_dates( $sort = false ) {

@@ -146,7 +146,8 @@ class RS_API {
 		// Perform the query based on api method
 		switch( $method ) {
 			case 'PATCH':
-				$args['method'] = 'PATCH';
+			case 'PUT':
+				$args['method'] = $method;
 				$request = wp_remote_request($final_url, $args);
 				break;
 			
@@ -159,7 +160,7 @@ class RS_API {
 				break;
 			
 			default:
-				wp_die('Invalid HTTP method "'. $method .'" for mailchimp api in A+A DTL Mailchimp Tags');
+				wp_die('Invalid HTTP method "'. $method .'" for api in ' . __FILE__);
 				exit;
 				break;
 		}
@@ -192,8 +193,11 @@ class RS_API {
 			if ( $j ) $response_body = $j;
 		}
 		
+		$is_success = true;
+		if ( is_numeric($response_code) && $response_code >= 400 ) $is_success = false;
+		
 		// Add response parts
-		$response['success'] = true;
+		$response['success'] = $is_success;
 		$response['data'] = $response_body;
 		$response['code'] = $response_code;
 		$response['message'] = $response_message;

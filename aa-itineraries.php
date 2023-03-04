@@ -77,10 +77,6 @@ class Class_AH_Plugin {
 		// 2. Include debug features
 		include_once( AH_PATH . '/includes/functions/debug.php' );
 		
-		// @TODO: Restrict access during development to only show for Radley
-		if ( ! aa_is_developer() ) return;
-		// @TODO: End of restricted access
-		
 		// ----------------------------------------
 		// 3. Include instance classes which can be instantiated multiple times
 		include_once( AH_PATH . '/includes/instances/api.php' );
@@ -181,8 +177,7 @@ class Class_AH_Plugin {
 		$this->Cron = new Class_AH_Cron();
 		
 		// Clear the schedule
-		// $this->Cron->clear_cron();
-		// wp_clear_scheduled_hook( $this->time_key );
+		$this->Cron->clear_cron();
 		
 	}
 	

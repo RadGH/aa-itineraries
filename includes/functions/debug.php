@@ -1,6 +1,6 @@
 <?php
 
-// Version 1.7
+// Version 1.8
 
 // Get user IP from cloudflare or remote_addr
 if ( ! function_exists('aa_get_ip_address') ) {
@@ -213,9 +213,9 @@ if ( ! aa_is_developer() ) {
  */
 if ( ! function_exists( 'pre_dump' ) ) {
 	function pre_dump( ...$args ) {
-		$margin = is_admin() ? 'margin: 0 0 0 180px;' : 'margin: 0;';
-		echo '<div style="font-family: \'Segoe UI\', Roboto, \'Helvetica Neue\', sans-serif;">';
-		echo '<pre style="overflow: auto; font-family: \'Courier New\', monospace; background: #fff; color: #000; font-size: 14px; line-height: 1.35; position: relative; z-index: 10; clear: both; width: fit-content; '. $margin .' padding: 15px; max-width: 65vw;">';
+		$pre_start = '<pre style="overflow: auto; font-family: \'Courier New\', monospace; background: #fff; color: #000; font-size: 14px; line-height: 1.35; position: relative; z-index: 10; clear: both; width: fit-content;">';
+		
+		echo '<div style="font-family: \'Segoe UI\', Roboto, \'Helvetica Neue\', sans-serif; border: 1px solid rgba(125, 125, 125, 0.5); width: fit-content; margin: 0 0 10px;">';
 		
 		// Args are always an array. If its one item, we don't need the array.
 		if ( isset($args[0]) && is_array($args[0]) && count($args) === 1 ) {
@@ -227,10 +227,25 @@ if ( ! function_exists( 'pre_dump' ) ) {
 			$args = reset($args);
 		}
 		
-		ob_start(); var_dump( $args );
-		echo esc_html( ob_get_clean() );
 		
-		echo '</pre>';
+		echo '<table><tbody>';
+		if ( is_array( $args ) && count($args) > 0 ) {
+			foreach( (array) $args as $k => $v ) {
+				echo '<tr><th style="width: 120px; text-align: right; vertical-align: top; padding-right: 10px;">', $k, '</th><td>';
+				ob_start();
+				var_dump( $v );
+				$v_html = ob_get_clean();
+				echo $pre_start, $v_html, '</pre>';
+				echo '</td></tr>';
+			}
+		}else{
+			ob_start();
+			var_dump( $args );
+			$v_html = ob_get_clean();
+			echo $pre_start, $v_html, '</pre>';
+		}
+		echo '</tbody></table>';
+		
 		echo '</div>';
 	}
 }
@@ -248,8 +263,8 @@ if ( ! function_exists( 'pre_dump_get' ) ) {
 if ( ! function_exists( 'pre_dump_table' ) ) {
 	function pre_dump_table( $array ) {
 		$margin = is_admin() ? 'margin: 0 0 0 180px;' : 'margin: 0;';
-		echo '<div style="font-family: \'Segoe UI\', Roboto, \'Helvetica Neue\', sans-serif;">';
-		echo '<div style="overflow: auto; font-family: \'Courier New\', monospace; background: #fff; color: #000; font-size: 14px; line-height: 1.35; position: relative; z-index: 10; clear: both; width: fit-content; '. $margin .' padding: 15px; max-width: 65vw;">';
+		echo '<div style="font-family: \'Segoe UI\', Roboto, \'Helvetica Neue\', sans-serif; border: 1px solid rgba(125, 125, 125, 0.5); width: fit-content; margin: 0 0 10px;">';
+		echo '<div style="overflow: auto; font-family: \'Courier New\', monospace; background: #fff; color: #000; font-size: 14px; line-height: 1.35; position: relative; z-index: 10; clear: both; width: fit-content; '. $margin .' padding: 15px; max-width: 100vw;">';
 		
 		echo '<table>';
 		

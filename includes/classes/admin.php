@@ -91,18 +91,23 @@ class Class_AH_Admin {
 			$type = $n['type'];
 			$message = $n['message'];
 			$data = $n['data'];
+			$date = $n['date'];
 			
 			if ( !$type && !$message ) {
 				$this->remove_notice( $key );
 				continue;
 			}
 			
+			if ( $message && $date ) $message .= "\n\n";
+			if ( $date ) $message .= '<em>' . human_time_diff(strtotime($date), current_time('timestamp')) . ' ago</em>';
+			
 			echo '<div class="ah-admin-notice notice notice-'. $type .' "">';
 			
 			echo wpautop($message);
 			
 			if ( $data ) {
-				echo '<pre class="code">';
+				echo '<p><a href="#" class="ah-toggle button button-secondary" data-target="#notice-'. $key .'">Show Data</a></p>';
+				echo '<pre class="code" id="notice-'. $key .'" style="display: none;">';
 				var_dump($data);
 				echo '</pre>';
 			}
@@ -115,9 +120,11 @@ class Class_AH_Admin {
 	}
 	
 	public function add_notice( $type, $message, $data = array() ) {
-		$notices = $this->get_notices();
+		$date = current_time('Y-m-d G:i:s');
 		$key = uniqid();
-		$notices[$key] = compact( 'type', 'message', 'data' );
+		
+		$notices = $this->get_notices();
+		$notices[$key] = compact( 'type', 'message', 'data', 'date' );
 		update_option( 'ah-admin-notice', $notices, false );
 	}
 	
