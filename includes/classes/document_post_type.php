@@ -4,6 +4,8 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 	
 	public $post_type = 'ah_document';
 	
+	public $document_page_id = 6226;
+	
 	public $use_custom_title = false;
 	public $use_custom_slug = true;
 	public $custom_slug_prefix = false;
@@ -21,6 +23,36 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 		// When saving a post, save each user_id as a separate meta key for permission = multiple
 		add_action( 'acf/save_post', array( $this, 'save_post_separate_multiple_user_id_meta' ), 40 );
 		
+		// Add document categories to account menu
+		add_filter( 'wp_nav_menu_objects', array( $this, 'add_categories_to_account_menu' ), 10, 2 );
+		
+	}
+	
+	/**
+	 * Add an item to an array unless it already exists
+	 * @param $array
+	 * @param $value
+	 *
+	 * @return void
+	 */
+	public function addarr( &$array, $value ) {
+		$k = array_search( $value, $array, true );
+		if ( $k === false ) $array[] = $value;
+		return $array;
+	}
+	
+	/**
+	 * Remove a value from an array, return an array indexed from 0
+	 *
+	 * @param array $array
+	 * @param string $value
+	 *
+	 * @return string[]
+	 */
+	public function rmarr( &$array, $value ) {
+		$k = array_search( $value, $array, true );
+		if ( $k !== false ) unset( $array[$k] );
+		return array_values($array);
 	}
 	
 	/**
@@ -281,13 +313,149 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 	}
 	
 	/**
+	 * @param array $menu_items
+	 * @param stdClass $args
+	 *
+	 * @return array
+	 */
+	public function add_categories_to_account_menu( $menu_items, $args ) {
+		// Only adjust account page menus
+		if ( ! str_starts_with( $args->menu->slug, 'account-' ) ) return $menu_items;
+		
+		// $menu_items: https://radleysustaire.com/s3/cffdec/
+		// $args: https://radleysustaire.com/s3/982330/
+		// pre_dump(compact('menu_items', 'args'));
+		
+		// Locate the documents page
+		$documents_menu_item = false;
+		$documents_menu_index = false;
+		
+		foreach( $menu_items as $i => $p ) {
+			if ( $p->object_id == $this->document_page_id ) {
+				$documents_menu_index = $i;
+				$documents_menu_item = $p;
+			}
+		}
+		
+		if ( !$documents_menu_index ) return $menu_items;
+		
+		// Add each term as a link, cloned from the documents page.
+		$args = array(
+			'taxonomy' => 'ah_document_category',
+			'orderby' => 'name',
+			'order' => 'ASC',
+		);
+		$terms = get_terms($args);
+		$doc_counts = $this->count_user_documents_per_category();
+		$new_items = array();
+		
+		// Identify the currently viewed category to make it the current menu item
+		if ( is_singular() && get_the_ID() == $this->document_page_id ) {
+			$viewed_category = $_GET['category'] ?? false;
+		}else{
+			$viewed_category = false;
+		}
+		
+		foreach( $terms as $term ) {
+			$item = clone $documents_menu_item;
+			
+			// Get number of documents that this user has of this category
+			$doc_count = $doc_counts[ $term->term_id ] ?? 0;
+			if ( $doc_count < 1 ) continue;
+			
+			$item->ID = 0;
+			$item->object_id = 0;
+			$item->post_name = 0;
+			$item->db_id = 0;
+			$item->title = $term->name . ' <span class="document-count">('. $doc_count .')</span>';
+			$item->url = add_query_arg(array( 'category' => $term->slug ) );
+			$item->menu_item_parent = $documents_menu_item->ID;
+			
+			if ( $viewed_category == $term->slug ) {
+				// This menu item should be active
+				$item->current = true;
+				$this->addarr( $item->classes, 'current-menu-item' );
+				$this->rmarr( $item->classes, 'current-menu-parent' );
+				
+				$documents_menu_item->current = false;
+				$documents_menu_item->current_item_parent = true;
+				$this->rmarr( $documents_menu_item->classes, 'current-menu-item' );
+				$this->addarr( $documents_menu_item->classes, 'current-menu-parent' );
+			}else{
+				$item->current = false;
+				$this->rmarr( $item->classes, 'current-menu-item' );
+				$this->rmarr( $item->classes, 'current-menu-parent' );
+			}
+			
+			$new_items[] = $item;
+		}
+		
+		$menu_items = array_merge(
+			array_slice( $menu_items, 0, $documents_menu_index, true ),
+			$new_items,
+			array_slice( $menu_items, $documents_menu_index, null, true )
+		);
+		
+		return $menu_items;
+		
+	}
+	
+	/**
+	 * Count the number of documents in each category for a user. Categories with no documents are excluded.
+	 *
+	 * @param null|array $documents
+	 *
+	 * @return int[]
+	 */
+	public function count_user_documents_per_category( $documents = null ) {
+		global $wpdb;
+		
+		if ( $documents === null ) {
+			$user_id = get_current_user_id();
+			$document_q = $this->get_user_documents( $user_id, array( 'fields' => 'ids' ) );
+			$document_ids = implode(',', $document_q->posts);
+		}
+		
+		$sql = <<<MySQL
+select
+    t.term_id as 'term_id',
+    count(t.term_id) as 'count'
+
+from wp_posts p
+
+inner join wp_term_relationships tr
+on tr.object_id = p.ID
+
+inner join wp_term_taxonomy tx
+on tx.term_taxonomy_id = tr.term_taxonomy_id
+
+inner join wp_terms t
+on tx.term_id = t.term_id
+
+where
+p.ID IN ( {$document_ids} )
+
+group by t.term_id
+
+limit 1000;
+MySQL;
+		
+		$sql = $wpdb->prepare( $sql );
+		
+		$r = $wpdb->get_results( $sql, ARRAY_A );
+		
+		// array( TERM_ID => COUNT )
+		return array_combine( wp_list_pluck( $r, 'term_id' ), wp_list_pluck( $r, 'count' ) );
+	}
+	
+	/**
 	 * Get a WP_Query containing all of the user's documents
 	 *
 	 * @param $user_id
 	 *
 	 * @return false|WP_Query
 	 */
-	public function get_user_documents( $user_id = null ) {
+	public function get_user_documents( $user_id = null, $custom_args = array() ) {
 		if ( $user_id === null ) $user_id = get_current_user_id();
 		if ( ! $user_id ) return false;
 		
@@ -358,6 +526,8 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 			'nopaging' => true,
 			'post__in' => $post_ids,
 		);
+		
+		if ( $custom_args ) $args = array_merge( $args, $custom_args );
 		
 		return new WP_Query($args);
 	}

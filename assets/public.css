@@ -151,10 +151,43 @@ nav.ah-account-menu-nav ul {
 }
 
 nav.ah-account-menu-nav li {
-	margin: 0 0 15px;
+	margin: 5px 0 10px;
 }
 
 nav.ah-account-menu-nav li a {
+	display: inline-block;
+	padding: 4px 0;
+}
+
+.account-sidebar .chevron {
+	display: none;
+}
+
+nav.ah-account-menu-nav ul.sub-menu {
+}
+
+nav.ah-account-menu-nav ul.sub-menu li {
+	margin: 0 0 5px 10px;
+}
+
+nav.ah-account-menu-nav ul.sub-menu li::before {
+	content: '•';
+	margin-right: 5px;
+}
+
+nav.ah-account-menu-nav ul.sub-menu li a {
+	font-size: 11px;
+	padding: 2px 0;
+	color: inherit;
+}
+
+nav.ah-account-menu-nav ul.sub-menu li a:hover,
+nav.ah-account-menu-nav ul.sub-menu li a:active {
+	text-decoration: underline;
+}
+
+nav.ah-account-menu-nav li.current-menu-item > a {
+	font-weight: 700;
 }
 /*
 End: Account Sidebar

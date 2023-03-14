@@ -4,7 +4,24 @@ function shortcode_ah_documents( $atts, $content = '', $shortcode_name = 'ah_doc
 	$atts = shortcode_atts(array(
 	), $atts, $shortcode_name);
 	
-	$documents = AH_Document()->get_user_documents();
+	$args = array();
+	
+	$current_category_slug = isset($_GET['category']) ? stripslashes($_GET['category']) : false;
+	$current_category = $current_category_slug ? get_term_by( 'slug', $current_category_slug, 'ah_document_category' ) : false;
+	
+	if ( $current_category ) {
+		$args['tax_query'] = array(
+			array(
+				'taxonomy' => 'ah_document_category',
+				'field' => 'term_id',
+				'terms' => $current_category->term_id
+			),
+		);
+	}else{
+		$current_category_slug = false;
+	}
+	
+	$documents = AH_Document()->get_user_documents( null, $args );
 
 	if ( ! $documents->have_posts() ) {
 		return 'You currently have no documents.';
@@ -13,6 +30,12 @@ function shortcode_ah_documents( $atts, $content = '', $shortcode_name = 'ah_doc
 	ob_start();
 	?>
 <div class="ah-documents">
+	
+	<?php
+	if ( $current_category ) {
+		echo '<h2 class="category-subtitle">', esc_html($current_category->name), '</h2>';
+	}
+	?>
 	
 	<table class="ah-table ah-table-responsive ah-document-table" cellspacing="0">
 		<thead>
@@ -54,7 +77,7 @@ function shortcode_ah_documents( $atts, $content = '', $shortcode_name = 'ah_doc
 					?></td>
 					<td class="col col-name" data-mobile-label="Name"><?php
 						echo '<div class="document-title">', $name, '</div>';
-						if ( $terms ) {
+						if ( $terms && ! $current_category ) {
 							echo '<div class="category-name">';
 							echo '<strong>'. _n('Category', 'Categories', count($terms)) .':</strong> ';
 							echo esc_html( implode(', ', wp_list_pluck( $terms, 'name') ) );
