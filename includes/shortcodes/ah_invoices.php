@@ -4,7 +4,7 @@ function shortcode_ah_invoices( $atts, $content = '', $shortcode_name = 'ah_invo
 	$atts = shortcode_atts(array(
 	), $atts, $shortcode_name);
 	
-	$invoices = AH_Plugin()->Invoice->get_user_invoices();
+	$invoices = AH_Invoice()->get_user_invoices();
 
 	if ( ! $invoices->have_posts() ) {
 		return 'You currently have no invoices.';

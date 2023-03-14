@@ -31,7 +31,7 @@ class Class_AH_Admin {
 		$type = 'success';
 		$message = 'Hello world!' . "\n\n" . 'This is a message.';
 		$data = array( 'first_name' => 'Radley', 'last_name' => 'Sustaire' );
-		$this->add_notice( $type, $message, $data );
+		$this->add_notice( $type, $message, $data, 'test_notice' );
 		echo 'notice added';
 		exit;
 	}
@@ -119,9 +119,19 @@ class Class_AH_Admin {
 		}
 	}
 	
-	public function add_notice( $type, $message, $data = array() ) {
+	/**
+	 * @param $type         string      - success, info, message, error
+	 * @param $message      string
+	 * @param $data         mixed
+	 * @param $unique_key   null|string - If provided, only one notice using this key will be stored (latest replaces previous)
+	 *
+	 * @return void
+	 */
+	public function add_notice( $type, $message, $data = array(), $unique_key = null ) {
 		$date = current_time('Y-m-d G:i:s');
+		
 		$key = uniqid();
+		if ( $unique_key !== null ) $key = $unique_key;
 		
 		$notices = $this->get_notices();
 		$notices[$key] = compact( 'type', 'message', 'data', 'date' );

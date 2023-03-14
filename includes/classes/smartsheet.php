@@ -32,6 +32,12 @@ get_sheet_columns( $sheet_id )
 # CELLS
 @todo get_cell( $sheet_id, $column_id, $row_id )
 @todo update_cell( $cell_id, $value )
+
+# WEBHOOKS
+list_webhooks( $sheet_id )
+@todo get_webhook( $sheet_id, $webhook_id ) ?
+@todo add_webhook( $sheet_id ) ?
+@todo update_webhook( $sheet_id ) ?
 */
 
 /**
@@ -47,10 +53,16 @@ class Class_AH_Smartsheet {
 	
 	public $api_initialized = false;
 	
+	public $last_request = false;
+	
 	// Construct
 	public function __construct() {
 		
 		$this->API = new RS_API();
+		
+		// ----------
+		// SHEETS, ROWS, COLUMNS, AND CELLS
+		// ----------
 		
 		// Get a list of all sheets
 		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_view_sheets
@@ -79,6 +91,28 @@ class Class_AH_Smartsheet {
 		// Update a cell in a row
 		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_update_row&sheet_id=7609265092355972&row_id=7654311241181060
 		if ( isset($_GET['ah_smartsheet_update_row']) ) add_action( 'init', array( $this, 'ah_smartsheet_update_row' ) );
+		
+		// ----------
+		// WEBHOOKS
+		// ----------
+		
+		// Get a list of webhooks
+		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_list_webhooks&sheet_id=7609265092355972
+		if ( isset($_GET['ah_smartsheet_list_webhooks']) ) add_action( 'init', array( $this, 'ah_smartsheet_list_webhooks' ) );
+		
+		// Add a webhook
+		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_add_webhook&sheet_id=7609265092355972&webhook_action=640510876576c&scope=sheet&title=Example%20Webhook
+		// Invoice: https://alpinehikerdev.wpengine.com/?ah_smartsheet_add_webhook&sheet_id=7609265092355972&webhook_action=invoice&scope=sheet&title=Invoice
+		if ( isset($_GET['ah_smartsheet_add_webhook']) ) add_action( 'init', array( $this, 'ah_smartsheet_add_webhook' ) );
+		
+		// Delete a webhook
+		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_delete_webhook&webhook_action=640510876576c
+		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_delete_webhook&webhook_id=7322288048629636
+		if ( isset($_GET['ah_smartsheet_delete_webhook']) ) add_action( 'init', array( $this, 'ah_smartsheet_delete_webhook' ) );
+		
+		// Enable or disable a webhook
+		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_toggle_webhook&webhook_action=invoice&enabled=1
+		if ( isset($_GET['ah_smartsheet_toggle_webhook']) ) add_action( 'init', array( $this, 'ah_smartsheet_toggle_webhook' ) );
 		
 		// @todo Update one cell
 		// @todo https://alpinehikerdev.wpengine.com/?ah_smartsheet_update_row&sheet_id=7609265092355972&row_id=7654311241181060&cell_id=XXX&value=YYY
@@ -115,7 +149,9 @@ class Class_AH_Smartsheet {
 	 * }
 	 */
 	public function request( $api_url, $method = 'GET', $url_args = array(), $body_args = array(), $headers = array() ) {
-		return $this->get_api()->request( $api_url, $method, $url_args, $body_args, $headers );
+		$result = $this->get_api()->request( $api_url, $method, $url_args, $body_args, $headers );
+		$this->last_request = $result;
+		return $result;
 	}
 	
 	/**
@@ -130,6 +166,20 @@ class Class_AH_Smartsheet {
 		$settings = get_field( $key, 'ah_settings' );
 		
 		return $settings['sheet_id'] ?? false;
+	}
+	
+	/**
+	 * Get the ID of a sheet by key that matches a field from Theme Settings -> Alpine Hikers -> Smartsheet Settings
+	 * The $key should be something like "invoices"
+	 *
+	 * @param $key
+	 *
+	 * @return void
+	 */
+	public function get_webhook_action_from_settings( $key ) {
+		$settings = get_field( $key, 'ah_settings' );
+		
+		return $settings['webhook_action'] ?? false;
 	}
 	
 	/**
@@ -353,8 +403,136 @@ class Class_AH_Smartsheet {
 		return false;
 	}
 	
+	/**
+	 * Returns an array of webhooks currently registered
+	 *
+	 * @param $sheet_id
+	 *
+	 * @return array|false
+	 */
+	public function list_webhooks( $sheet_id ) {
+		// @see https://smartsheet.redoc.ly/tag/webhooks
+		$url = 'https://api.smartsheet.com/2.0/webhooks';
+		$data = array();
+		$body = array();
+		$method = 'GET';
+		$headers = array( 'Content-Type' => 'application/json' );
+		
+		$data['includeAll'] = true;
+		
+		$result = $this->request( $url, $method, $data, $body, $headers );
+		
+		// $result['data'] = array( pageNumber = 0, pageSize = 100, totalPages = 0, totalCount = 0, data = array() )
+		
+		if ( ! $result['success'] || empty($result['data']) ) {
+			return false;
+		}else{
+			return $result['data'] ?? false;
+		}
+	}
+	
+	/**
+	 * Registers a new webhook. Webhooks are not enabled by default. Returns an array from data->result explained in a comment inside.
+	 *
+	 * @param int $object_id  ID of the sheet/row/cell/etc
+	 * @param string $scope   Type of the ID above, such as "sheet"
+	 * @param string $title    Name
+	 * @param string $action
+	 * @param bool $enabled
+	 *
+	 * @return array|false
+	 */
+	public function add_webhook( $object_id, $scope, $title, $action, $enabled = true ) {
+		// @see https://smartsheet.redoc.ly/tag/webhooks#operation/createWebhook
+		$url = 'https://api.smartsheet.com/2.0/webhooks';
+		$data = array();
+		$body = array();
+		$method = 'POST';
+		$headers = array( 'Content-Type' => 'application/json' );
+		
+		$callback_url = site_url('/smartsheet/'. urlencode($action) .'/');
+		
+		$body['callbackUrl'] = $callback_url;
+		$body['name'] = $title;
+		$body['version'] = 1;
+		$body['scopeObjectId'] = $object_id;
+		$body['scope'] = $scope;
+		$body['events'] = array( '*.*' );
+		
+		$result = $this->request( $url, $method, $data, $body, $headers );
+		
+		// data: https://radleysustaire.com/s3/8fa39a/
+		// $result['data'] = array(): message (SUCCESS), resultCode (0), result (array)
+		
+		// $result['data']['result'] = array() with keys:
+		// id, name, scope, scopeObjectId, subscope, events, callbackUrl,
+		// sharedSecret, enabled, status, version, createdAt, modifiedAt
+		
+		if ( ! $result['success'] || empty($result['data']) ) {
+			return false;
+		}else{
+			return $result['data']['result'] ?? false;
+		}
+	}
+	
+	/**
+	 * Deletes an existing webhook
+	 *
+	 * @param int $webhook_id
+	 *
+	 * @return array|false
+	 */
+	public function delete_webhook( $webhook_id ) {
+		// @see https://smartsheet.redoc.ly/tag/webhooks#operation/deleteWebhook
+		$url = 'https://api.smartsheet.com/2.0/webhooks/' . urlencode($webhook_id);
+		$data = array();
+		$body = array();
+		$method = 'DELETE';
+		$headers = array( 'Content-Type' => 'application/json' );
+		
+		$result = $this->request( $url, $method, $data, $body, $headers );
+		
+		if ( ! $result['success'] || empty($result['data']) ) {
+			return false;
+		}else{
+			return $result['data'] ?? false;
+		}
+	}
+	
+	/**
+	 * Toggle a webhook to be enabled or disabled
+	 *
+	 * @param int $webhook_id
+	 * @param bool $enabled
+	 *
+	 * @return array|false
+	 */
+	public function toggle_webhook( $webhook_id, $enabled ) {
+		// @see https://smartsheet.redoc.ly/tag/webhooks#operation/updateWebhook
+		$url = 'https://api.smartsheet.com/2.0/webhooks/' . urlencode($webhook_id);
+		$data = array();
+		$body = array();
+		$method = 'PUT';
+		$headers = array( 'Content-Type' => 'application/json' );
+		
+		$body['enabled'] = $enabled;
+		
+		$result = $this->request( $url, $method, $data, $body, $headers );
+		
+		pre_dump($result);
+		
+		// $result['data'] = https://radleysustaire.com/s3/8de5e6/
+		// result['data']['result'] = array: id, name, scope, ...
+		
+		if ( ! $result['success'] || empty($result['data']) ) {
+			return false;
+		}else{
+			return $result['data']['result'] ?? false;
+		}
+	}
+	
 	public function ah_smartsheet_view_sheets() {
-		if ( ! current_user_can('administrator') ) aa_die( 'ah_smartsheet_view_sheets is admin only' );
+		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
 		
 		// settings
 		$api_key = 'fqqgSHk6vetds8djU915DIa5aRlHzHrmoAu31';
@@ -378,11 +556,14 @@ class Class_AH_Smartsheet {
 		// display sheets
 		pre_dump_table( $body['data'] );
 		
+		echo '<p><strong>Last request:</strong></p>';
+		pre_dump( $this->last_request );
+		
 		exit;
 	}
 	
 	public function ah_smartsheet_search_sheets() {
-		if ( ! current_user_can('administrator') ) aa_die( 'ah_smartsheet_search_sheets is admin only' );
+		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
 		
 		$search = (string) stripslashes($_GET['ah_smartsheet_search_sheets']);
 		if ( ! $search || $search === '1' || $search === '0' ) $search = 'A+A';
@@ -398,11 +579,14 @@ class Class_AH_Smartsheet {
 		
 		pre_dump_table( $results );
 		
+		echo '<p><strong>Last request:</strong></p>';
+		pre_dump( $this->last_request );
+		
 		exit;
 	}
 	
 	public function ah_smartsheet_view_column_ids() {
-		if ( ! current_user_can('administrator') ) aa_die( 'ah_smartsheet_view_column_ids is admin only' );
+		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
 		
 		$sheet_id = (string) stripslashes($_GET['ah_smartsheet_view_column_ids']);
 		
@@ -424,19 +608,22 @@ class Class_AH_Smartsheet {
 		
 		pre_dump_table( $results['data'] );
 		
+		echo '<p><strong>Last request:</strong></p>';
+		pre_dump( $this->last_request );
+		
 		exit;
 	}
 	
 	public function ah_smartsheet_insert_invoice_row() {
-		if ( ! current_user_can('administrator') ) aa_die( 'ah_smartsheet_insert_invoice_row is admin only' );
+		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
 		
 		try {
 			
-			$sheet_id = AH_Plugin()->Smartsheet->get_sheet_id_from_settings( 'invoices' );
-			$column_ids = AH_Plugin()->Smartsheet->get_column_ids_from_settings( 'invoices' );
+			$sheet_id = AH_Smartsheet()->get_sheet_id_from_settings( 'invoices' );
+			$column_ids = AH_Smartsheet()->get_column_ids_from_settings( 'invoices' );
 			if ( !$sheet_id || !$column_ids ) throw new Exception( 'Sheet or column IDs not provided in settings.');
 			
-			$sheet_cols = AH_Plugin()->Smartsheet->get_sheet_columns( $sheet_id );
+			$sheet_cols = AH_Smartsheet()->get_sheet_columns( $sheet_id );
 			if ( !$sheet_cols ) throw new Exception( 'API could not load column settings from Smartsheet.');
 			
 			$cells = array();
@@ -457,68 +644,77 @@ class Class_AH_Smartsheet {
 				);
 			}
 			
-			$row_id = AH_Plugin()->Smartsheet->insert_row( $sheet_id, $cells );
-			if ( ! $row_id ) throw new Exception( 'API method failed');
+			$row_id = AH_Smartsheet()->insert_row( $sheet_id, $cells );
+			if ( ! $row_id ) throw new Exception( 'Row could not be inserted');
 			
 			echo '<strong>Success: Row inserted</strong>';
 			
 		} catch( Exception $e ) {
 			// AH_Plugin()->Admin->add_notice( 'error', 'Failed to insert row in smartsheet for test invoice ('. __FUNCTION__ .').' . "\n\n" . $e->getMessage(), array('Exception' => $e, 'Sheet ID' => $sheet_id) );
-			echo '<strong>Error: Row could not be inserted</strong>';
+			echo '<strong>Error: '. $e->getMessage() .'</strong>';
 		}
 		
 		pre_dump(compact('row_id', 'sheet_id', 'cells'));
+		
+		echo '<p><strong>Last request:</strong></p>';
+		pre_dump( $this->last_request );
 		exit;
 	}
 
 	public function ah_smartsheet_search_for_row() {
-		if ( ! current_user_can('administrator') ) aa_die( 'ah_smartsheet_search_for_row is admin only' );
+		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
 		
 		try {
 			
-			$sheet_id = AH_Plugin()->Smartsheet->get_sheet_id_from_settings( 'invoices' );
-			$column_ids = AH_Plugin()->Smartsheet->get_column_ids_from_settings( 'invoices' );
+			$sheet_id = AH_Smartsheet()->get_sheet_id_from_settings( 'invoices' );
+			$column_ids = AH_Smartsheet()->get_column_ids_from_settings( 'invoices' );
 			if ( !$sheet_id || !$column_ids ) throw new Exception( 'Sheet or column IDs not provided in settings.');
 			
 			$post_id_column_id = $column_ids['post_id'];
 			$search = '6118';
 			
-			$row_id = AH_Plugin()->Smartsheet->lookup_row_by_column_value( $sheet_id, $post_id_column_id, $search );
-			if ( ! $row_id ) throw new Exception( 'API method failed');
+			$row_id = AH_Smartsheet()->lookup_row_by_column_value( $sheet_id, $post_id_column_id, $search );
+			if ( ! $row_id ) throw new Exception( 'Row lookup failed');
 			
 			echo '<strong>Success: Row lookup success</strong>';
 			
 		} catch( Exception $e ) {
-			echo '<strong>Error: Row could not be found</strong>';
+			echo '<strong>Error: '. $e->getMessage() .'</strong>';
 		}
 		
 		pre_dump(compact('sheet_id', 'column_ids', 'post_id_column_id', 'search', 'row_id'));
+		
+		echo '<p><strong>Last request:</strong></p>';
+		pre_dump( $this->last_request );
 		exit;
 	}
 
 	public function ah_smartsheet_get_row() {
-		if ( ! current_user_can('administrator') ) aa_die( 'ah_smartsheet_get_row is admin only' );
+		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
 		
 		try {
 			
 			$sheet_id = (int) $_GET['sheet_id'];
 			$row_id = (int) $_GET['row_id'];
 			
-			$row = AH_Plugin()->Smartsheet->get_row( $sheet_id, $row_id );
+			$row = AH_Smartsheet()->get_row( $sheet_id, $row_id );
 			if ( ! $row ) throw new Exception( 'No results');
 			
 			echo '<strong>Success: Row found</strong>';
 			
 		} catch( Exception $e ) {
-			echo '<strong>Error: Row not be found</strong>';
+			echo '<strong>Error: '. $e->getMessage() .'</strong>';
 		}
 		
 		pre_dump(compact('sheet_id', 'row_id', 'row'));
+		
+		echo '<p><strong>Last request:</strong></p>';
+		pre_dump( $this->last_request );
 		exit;
 	}
 
 	public function ah_smartsheet_update_row() {
-		if ( ! current_user_can('administrator') ) aa_die( 'ah_smartsheet_update_row is admin only' );
+		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
 		
 		try {
 			
@@ -565,16 +761,151 @@ class Class_AH_Smartsheet {
 				),
 			);
 			
-			$result = AH_Plugin()->Smartsheet->update_row( $sheet_id, $row_id, $cells );
+			$result = AH_Smartsheet()->update_row( $sheet_id, $row_id, $cells );
 			if ( ! $result ) throw new Exception( 'Update failed');
 			
 			echo '<strong>Success: Row updated</strong>';
 			
 		} catch( Exception $e ) {
-			echo '<strong>Error: Row not updated</strong>';
+			echo '<strong>Error: '. $e->getMessage() .'</strong>';
 		}
 		
 		pre_dump(compact('sheet_id', 'row_id', 'cells', 'result'));
+		
+		echo '<p><strong>Last request:</strong></p>';
+		pre_dump( $this->last_request );
+		exit;
+	}
+	
+	
+	// Get a list of webhooks
+	// https://alpinehikerdev.wpengine.com/?ah_smartsheet_list_webhooks&sheet_id=7609265092355972
+	public function ah_smartsheet_list_webhooks() {
+		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
+		
+		try {
+			
+			$sheet_id = (int) $_GET['sheet_id'];
+			
+			$webhooks = AH_Smartsheet()->list_webhooks( $sheet_id );
+			if ( ! $webhooks ) throw new Exception( 'Failed to get list of webhooks');
+			
+		} catch( Exception $e ) {
+			echo '<strong>Error: '. $e->getMessage() .'</strong>';
+		}
+		
+		pre_dump(compact('sheet_id', 'webhooks'));
+		
+		echo '<p><strong>Last request:</strong></p>';
+		pre_dump( $this->last_request );
+		exit;
+	}
+	
+	// Add a webhook
+	// https://alpinehikerdev.wpengine.com/?ah_smartsheet_add_webhook&sheet_id=7609265092355972&webhook_action=640510876576c&scope=sheet&title=Example%20Webhook
+	// Invoice: https://alpinehikerdev.wpengine.com/?ah_smartsheet_add_webhook&sheet_id=7609265092355972&webhook_action=invoice&scope=sheet&title=Invoice
+	public function ah_smartsheet_add_webhook() {
+		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
+		
+		try {
+			
+			$sheet_id = (int) $_GET['sheet_id'];
+			$scope = $_GET['scope'] ?? 'sheet';
+			$action = $_GET['webhook_action'] ?? '640510876576c';
+			$title = $_GET['title'] ?? ('Example Webhook ' . $action);
+			
+			$saved_webhook = AH_Smartsheet_Webhooks()->get_saved_webhook_from_action( $action );
+			if ( $saved_webhook ) throw new Exception( 'Webhook already exists with the action "'. esc_html($action) .'"');
+			
+			// webhook callback path:
+			// /smartsheet/SOMETHING/
+			
+			// secret: 1oc4lqv5g8wrpblfefvwyprhrz
+			
+			$result = AH_Smartsheet()->add_webhook( $sheet_id, $scope, $title, $action );
+			if ( ! $result ) throw new Exception( 'Could not insert webhook');
+			
+			$webhook_id = $result['id'];
+			$secret = $result['sharedSecret'];
+			
+			AH_Smartsheet_Webhooks()->add_saved_webhook( $action, $webhook_id, $secret, $sheet_id, $scope, $title );
+			
+		} catch( Exception $e ) {
+			echo '<strong>Error: '. $e->getMessage() .'</strong>';
+		}
+		
+		pre_dump(compact('sheet_id', 'scope', 'action', 'title', 'saved_webhook', 'result'));
+		
+		echo '<p><strong>Last request:</strong></p>';
+		pre_dump( $this->last_request );
+		exit;
+	}
+	
+	// Delete a webhook
+	// https://alpinehikerdev.wpengine.com/?ah_smartsheet_delete_webhook&webhook_action=640510876576c
+	// https://alpinehikerdev.wpengine.com/?ah_smartsheet_delete_webhook&webhook_id=7322288048629636
+	public function ah_smartsheet_delete_webhook() {
+		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
+		
+		try {
+			
+			$action = $_GET['webhook_action'] ?? false;
+			$webhook_id = $_GET['webhook_id'] ?? false;
+			
+			// If no id specified, delete by action instead
+			if ( $webhook_id ) {
+				$saved_webhook = AH_Smartsheet_Webhooks()->get_saved_webhook( $webhook_id );
+			}else{
+				$saved_webhook = AH_Smartsheet_Webhooks()->get_saved_webhook_from_action( $action );
+			}
+			
+			if ( ! $saved_webhook ) throw new Exception( 'Webhook is not registered within the website');
+				
+			$action = $saved_webhook['action'];
+			$webhook_id = $saved_webhook['webhook_id'];
+			
+			$result = AH_Smartsheet()->delete_webhook( $webhook_id );
+			if ( ! $result ) throw new Exception( 'Could not delete webhook');
+			
+			AH_Smartsheet_Webhooks()->delete_saved_webhook( $webhook_id );
+			
+		} catch( Exception $e ) {
+			echo '<strong>Error: '. $e->getMessage() .'</strong>';
+		}
+		
+		pre_dump(compact('action', 'saved_webhook', 'webhook_id', 'result'));
+		
+		echo '<p><strong>Last request:</strong></p>';
+		pre_dump( $this->last_request );
+		exit;
+	}
+	
+	// Enable or disable a webhook
+	// https://alpinehikerdev.wpengine.com/?ah_smartsheet_toggle_webhook&webhook_action=invoice&enabled=1
+	public function ah_smartsheet_toggle_webhook() {
+		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
+		
+		try {
+			
+			$action = $_GET['webhook_action'] ?? 'invoice';
+			$enabled = ! empty($_GET['enabled']);
+			
+			$saved_webhook = AH_Smartsheet_Webhooks()->get_saved_webhook_from_action( $action );
+			if ( ! $saved_webhook ) throw new Exception( 'Webhook is not registered within the website');
+			
+			$webhook_id = $saved_webhook['webhook_id'];
+			
+			$result = AH_Smartsheet()->toggle_webhook( $webhook_id, $enabled );
+			if ( ! $result ) throw new Exception( 'Could not toggle webhook');
+			
+		} catch( Exception $e ) {
+			echo '<strong>Error: '. $e->getMessage() .'</strong>';
+		}
+		
+		pre_dump(compact('action', 'enabled', 'saved_webhook', 'webhook_id', 'result'));
+		
+		echo '<p><strong>Last request:</strong></p>';
+		pre_dump( $this->last_request );
 		exit;
 	}
 	

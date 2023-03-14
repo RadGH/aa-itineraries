@@ -25,10 +25,17 @@ class Class_AH_Rewrites {
 			'top'
 		);
 		
+		add_rewrite_rule(
+			'(smartsheet)/([^/]+)?(:/([0-9]+))?/?$',
+			'index.php?pagename=&page=&ah_action=smartsheet_webhook&ah_webhook=$matches[2]',
+			'top'
+		);
+		
 	}
 	
 	public function add_query_vars($query_vars) {
 		$query_vars[] = 'ah_action';
+		$query_vars[] = 'ah_webhook';
 		return $query_vars;
 	}
 	

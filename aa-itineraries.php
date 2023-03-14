@@ -20,6 +20,20 @@ function AH_Plugin() {
 	return $AH;
 }
 
+/* Shorthands of our objects */
+function AH_Cron() { return AH_Plugin()->Cron; }
+function AH_Admin() { return AH_Plugin()->Admin; }
+function AH_Enqueue() { return AH_Plugin()->Enqueue; }
+function AH_Rewrites() { return AH_Plugin()->Rewrites; }
+function AH_Reminders() { return AH_Plugin()->Reminders; }
+function AH_Smartsheet() { return AH_Plugin()->Smartsheet; }
+function AH_Smartsheet_Invoices() { return AH_Plugin()->Smartsheet_Invoices; }
+function AH_Smartsheet_Webhooks() { return AH_Plugin()->Smartsheet_Webhooks; }
+function AH_Account_Page() { return AH_Plugin()->Account_Page; }
+function AH_Document() { return AH_Plugin()->Document; }
+function AH_Invoice() { return AH_Plugin()->Invoice; }
+function AH_Itinerary() { return AH_Plugin()->Itinerary; }
+
 /**
  * This class includes plugin files, performs upgrades, and registers cron schedules. It also stores each module as an object.
  *
@@ -39,9 +53,11 @@ class Class_AH_Plugin {
 	public Class_AH_Reminders           $Reminders;
 	public Class_AH_Smartsheet          $Smartsheet;
 	public Class_AH_Smartsheet_Invoices $Smartsheet_Invoices;
+	public Class_AH_Smartsheet_Webhooks $Smartsheet_Webhooks;
 	public Class_Account_Page_Post_Type $Account_Page;
 	public Class_Document_Post_Type     $Document;
 	public Class_Invoice_Post_Type      $Invoice;
+	public Class_Itinerary_Post_Type    $Itinerary;
 	
 	/*
 	 * Constructor
@@ -105,6 +121,9 @@ class Class_AH_Plugin {
 		include_once( __DIR__ . '/includes/classes/smartsheet-invoices.php' );
 		$this->Smartsheet_Invoices = new Class_AH_Smartsheet_Invoices();
 		
+		include_once( __DIR__ . '/includes/classes/smartsheet-webhooks.php' );
+		$this->Smartsheet_Webhooks = new Class_AH_Smartsheet_Webhooks();
+		
 		// ----------------------------------------
 		// 5. Custom post types controllers
 		include_once( AH_PATH . '/includes/classes/_abstract_post_type.php' );
@@ -117,6 +136,9 @@ class Class_AH_Plugin {
 		
 		include_once( __DIR__ . '/includes/classes/invoice_post_type.php' );
 		$this->Invoice = new Class_Invoice_Post_Type();
+		
+		include_once( __DIR__ . '/includes/classes/itinerary_post_type.php' );
+		$this->Itinerary = new Class_Itinerary_Post_Type();
 		
 		// ----------------------------------------
 		// 6. Include other functions

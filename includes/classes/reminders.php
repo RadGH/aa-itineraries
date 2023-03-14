@@ -102,7 +102,7 @@ class Class_AH_Reminders {
 			// $reminder_date_ymd = date( 'Y-m-d', $reminder_date_ts );
 			
 			$args = array(
-				'post_type' => AH_Plugin()->Invoice->get_post_type(),
+				'post_type' => AH_Invoice()->get_post_type(),
 				'meta_query' => array(
 					array(
 						'key' => "{$key}_enabled",

@@ -4,7 +4,7 @@ function shortcode_ah_documents( $atts, $content = '', $shortcode_name = 'ah_doc
 	$atts = shortcode_atts(array(
 	), $atts, $shortcode_name);
 	
-	$documents = AH_Plugin()->Document->get_user_documents();
+	$documents = AH_Document()->get_user_documents();
 
 	if ( ! $documents->have_posts() ) {
 		return 'You currently have no documents.';

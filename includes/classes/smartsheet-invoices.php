@@ -20,18 +20,33 @@ class Class_AH_Smartsheet_Invoices  {
 		// Process the queue every 5 minutes to stay in sync
 		add_action( 'ah_cron/5_minute', array( $this, 'process_queue' ) );
 		
+		// Ensures the Smartsheet webhook is registered, which sync's Smartsheet changes back to the site.
+		add_action( 'init', array( $this, 'register_smartsheet_webhooks' ) );
+		
 		// Test the queue system by updating an invoice
 		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_invoice_test_queue
 		if ( isset($_GET['ah_smartsheet_invoice_test_queue']) ) add_action( 'init', array( $this, 'ah_smartsheet_invoice_test_queue' ) );
 		
-		// Update a cell in a row
+		// Test updating a cell in a row when acf saves a field
 		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_invoice_update_field&post_id=6118
 		if ( isset($_GET['ah_smartsheet_invoice_update_field']) ) add_action( 'init', array( $this, 'ah_smartsheet_invoice_update_field' ) );
 		
 	}
 	
+	public function register_smartsheet_webhooks() {
+	}
+	
+	/**
+	 * Add an invoice to the queue so that when next processed, the invoice is updated in Smartsheet.
+	 * The queue is processed at the end of the PHP process, otherwise in 5 minute intervals using WP Cron.
+	 * Using a queue prevents an issue where one invoice is updated multiple times when several fields change in one request.
+	 *
+	 * @param $post_id
+	 *
+	 * @return void
+	 */
 	public function add_to_queue( $post_id ) {
-		if ( ! AH_Plugin()->Invoice->is_valid_invoice( $post_id ) ) return;
+		if ( ! AH_Invoice()->is_valid_invoice( $post_id ) ) return;
 		
 		$notices = $this->get_queue();
 		$notices[$post_id] = $post_id;
@@ -71,10 +86,11 @@ class Class_AH_Smartsheet_Invoices  {
 	}
 	
 	public function update_invoice_row( $post_id ) {
-		if ( ! AH_Plugin()->Invoice->is_valid_invoice( $post_id ) ) return;
+		if ( ! AH_Invoice()->is_valid_invoice( $post_id ) ) return;
 		
-		$smartsheet_id = AH_Plugin()->Smartsheet->get_sheet_id_from_settings( 'invoices' );
-		$column_ids = AH_Plugin()->Smartsheet->get_column_ids_from_settings( 'invoices' );
+		$smartsheet_id = AH_Smartsheet()->get_sheet_id_from_settings( 'invoices' );
+		// $webhook_action = AH_Smartsheet()->get_webhook_action_from_settings( 'invoices' );
+		$column_ids = AH_Smartsheet()->get_column_ids_from_settings( 'invoices' );
 		
 		$post_id_column_id = array_search( 'post_id', $column_ids );
 		
@@ -94,24 +110,24 @@ class Class_AH_Smartsheet_Invoices  {
 		}
 		
 		// Find the row
-		$row = AH_Plugin()->Smartsheet->lookup_row_by_column_value( $smartsheet_id, $post_id_column_id, $post_id );
+		$row = AH_Smartsheet()->lookup_row_by_column_value( $smartsheet_id, $post_id_column_id, $post_id );
 		$row_id = $row ? $row['id'] : false;
 		
 		// If row is missing, create a new row
-		if ( ! $row_id ) $row_id = AH_Plugin()->Smartsheet->insert_row( $smartsheet_id, $cells );
+		if ( ! $row_id ) $row_id = AH_Smartsheet()->insert_row( $smartsheet_id, $cells );
 		
 		// If failed to insert row, abort
 		if ( ! $row_id ) {
-			AH_Plugin()->Invoice->add_log_message( $post_id, 'Smartsheet Error: Could not locate or insert row to sheet.' );
+			AH_Invoice()->add_log_message( $post_id, 'Smartsheet Error: Could not locate or insert row to sheet.' );
 			return;
 		}
 		
 		// Update that row
-		$result = AH_Plugin()->Smartsheet->update_row( $smartsheet_id, $row_id, $cells );
+		$result = AH_Smartsheet()->update_row( $smartsheet_id, $row_id, $cells );
 		
 		// If failed to update row, abort
 		if ( ! $result ) {
-			AH_Plugin()->Invoice->add_log_message( $post_id, 'Smartsheet Error: Row was found but could not be updated.' );
+			AH_Invoice()->add_log_message( $post_id, 'Smartsheet Error: Row was found but could not be updated.' );
 			return;
 		}
 		
@@ -191,7 +207,7 @@ class Class_AH_Smartsheet_Invoices  {
 	 * @return void
 	 */
 	public function on_modified_post( $post_id ) {
-		if ( ! AH_Plugin()->Invoice->is_valid_invoice( $post_id ) ) return;
+		if ( ! AH_Invoice()->is_valid_invoice( $post_id ) ) return;
 		
 		$this->add_to_queue( $post_id );
 	}
@@ -206,7 +222,7 @@ class Class_AH_Smartsheet_Invoices  {
 	public function acf_on_save_post( $acf_id ) {
 		$info = acf_get_post_id_info( $acf_id );
 		if ( $info['type'] != 'post' ) return;
-		if ( ! AH_Plugin()->Invoice->is_valid_invoice( $info['id'] ) ) return;
+		if ( ! AH_Invoice()->is_valid_invoice( $info['id'] ) ) return;
 		
 		$this->add_to_queue( $info['id'] );
 	}
@@ -222,14 +238,16 @@ class Class_AH_Smartsheet_Invoices  {
 	 */
 	public function acf_on_update_value( $value, $acf_id, $field ) {
 		$info = acf_get_post_id_info( $acf_id );
-		if ( $info['type'] != 'post' ) return;
-		if ( ! AH_Plugin()->Invoice->is_valid_invoice( $info['id'] ) ) return $value;
+		if ( $info['type'] != 'post' ) return $value;
+		if ( ! AH_Invoice()->is_valid_invoice( $info['id'] ) ) return $value;
 		
 		$this->add_to_queue( $info['id'] );
 		
 		return $value;
 	}
 	
+	// Test the queue system by updating an invoice
+	// https://alpinehikerdev.wpengine.com/?ah_smartsheet_invoice_test_queue
 	public function ah_smartsheet_invoice_test_queue() {
 		$post_id = 6118;
 		$this->add_to_queue( $post_id );
@@ -242,6 +260,8 @@ class Class_AH_Smartsheet_Invoices  {
 		exit;
 	}
 	
+	// Test updating a cell in a row when acf saves a field
+	// https://alpinehikerdev.wpengine.com/?ah_smartsheet_invoice_update_field&post_id=6118
 	public function ah_smartsheet_invoice_update_field() {
 		$post_id = (int) $_GET['post_id'];
 		$value = rand(0, 1000) / 100;

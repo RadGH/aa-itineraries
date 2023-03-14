@@ -147,6 +147,7 @@ class RS_API {
 		switch( $method ) {
 			case 'PATCH':
 			case 'PUT':
+			case 'DELETE':
 				$args['method'] = $method;
 				$request = wp_remote_request($final_url, $args);
 				break;

@@ -1,6 +1,6 @@
 <?php
 
-// Version 1.8
+// Version 1.9
 
 // Get user IP from cloudflare or remote_addr
 if ( ! function_exists('aa_get_ip_address') ) {
@@ -200,6 +200,14 @@ if ( ! aa_is_developer() ) {
 		function pre_dump_table( $array ) {}
 	}
 	
+	if ( ! function_exists( 'rs_start_timer' ) ) {
+		function rs_start_timer( ...$args ) {}
+	}
+	
+	if ( ! function_exists( 'rs_stop_timer' ) ) {
+		function rs_stop_timer( ...$args ) { return 0; }
+	}
+	
 	return;
 	
 }
@@ -314,6 +322,29 @@ if ( ! function_exists( 'pre_dump_table' ) ) {
 }
 
 
+/**
+ * Start and stop a timer. Returns duration between calls in seconds (float).
+ *
+ * rs_start_timer();
+ * usleep(2500);
+ * $s = rs_stop_timer();
+ * echo 'took ' . $s . ' seconds!';
+ *
+ * @return void, float
+ */
+function rs_start_timer() {
+	rs_stop_timer(true);
+}
+function rs_stop_timer( $reset = null ) {
+	static $seconds = 0;
+	
+	if ( $reset === null )
+		return (microtime(true) - $seconds);
+	else
+		$seconds = microtime(true);
+}
+
+
 
 // https://alpinehikerdev.wpengine.com/?rad_20234821_34819
 function rad_20234821_34819() {
@@ -325,7 +356,7 @@ if ( isset($_GET['rad_20234821_34819']) ) add_action( 'init', 'rad_20234821_3481
 function rad_2023222_226() {
 	$invoice_id = 6072;
 	
-	$status = AH_Plugin()->Invoice->get_invoice_status( $invoice_id );
+	$status = AH_Invoice()->get_invoice_status( $invoice_id );
 	$processing_start_date = get_post_meta( $invoice_id, 'processing_start_date', true );
 	
 	echo '<pre>';
@@ -345,8 +376,8 @@ function rad_2023124_12142() {
 	
 	$entry = GFAPI::get_entry( $entry_id );
 	
-	$post_id = AH_Plugin()->Invoice->get_invoice_id_from_entry_id( $entry );
-	$entry_2 = AH_Plugin()->Invoice->get_entry_id_from_invoice_id( $post_id );
+	$post_id = AH_Invoice()->get_invoice_id_from_entry_id( $entry );
+	$entry_2 = AH_Invoice()->get_entry_id_from_invoice_id( $post_id );
 	
 	$ah_payment_status = gform_get_meta( $entry_id, 'ah_payment_status' );
 	
@@ -366,9 +397,9 @@ function rad_20235927_11593() {
 	$brandi_user_id = 21; // brandi@brandibernoskie.com
 	$alchemy_user_id = 2; // alchemyandaim
 	
-	AH_Plugin()->Invoice->set_owner( $invoice_id, $alchemy_user_id );
+	AH_Invoice()->set_owner( $invoice_id, $alchemy_user_id );
 	
-	$new_owner = AH_Plugin()->Invoice->get_owner_user_id( $invoice_id );
+	$new_owner = AH_Invoice()->get_owner_user_id( $invoice_id );
 	
 	/*
 	delete_post_meta( $invoice_id, 'reminder_1_enabled' );
@@ -388,10 +419,10 @@ function rad_20235927_11593() {
 	delete_post_meta( $invoice_id, 'reminder_4_date' );
 	delete_post_meta( $invoice_id, 'reminder_4_notes' );
 	
-	AH_Plugin()->Invoice->setup_reminder_notifications( $invoice_id );
+	AH_Invoice()->setup_reminder_notifications( $invoice_id );
 	*/
 	
-	AH_Plugin()->Reminders->send_daily_reminders();
+	AH_Reminders()->send_daily_reminders();
 	
 	echo '<pre>';
 	var_dump(compact( 'new_owner' ));

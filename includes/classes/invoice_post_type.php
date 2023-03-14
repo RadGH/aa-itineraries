@@ -733,7 +733,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	 * Alias of @see Class_AH_Reminders::setup_reminder_notifications
 	 */
 	public function setup_reminder_notifications( $invoice_id ) {
-		AH_Plugin()->Reminders->setup_reminder_notifications( $invoice_id );
+		AH_Reminders()->setup_reminder_notifications( $invoice_id );
 	}
 	
 	/**
