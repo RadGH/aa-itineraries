@@ -33,6 +33,7 @@ function AH_Account_Page() { return AH_Plugin()->Account_Page; }
 function AH_Document() { return AH_Plugin()->Document; }
 function AH_Invoice() { return AH_Plugin()->Invoice; }
 function AH_Itinerary() { return AH_Plugin()->Itinerary; }
+function AH_PDF() { return AH_Plugin()->PDF; }
 
 /**
  * This class includes plugin files, performs upgrades, and registers cron schedules. It also stores each module as an object.
@@ -58,6 +59,7 @@ class Class_AH_Plugin {
 	public Class_Document_Post_Type     $Document;
 	public Class_Invoice_Post_Type      $Invoice;
 	public Class_Itinerary_Post_Type    $Itinerary;
+	public Class_AH_PDF                 $PDF;
 	
 	/*
 	 * Constructor
@@ -152,6 +154,11 @@ class Class_AH_Plugin {
 		include_once( AH_PATH . '/includes/shortcodes/ah_invoices.php' );
 		include_once( AH_PATH . '/includes/shortcodes/ah_login_form.php' );
 		
+		// ----------------------------------------
+		// 8. PDF Library
+		include_once( AH_PATH . '/includes/pdf/pdf.php' );
+		include_once( AH_PATH . '/includes/pdf/preview.php' );
+		$this->PDF = new Class_AH_PDF();
 	}
 	
 	/**
