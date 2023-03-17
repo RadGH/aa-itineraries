@@ -46,7 +46,7 @@ list_webhooks( $sheet_id )
 class Class_AH_Smartsheet {
 	
 	// Config
-	public $api_key = 'fqqgSHk6vetds8djU915DIa5aRlHzHrmoAu31';
+	public $api_key = null;
 	
 	// Variables
 	private RS_API $API;
@@ -119,11 +119,19 @@ class Class_AH_Smartsheet {
 		
 	}
 	
+	public function get_api_key() {
+		if ( $this->api_key === null ) {
+			$this->api_key = get_field( 'smartsheet_api_key', 'ah_settings' );
+		}
+		
+		return $this->api_key;
+	}
+	
 	
 	public function get_api() {
 		if ( $this->api_initialized ) return $this->API;
 		
-		$this->API->set_authorization_header( 'Bearer ' . $this->api_key );
+		$this->API->set_authorization_header( 'Bearer ' . $this->get_api_key() );
 
 		if ( aa_is_developer() ) {
 			$this->API->set_debug_mode( true );
@@ -535,7 +543,7 @@ class Class_AH_Smartsheet {
 		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
 		
 		// settings
-		$api_key = 'fqqgSHk6vetds8djU915DIa5aRlHzHrmoAu31';
+		$api_key = $this->get_api_key();
 		$auth_header = 'Bearer ' . $api_key;
 		
 		// perform a request to get all sheets
