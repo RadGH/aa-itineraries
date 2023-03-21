@@ -128,18 +128,18 @@ class Class_AH_Plugin {
 		
 		// ----------------------------------------
 		// 5. Custom post types controllers
-		include_once( AH_PATH . '/includes/classes/_abstract_post_type.php' );
+		include_once( AH_PATH . '/includes/post-types/_abstract_post_type.php' );
 		
-		include_once( __DIR__ . '/includes/classes/account_page_post_type.php' );
+		include_once( __DIR__ . '/includes/post-types/account_page.php' );
 		$this->Account_Page = new Class_Account_Page_Post_Type();
 		
-		include_once( __DIR__ . '/includes/classes/document_post_type.php' );
+		include_once( __DIR__ . '/includes/post-types/document.php' );
 		$this->Document = new Class_Document_Post_Type();
 		
-		include_once( __DIR__ . '/includes/classes/invoice_post_type.php' );
+		include_once( __DIR__ . '/includes/post-types/invoice.php' );
 		$this->Invoice = new Class_Invoice_Post_Type();
 		
-		include_once( __DIR__ . '/includes/classes/itinerary_post_type.php' );
+		include_once( __DIR__ . '/includes/post-types/itinerary.php' );
 		$this->Itinerary = new Class_Itinerary_Post_Type();
 		
 		// ----------------------------------------

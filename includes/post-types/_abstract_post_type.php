@@ -310,4 +310,15 @@ abstract class Class_Abstract_Post_Type {
 		return $columns;
 	}
 	
+	/**
+	 * Check if the given post ID is valid (exists and the correct post type)
+	 *
+	 * @param $post_id
+	 *
+	 * @return bool
+	 */
+	public function is_valid( $post_id ) {
+		return get_post_type( $post_id ) == $this->get_post_type();
+	}
+	
 }

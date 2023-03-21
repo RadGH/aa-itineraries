@@ -226,7 +226,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	 * @return void
 	 */
 	public function save_post_reassign_author( $post_id ) {
-		if ( ! $this->is_valid_invoice( $post_id ) ) return;
+		if ( ! $this->is_valid( $post_id ) ) return;
 		
 		$post = get_post( $post_id );
 		
@@ -247,7 +247,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	 * @return void
 	 */
 	public function save_post_recalculate_reminders( $post_id ) {
-		if ( ! $this->is_valid_invoice( $post_id ) ) return;
+		if ( ! $this->is_valid( $post_id ) ) return;
 		
 		$this->setup_reminder_notifications( $post_id );
 	}
@@ -353,7 +353,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		
 		// Get the invoice ID that the user is about to pay
 		$invoice_id = isset($_GET['invoice_id']) ? (int) $_GET['invoice_id'] : false;
-		if ( ! $this->is_valid_invoice( $invoice_id ) ) return $atts;
+		if ( ! $this->is_valid( $invoice_id ) ) return $atts;
 		
 		// Pull values from the invoice
 		$field_values = wp_parse_args( (string) $atts['field_values'] );
@@ -455,7 +455,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	 * @return void
 	 */
 	public function set_owner( $invoice_id, $user_id ) {
-		if ( ! $this->is_valid_invoice( $invoice_id ) ) return;
+		if ( ! $this->is_valid( $invoice_id ) ) return;
 		
 		// Save as custom field
 		update_field( 'user', $user_id );
@@ -510,7 +510,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		
 		$post_id = (int) gform_get_meta( $entry['id'], $this->field_ids['invoice_id'] );
 		
-		if ( $this->is_valid_invoice( $post_id ) ) {
+		if ( $this->is_valid( $post_id ) ) {
 			return $post_id;
 		}else{
 			return false;
@@ -612,7 +612,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	public function get_merge_tags( $invoice_id = null ) {
 		
 		// Variables to use directly
-		if ( $this->is_valid_invoice( $invoice_id ) ) {
+		if ( $this->is_valid( $invoice_id ) ) {
 			$invoice_status = $this->get_invoice_status( $invoice_id );
 			$invoice_page_url = $this->get_invoice_page_url( $invoice_id );
 			$invoice_form_url = $this->get_invoice_form_url( $invoice_id );
@@ -755,17 +755,6 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	}
 	
 	/**
-	 * Check if an invoice is valid (exists, correct post type)
-	 *
-	 * @param $post_id
-	 *
-	 * @return bool
-	 */
-	public function is_valid_invoice( $post_id ) {
-		return get_post_type( $post_id ) == $this->get_post_type();
-	}
-	
-	/**
 	 * Get a value from an entry using a key like "first_name" instead of a field id from $this->field_ids
 	 *
 	 * @param $entry
@@ -788,7 +777,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	 * @return string|false
 	 */
 	public function get_invoice_page_url( $post_id ) {
-		if ( ! $this->is_valid_invoice( $post_id ) ) return false;
+		if ( ! $this->is_valid( $post_id ) ) return false;
 		return get_permalink( $post_id );
 	}
 	
@@ -800,7 +789,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	 * @return string|false
 	 */
 	public function get_invoice_form_url( $post_id ) {
-		if ( ! $this->is_valid_invoice( $post_id ) ) return false;
+		if ( ! $this->is_valid( $post_id ) ) return false;
 		$invoice_page_id = ah_get_invoice_page_id();
 		$invoice_page_url = get_permalink( $invoice_page_id );
 		return add_query_arg( array( 'invoice_id' => (int) $post_id ), $invoice_page_url );
@@ -814,7 +803,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	 * @return bool
 	 */
 	public function does_invoice_need_payment( $post_id ) {
-		if ( ! $this->is_valid_invoice( $post_id ) ) return false;
+		if ( ! $this->is_valid( $post_id ) ) return false;
 		
 		$status = $this->get_invoice_status( $post_id );
 		if ( $status == 'Paid' ) return false;

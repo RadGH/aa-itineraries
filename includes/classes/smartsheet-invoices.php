@@ -46,7 +46,7 @@ class Class_AH_Smartsheet_Invoices  {
 	 * @return void
 	 */
 	public function add_to_queue( $post_id ) {
-		if ( ! AH_Invoice()->is_valid_invoice( $post_id ) ) return;
+		if ( ! AH_Invoice()->is_valid( $post_id ) ) return;
 		
 		$notices = $this->get_queue();
 		$notices[$post_id] = $post_id;
@@ -86,7 +86,7 @@ class Class_AH_Smartsheet_Invoices  {
 	}
 	
 	public function update_invoice_row( $post_id ) {
-		if ( ! AH_Invoice()->is_valid_invoice( $post_id ) ) return;
+		if ( ! AH_Invoice()->is_valid( $post_id ) ) return;
 		
 		$smartsheet_id = AH_Smartsheet()->get_sheet_id_from_settings( 'invoices' );
 		// $webhook_action = AH_Smartsheet()->get_webhook_action_from_settings( 'invoices' );
@@ -207,7 +207,7 @@ class Class_AH_Smartsheet_Invoices  {
 	 * @return void
 	 */
 	public function on_modified_post( $post_id ) {
-		if ( ! AH_Invoice()->is_valid_invoice( $post_id ) ) return;
+		if ( ! AH_Invoice()->is_valid( $post_id ) ) return;
 		
 		$this->add_to_queue( $post_id );
 	}
@@ -222,7 +222,7 @@ class Class_AH_Smartsheet_Invoices  {
 	public function acf_on_save_post( $acf_id ) {
 		$info = acf_get_post_id_info( $acf_id );
 		if ( $info['type'] != 'post' ) return;
-		if ( ! AH_Invoice()->is_valid_invoice( $info['id'] ) ) return;
+		if ( ! AH_Invoice()->is_valid( $info['id'] ) ) return;
 		
 		$this->add_to_queue( $info['id'] );
 	}
@@ -239,7 +239,7 @@ class Class_AH_Smartsheet_Invoices  {
 	public function acf_on_update_value( $value, $acf_id, $field ) {
 		$info = acf_get_post_id_info( $acf_id );
 		if ( $info['type'] != 'post' ) return $value;
-		if ( ! AH_Invoice()->is_valid_invoice( $info['id'] ) ) return $value;
+		if ( ! AH_Invoice()->is_valid( $info['id'] ) ) return $value;
 		
 		$this->add_to_queue( $info['id'] );
 		

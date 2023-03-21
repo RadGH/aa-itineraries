@@ -186,7 +186,7 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 	 * @return bool
 	 */
 	public function user_has_access( $post_id = null, $user_id = null ) {
-		if ( ! $this->is_valid_document( $post_id ) ) return false;
+		if ( ! $this->is_valid( $post_id ) ) return false;
 		
 		// Must be logged in, even if permission is set to "All Users"
 		if ( $user_id === null ) $user_id = get_current_user_id();
@@ -301,7 +301,7 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 	 * @return void
 	 */
 	public function save_post_separate_multiple_user_id_meta( $post_id ) {
-		if ( ! $this->is_valid_document( $post_id ) ) return;
+		if ( ! $this->is_valid( $post_id ) ) return;
 		
 		$user_ids = (array) get_field( 'user_ids', $post_id );
 		
@@ -530,17 +530,6 @@ MySQL;
 		if ( $custom_args ) $args = array_merge( $args, $custom_args );
 		
 		return new WP_Query($args);
-	}
-	
-	/**
-	 * Check if an document is valid (exists, correct post type)
-	 *
-	 * @param $post_id
-	 *
-	 * @return bool
-	 */
-	public function is_valid_document( $post_id ) {
-		return get_post_type( $post_id ) == $this->get_post_type();
 	}
 	
 }
