@@ -96,6 +96,10 @@ class Class_AH_Smartsheet {
 		// WEBHOOKS
 		// ----------
 		
+		// Get API owner user id
+		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_get_user_id
+		if ( isset($_GET['ah_smartsheet_get_user_id']) ) add_action( 'init', array( $this, 'ah_smartsheet_get_user_id' ) );
+		
 		// Get a list of webhooks
 		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_list_webhooks&sheet_id=7609265092355972
 		if ( isset($_GET['ah_smartsheet_list_webhooks']) ) add_action( 'init', array( $this, 'ah_smartsheet_list_webhooks' ) );
@@ -433,6 +437,30 @@ class Class_AH_Smartsheet {
 		$result = $this->request( $url, $method, $data, $body, $headers );
 		
 		// $result['data'] = array( pageNumber = 0, pageSize = 100, totalPages = 0, totalCount = 0, data = array() )
+		
+		if ( ! $result['success'] || empty($result['data']) ) {
+			return false;
+		}else{
+			return $result['data'] ?? false;
+		}
+	}
+	
+	/**
+	 * Returns the current user info
+	 *
+	 * @return array|false
+	 */
+	public function get_current_user() {
+		// @see https://smartsheet.redoc.ly/tag/webhooks
+		$url = 'https://api.smartsheet.com/2.0/users/me';
+		$data = array();
+		$body = array();
+		$method = 'GET';
+		$headers = array( 'Content-Type' => 'application/json' );
+		
+		$result = $this->request( $url, $method, $data, $body, $headers );
+		
+		// $result['data'] looks like: https://radleysustaire.com/s3/0987ba/
 		
 		if ( ! $result['success'] || empty($result['data']) ) {
 			return false;
@@ -781,6 +809,28 @@ class Class_AH_Smartsheet {
 		}
 		
 		pre_dump(compact('sheet_id', 'row_id', 'cells', 'result'));
+		
+		echo '<p><strong>Last request:</strong></p>';
+		pre_dump( $this->last_request );
+		exit;
+	}
+	
+	
+	// Get the user ID who owns the API key
+	// https://alpinehikerdev.wpengine.com/?ah_smartsheet_get_user_id
+	public function ah_smartsheet_get_user_id() {
+		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
+		
+		try {
+			
+			$user = AH_Smartsheet()->get_current_user();
+			if ( ! $user ) throw new Exception( 'Failed to get current user');
+			
+		} catch( Exception $e ) {
+			echo '<strong>Error: '. $e->getMessage() .'</strong>';
+		}
+		
+		pre_dump(compact('user'));
 		
 		echo '<p><strong>Last request:</strong></p>';
 		pre_dump( $this->last_request );

@@ -155,7 +155,7 @@ class Class_AH_Smartsheet_Webhooks  {
 			'SERVER' => $_SERVER,
 		);
 		
-		if ( isset($headers['Smartsheet-Hook-Challenge']) ) {
+		if ( $challenge ) {
 			// Verifying a webhook
 			// A webhook must be re-verified every 100 callbacks
 			// https://smartsheet.redoc.ly/tag/webhooksDescription#section/Creating-a-Webhook/Webhook-Verification
