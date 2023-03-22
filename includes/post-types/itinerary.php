@@ -54,13 +54,4 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		return $args;
 	}
 	
-	/**
-	 * Remove author metabox, because we use a "User" field instead
-	 *
-	 * @return void
-	 */
-	public function remove_unwanted_meta_boxes() {
-		parent::remove_unwanted_meta_boxes();
-	}
-	
 }

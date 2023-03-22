@@ -33,6 +33,8 @@ function AH_Account_Page() { return AH_Plugin()->Account_Page; }
 function AH_Document() { return AH_Plugin()->Document; }
 function AH_Invoice() { return AH_Plugin()->Invoice; }
 function AH_Itinerary() { return AH_Plugin()->Itinerary; }
+function AH_Village() { return AH_Plugin()->Village; }
+function AH_Hike() { return AH_Plugin()->Hike; }
 function AH_PDF() { return AH_Plugin()->PDF; }
 
 /**
@@ -59,6 +61,8 @@ class Class_AH_Plugin {
 	public Class_Document_Post_Type     $Document;
 	public Class_Invoice_Post_Type      $Invoice;
 	public Class_Itinerary_Post_Type    $Itinerary;
+	public Class_Village_Post_Type      $Village;
+	public Class_Hike_Post_Type         $Hike;
 	public Class_AH_PDF                 $PDF;
 	
 	/*
@@ -141,6 +145,12 @@ class Class_AH_Plugin {
 		
 		include_once( __DIR__ . '/includes/post-types/itinerary.php' );
 		$this->Itinerary = new Class_Itinerary_Post_Type();
+		
+		include_once( __DIR__ . '/includes/post-types/village.php' );
+		$this->Village = new Class_Village_Post_Type();
+		
+		include_once( __DIR__ . '/includes/post-types/hike.php' );
+		$this->Hike = new Class_Hike_Post_Type();
 		
 		// ----------------------------------------
 		// 6. Include other functions

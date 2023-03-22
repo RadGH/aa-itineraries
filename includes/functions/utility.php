@@ -30,8 +30,11 @@ function ah_adjust_date( $offset, $format, $current_time = null ) {
  * @return array|string|string[]
  */
 function ah_format_price( $amount, $remove_zeroes = true ) {
-	$amount = '$' . number_format(  (float) $amount, 2 );
+	$is_negative = $amount < 0;
+	$amount = number_format(  abs( $amount ), 2 );
+	$amount = '$' . $amount;
 	if ( $remove_zeroes ) $amount = str_replace( '.00', '', $amount );
+	if ( $is_negative ) $amount = '-' . $amount;
 	return $amount;
 }
 
@@ -61,7 +64,7 @@ function ah_get_user_field( $user_id, $field, $default = null ) {
 	$user = wp_cache_get( $cache_key );
 	
 	if ( !$user ) {
-		$user = get_user_by( 'id', 'user_id' );
+		$user = get_user_by( 'id', $user_id );
 		wp_cache_set( $cache_key, $user );
 	}
 	
@@ -76,7 +79,12 @@ function ah_get_user_field( $user_id, $field, $default = null ) {
  * @return string
  */
 function ah_get_user_full_name( $user_id ) {
-	return trim( ah_get_user_field( $user_id, 'first_name' ) . ' ' . ah_get_user_field( $user_id, 'last_name' ) );
+	$first_name = ah_get_user_field( $user_id, 'first_name' );
+	$last_name = ah_get_user_field( $user_id, 'last_name' );
+	$full_name = trim( $first_name . ' ' . $last_name );
+	if ( !$full_name ) $full_name = ah_get_user_field( $user_id, 'display_name' );
+	if ( !$full_name ) $full_name = 'User #'. $user_id;
+	return $full_name;
 }
 
 /**

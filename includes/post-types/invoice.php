@@ -119,7 +119,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		);
 		
 		$args['hierarchical'] = false;
-		$args['supports'] = array( 'title', 'author' );
+		$args['supports'] = array( 'title' );
 		
 		return $args;
 	}
@@ -138,6 +138,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 			array('ah_status' => 'Status'),
 			array('ah_amount' => 'Remaining Balance'),
 			array('ah_name' => 'Name'),
+			array('ah_owner' => 'Assigned To'),
 			array_slice( $columns, 2, null),
 		);
 	}
@@ -153,23 +154,44 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	 */
 	public function display_columns( $column, $post_id ) {
 		switch( $column ) {
+			
 			case 'ah_status':
 				echo $this->get_invoice_status( $post_id );
 				break;
+				
 			case 'ah_amount':
 				$amount = $this->get_remaining_balance( $post_id );
 				echo ah_format_price( $amount );
 				break;
+				
 			case 'ah_name':
 				echo get_field( 'first_name', $post_id );
 				echo ' ';
 				echo get_field( 'last_name', $post_id );
 				break;
+				
+			case 'ah_owner':
+				$user_id = $this->get_owner_user_id( $post_id );
+				$user = $user_id ? get_user_by( 'id', $user_id ) : false;
+				
+				if ( $user ) {
+					$name = ah_get_user_full_name( $user->ID );
+					$url = get_edit_user_link( $user->ID );
+					echo sprintf(
+						'<a href="%s">%s</a>',
+						esc_attr($url),
+						esc_html($name)
+					);
+				}else{
+					echo '<em style="opacity: 0.5;">Nobody</em>';
+				}
+				break;
+				
 		}
 	}
 	
 	/**
-	 * Remove author metabox, because we use a "User" field instead
+	 * Remove author metabox because we use a "User" field instead
 	 *
 	 * @return void
 	 */
@@ -234,8 +256,16 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		$owner_user_id = $this->get_owner_user_id( $post_id );
 		
 		// If the "User" field is different, set the author to that user
+		/*
 		if ( $owner_user_id && $author_user_id != $owner_user_id ) {
 			$this->set_owner( $post_id, $owner_user_id );
+		}
+		*/
+		
+		if ( $owner_user_id ) {
+			$this->set_owner( $post_id, $owner_user_id );
+		}else{
+			$this->set_owner( $post_id, false );
 		}
 	}
 	
@@ -561,15 +591,18 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	/**
 	 * Creates a plain invoice with some default values
 	 *
+	 * @param $owner_id
 	 * @param $custom_args
 	 *
 	 * @return false|int
 	 */
-	public function create_invoice( $custom_args = null ) {
+	public function create_invoice( $owner_id = null, $custom_args = null ) {
+		if ( $owner_id === null ) $owner_id = get_current_user_id();
+		
 		// Default invoice args
 		$args = array(
 			'post_title' => 'New Invoice',
-			'post_author' => get_current_user_id(),
+			'post_author' => $owner_id,
 			'post_type' => $this->get_post_type(),
 			'post_name' => $this->get_custom_post_slug(),
 			'post_status' => 'publish',
@@ -583,6 +616,9 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		// Create post
 		$post_id = wp_insert_post( $args );
 		if ( ! $post_id || is_wp_error( $post_id ) ) return false;
+		
+		// Assign owner
+		$this->set_owner( $post_id, $owner_id );
 		
 		// Regenerate title based on the ID
 		$this->set_custom_post_title( $post_id );

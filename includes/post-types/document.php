@@ -165,19 +165,6 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 	}
 	
 	/**
-	 * Remove author metabox, because we use a "User" field instead
-	 *
-	 * @return void
-	 */
-	public function remove_unwanted_meta_boxes() {
-		parent::remove_unwanted_meta_boxes();
-		
-		// Remove author metabox
-		remove_meta_box( 'authordiv', $this->get_post_type(), 'normal' );
-		remove_meta_box( 'authordiv', $this->get_post_type(), 'side' );
-	}
-	
-	/**
 	 * Check if a user has access to a document
 	 *
 	 * @param $post_id
