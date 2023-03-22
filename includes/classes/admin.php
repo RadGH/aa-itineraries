@@ -103,14 +103,19 @@ class Class_AH_Admin {
 			$message = $n['message'];
 			$data = $n['data'];
 			$date = $n['date'];
+			$auto_dismiss = $n['auto_dismiss'];
 			
 			if ( !$type && !$message ) {
 				$this->remove_notice( $key );
 				continue;
 			}
 			
+			if ( $auto_dismiss ) {
+				$this->remove_notice( $key );
+			}
+			
 			if ( $message && $date ) $message .= "\n\n";
-			if ( $date ) $message .= '<em>' . human_time_diff(strtotime($date), current_time('timestamp')) . ' ago</em>';
+			if ( $date && !$auto_dismiss ) $message .= '<em>' . human_time_diff(strtotime($date), current_time('timestamp')) . ' ago</em>';
 			
 			echo '<div class="ah-admin-notice notice notice-'. $type .' "">';
 			
@@ -135,17 +140,18 @@ class Class_AH_Admin {
 	 * @param $message      string
 	 * @param $data         mixed
 	 * @param $unique_key   null|string - If provided, only one notice using this key will be stored (latest replaces previous)
+	 * @param $auto_dismiss bool        - If true, will only be displayed once
 	 *
 	 * @return void
 	 */
-	public function add_notice( $type, $message, $data = array(), $unique_key = null ) {
+	public function add_notice( $type, $message, $data = array(), $unique_key = null, $auto_dismiss = false ) {
 		$date = current_time('Y-m-d G:i:s');
 		
 		$key = uniqid();
 		if ( $unique_key !== null ) $key = $unique_key;
 		
 		$notices = $this->get_notices();
-		$notices[$key] = compact( 'type', 'message', 'data', 'date' );
+		$notices[$key] = compact( 'type', 'message', 'data', 'date', 'auto_dismiss' );
 		update_option( 'ah-admin-notice', $notices, false );
 	}
 	

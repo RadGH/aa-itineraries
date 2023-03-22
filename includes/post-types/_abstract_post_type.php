@@ -81,6 +81,54 @@ abstract class Class_Abstract_Post_Type {
 		add_filter( "manage_edit-{$this->post_type}_columns", array( $this, 'remove_unwanted_post_columns' ), 30 );
 	}
 	
+	/**
+	 * Get the full name of the owner of this post.
+	 *
+	 * @param $post_id
+	 *
+	 * @return false|string
+	 */
+	public function get_owner_full_name( $post_id ) {
+		$user_id = $this->get_owner( $post_id );
+		if ( ! $user_id ) return false;
+		
+		return ah_get_user_full_name( $user_id );
+	}
+	
+	/**
+	 * Get the User ID who owns the post. By default, this returns the post author.
+	 *
+	 * @param $post_id
+	 *
+	 * @return array|false|int|string
+	 */
+	public function get_owner( $post_id ) {
+		if ( ! $this->is_valid( $post_id ) ) return false;
+		
+		return get_post_field( 'post_author', $post_id ) ?: false;
+	}
+	
+	/**
+	 * Changes the owner of a post. By default, this changes the post author.
+	 *
+	 * @param $post_id
+	 * @param $user_id
+	 *
+	 * @return void
+	 */
+	public function set_owner( $post_id, $user_id ) {
+		if ( ! $this->is_valid( $post_id ) ) return;
+		
+		$args = array(
+			'ID' => $post_id,
+			'post_author' => $user_id ?: false,
+		);
+		
+		$this->toggle_save_post_hooks(false);
+		wp_update_post( $args );
+		$this->toggle_save_post_hooks(true);
+	}
+	
 	
 	/**
 	 * Enable or disable "save_post" hooks to allow updating posts without infinite loop

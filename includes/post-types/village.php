@@ -12,6 +12,18 @@ class Class_Village_Post_Type extends Class_Abstract_Post_Type {
 		
 		parent::__construct();
 		
+		add_filter( 'single_template', array( $this, 'replace_page_template' ) );
+		
+	}
+	
+	public function replace_page_template( $template ) {
+		global $post;
+		
+		if ( $post->post_type == $this->get_post_type() ) {
+			$template = AH_PATH . '/templates/single-village.php';
+		}
+		
+		return $template;
 	}
 	
 	/**
@@ -41,7 +53,7 @@ class Class_Village_Post_Type extends Class_Abstract_Post_Type {
 		// $args['menu_position'] = 22.1;
 		$args['show_in_menu'] = 'edit.php?post_type=ah_itinerary';
 		
-		$args['publicly_queryable'] = false;
+		$args['publicly_queryable'] = true;
 		$args['rewrite'] = array(
 			'slug' => 'villages',
 			'with_front' => false,

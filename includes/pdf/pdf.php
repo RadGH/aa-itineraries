@@ -42,6 +42,8 @@ class Class_AH_PDF {
 	public $document_title = false;
 	public $filename = false;
 	
+	public $use_preview = false;
+	
 	public function __construct() {
 		
 		// PDF generation is done using mpdf
@@ -51,6 +53,10 @@ class Class_AH_PDF {
 		// https://alpinehikerdev.wpengine.com/?alpine_pdf=640b80a562034
 		if ( isset($_GET['alpine_pdf']) ) {
 			add_action( 'init', array( $this, 'display_pdf_to_visitor' ) );
+		}
+		
+		if ( isset($_GET['previewpdf']) ) {
+			$this->use_preview = true;
 		}
 		
 	}
@@ -168,7 +174,7 @@ class Class_AH_PDF {
 		
 		$path = realpath( __DIR__ . '/../../assets/fonts/' );
 		
-		if ( isset($_GET['previewpdf']) ) {
+		if ( $this->use_preview ) {
 			return new Class_AH_PDF_Preview();
 		}
 		

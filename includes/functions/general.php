@@ -118,7 +118,7 @@ function ah_get_invoice_due_date( $invoice_id, $format = 'Y-m-d' ) {
  * @return int|false
  */
 function ah_get_invoice_owner( $invoice_id ) {
-	return AH_Invoice()->get_owner_user_id( $invoice_id );
+	return AH_Invoice()->get_owner( $invoice_id );
 }
 
 /**

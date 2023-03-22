@@ -79,11 +79,15 @@ function ah_get_user_field( $user_id, $field, $default = null ) {
  * @return string
  */
 function ah_get_user_full_name( $user_id ) {
-	$first_name = ah_get_user_field( $user_id, 'first_name' );
-	$last_name = ah_get_user_field( $user_id, 'last_name' );
+	$first_name = get_user_meta( $user_id, 'first_name', true );
+	$last_name = get_user_meta( $user_id, 'last_name', true );
+	
+	if ( ! $first_name ) $first_name = ah_get_user_field( $user_id, 'first_name');
+	if ( ! $last_name ) $last_name = ah_get_user_field( $user_id, 'last_name');
+	
 	$full_name = trim( $first_name . ' ' . $last_name );
-	if ( !$full_name ) $full_name = ah_get_user_field( $user_id, 'display_name' );
 	if ( !$full_name ) $full_name = 'User #'. $user_id;
+	
 	return $full_name;
 }
 

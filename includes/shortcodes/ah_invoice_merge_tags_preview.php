@@ -17,7 +17,9 @@ function shortcode_ah_invoice_merge_tags_preview( $atts, $content = '', $shortco
 		'invoice_id' => null,
 	), $atts, $shortcode_name);
 	
-	$merge_tags = ah_get_invoice_merge_tags( "placeholders" );
+	$invoice_id = (int) $atts['invoice_id'];
+	
+	$merge_tags = ah_get_invoice_merge_tags( $invoice_id ?: "placeholders" );
 	
 	ob_start();
 	?>

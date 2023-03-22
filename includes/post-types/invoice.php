@@ -62,9 +62,6 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		// Only allow access to invoice if you own the invoice
 		add_action( 'template_redirect', array( $this, 'restrict_invoice_access' ) );
 		
-		// Make the author match the assigned user for the post
-		add_action( 'acf/save_post', array( $this, 'save_post_reassign_author' ), 40 );
-		
 		// Calculate reminder notifications when due date changes
 		add_action( 'acf/save_post', array( $this, 'save_post_recalculate_reminders' ), 40 );
 		
@@ -80,6 +77,24 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		// Fill default values for GF
 		add_filter( 'shortcode_atts_gravityforms', array( $this, 'gf_fill_field_values' ), 20, 4 );
 		
+		// Custom page template
+		add_filter( 'single_template', array( $this, 'replace_page_template' ) );
+		
+		// Displays merge tags for your most recent invoice
+		// https://alpinehikers.com.com/?test_invoice_merge_tags
+		// https://alpinehikerdev.wpengine.com/?test_invoice_merge_tags
+		if ( isset($_GET['test_invoice_merge_tags']) ) add_action( 'init', array( $this, 'test_invoice_merge_tags' ) );
+		
+	}
+	
+	public function replace_page_template( $template ) {
+		global $post;
+		
+		if ( $post->post_type == $this->get_post_type() ) {
+			$template = AH_PATH . '/templates/single-invoice.php';
+		}
+		
+		return $template;
 	}
 	
 	public function get_form_id() {
@@ -171,11 +186,11 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 				break;
 				
 			case 'ah_owner':
-				$user_id = $this->get_owner_user_id( $post_id );
+				$user_id = $this->get_owner( $post_id );
 				$user = $user_id ? get_user_by( 'id', $user_id ) : false;
 				
 				if ( $user ) {
-					$name = ah_get_user_full_name( $user->ID );
+					$name = $this->get_owner_full_name( $user->ID );
 					$url = get_edit_user_link( $user->ID );
 					echo sprintf(
 						'<a href="%s">%s</a>',
@@ -203,6 +218,24 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		remove_meta_box( 'authordiv', $this->get_post_type(), 'side' );
 	}
 	
+	/**
+	 * Enable or disable "save_post" hooks to allow updating posts without infinite loop
+	 *
+	 * @param $enabled
+	 *
+	 * @return void
+	 */
+	public function toggle_save_post_hooks( $enabled ) {
+		parent::toggle_save_post_hooks( $enabled );
+		
+		if ( $enabled ) {
+			// Make the author match the assigned user for the post
+			add_action( 'acf/save_post', array( $this, 'save_post_reassign_author' ), 40 );
+		}else{
+			remove_action( 'acf/save_post', array( $this, 'save_post_reassign_author' ), 40 );
+		}
+	}
+	
 	public function restrict_invoice_access() {
 		
 		// Only affect singular invoice page
@@ -211,7 +244,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		$invoice_id = get_the_ID();
 		
 		// Check if the invoice has an owner.
-		$invoice_user_id = $this->get_owner_user_id( $invoice_id );
+		$invoice_user_id = $this->get_owner( $invoice_id );
 		
 		// Public invoices can be paid by anyone, though they must either log in or create an account
 		if ( ! $invoice_user_id ) return;
@@ -240,8 +273,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	}
 	
 	/**
-	 * Make the post author match the assigned user for the invoice, if set.
-	 * Note that invoices do not need to be assigned to an existing users.
+	 * When saving the post, set the "User" field as the post author.
 	 *
 	 * @param $post_id
 	 *
@@ -250,23 +282,10 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	public function save_post_reassign_author( $post_id ) {
 		if ( ! $this->is_valid( $post_id ) ) return;
 		
-		$post = get_post( $post_id );
+		$user_id = get_field( 'user', $post_id );
+		if ( ! $user_id ) $user_id = false;
 		
-		$author_user_id = $post->post_author;
-		$owner_user_id = $this->get_owner_user_id( $post_id );
-		
-		// If the "User" field is different, set the author to that user
-		/*
-		if ( $owner_user_id && $author_user_id != $owner_user_id ) {
-			$this->set_owner( $post_id, $owner_user_id );
-		}
-		*/
-		
-		if ( $owner_user_id ) {
-			$this->set_owner( $post_id, $owner_user_id );
-		}else{
-			$this->set_owner( $post_id, false );
-		}
+		$this->set_owner( $post_id, $user_id );
 	}
 	
 	/**
@@ -487,32 +506,11 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	public function set_owner( $invoice_id, $user_id ) {
 		if ( ! $this->is_valid( $invoice_id ) ) return;
 		
-		// Save as custom field
+		// Save the user to custom field
 		update_field( 'user', $user_id );
 		
-		// Also save as the post author
-		$args = array(
-			'ID' => $invoice_id,
-			'post_author' => $user_id,
-		);
-		
-		// Unhook and re-hook to avoid infinite loop
-		$this->toggle_save_post_hooks(false);
-		wp_update_post($args);
-		$this->toggle_save_post_hooks(true);
-	}
-	
-	/**
-	 * Get the owner of an invoice (user ID)
-	 *
-	 * @param $invoice_id
-	 *
-	 * @return int|false
-	 */
-	public function get_owner_user_id( $invoice_id ) {
-		$user_id = get_field( 'user', $invoice_id );
-		
-		return $user_id ?: false;
+		// Save the post author
+		parent::set_owner( $invoice_id, $user_id );
 	}
 	
 	/**
@@ -677,7 +675,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 			$tour_date = get_post_meta( $invoice_id, 'tour_date', true );
 			
 			// Use the user's first name, last name, and email, if not provided on the invoice
-			$owner_user_id = $this->get_owner_user_id( $invoice_id );
+			$owner_user_id = $this->get_owner( $invoice_id );
 			
 			if ( $owner_user_id ) {
 				if ( ! $first_name ) $first_name = ah_get_user_field( $owner_user_id, 'first_name');
@@ -763,6 +761,28 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		$tags = array_merge( $general_tags, $tags );
 		
 		return $tags;
+	}
+	
+	// Displays merge tags for your most recent invoice
+	// https://alpinehikers.com.com/?test_invoice_merge_tags
+	// https://alpinehikerdev.wpengine.com/?test_invoice_merge_tags
+	public function test_invoice_merge_tags() {
+		if ( ! current_user_can( 'administrator' ) ) aa_die( __CLASS__ . '::' . __FUNCTION__ . ' is admin only' );
+		
+		$user_id = get_current_user_id();
+		$invoices = $this->get_user_invoices( $user_id );
+		
+		if ( !$invoices->have_posts() ) aa_die( 'You must be assigned at least one invoice to view invoice merge tags.' );
+		
+		$invoice = $invoices->posts[0];
+		
+		echo '<h2>', $invoice->post_title, '</h2>';
+		
+		echo '<h3>Owner: ', $this->get_owner_full_name( $invoice->ID ), ' #', $this->get_owner( $invoice->ID ), '</h3>';
+		
+		echo do_shortcode( '[ah_invoice_merge_tags_preview invoice_id="'. $invoice->ID .'"]' );
+		
+		exit;
 	}
 	
 	/**

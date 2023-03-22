@@ -399,7 +399,7 @@ function rad_20235927_11593() {
 	
 	AH_Invoice()->set_owner( $invoice_id, $alchemy_user_id );
 	
-	$new_owner = AH_Invoice()->get_owner_user_id( $invoice_id );
+	$new_owner = AH_Invoice()->get_owner( $invoice_id );
 	
 	/*
 	delete_post_meta( $invoice_id, 'reminder_1_enabled' );

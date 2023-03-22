@@ -11,6 +11,9 @@ window.AH_Admin = new (function() {
 		// Allow clicking our custom admin notices to silently dismiss with ajax, rather than reloading the page
 		o.admin_notices();
 
+		// Remove empty ACF labels
+		o.hide_empty_acf_labels();
+
 		if ( is_post_edit_screen && post_type === 'ah_invoice' ) {
 			// When editing an invoice, disable the post title. It is generated when the invoice is saved.
 			o.disable_post_title();
@@ -43,6 +46,22 @@ window.AH_Admin = new (function() {
 			AH_API.ajax( url, {}, on_complete, on_complete );
 
 			return false;
+		});
+	};
+
+	/**
+	 * If an ACF label is empty it still has a space in the HTML element. This hides those ACF labels.
+	 */
+	o.hide_empty_acf_labels = function() {
+		jQuery( '.acf-label' ).each(function() {
+			let $label = jQuery(this);
+			let text = $label.text();
+
+			if ( text.trim() === "" ) {
+				$label
+					.css('display', 'none')
+					.addClass('aa-hidden-empty-acf-label');
+			}
 		});
 	};
 

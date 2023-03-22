@@ -26,6 +26,19 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 		// Add document categories to account menu
 		add_filter( 'wp_nav_menu_objects', array( $this, 'add_categories_to_account_menu' ), 10, 2 );
 		
+		// Custom page template
+		add_filter( 'single_template', array( $this, 'replace_page_template' ) );
+		
+	}
+	
+	public function replace_page_template( $template ) {
+		global $post;
+		
+		if ( $post->post_type == $this->get_post_type() ) {
+			$template = AH_PATH . '/templates/single-document.php';
+		}
+		
+		return $template;
 	}
 	
 	/**
