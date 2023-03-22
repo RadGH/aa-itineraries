@@ -1,12 +1,15 @@
 /*
-Start: Custom dashicon for Alpine Hikers Settings menu
+Start: General admin dashboard
 */
 @import 'dashicon/AH.css';
 
+.wp-menu-separator {
+	border-bottom: 2px solid #515151;
+}
 /*
-End: Custom dashicon for Alpine Hikers Settings menu
+End: General admin dashboard
 */
-.
+
 /*
 Start: Fix select2 on top of datepickers
 */

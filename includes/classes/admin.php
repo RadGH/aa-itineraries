@@ -61,16 +61,26 @@ class Class_AH_Admin {
 				'capability'    => 'manage_options',
 			));
 			
-			// Alpine Hikers
+			// Alpine Hikers Settings
 			acf_add_options_page(array(
 				'page_title' 	=> 'Alpine Hikers (ah_settings)',
 				'menu_title' 	=> 'Alpine Hikers Settings',
-				// 'parent_slug' 	=> 'theme-general-settings', // 'admin.php?page=theme-general-settings',
 				'post_id'       => 'ah_settings',
 				'slug'          => 'acf-ah-settings',
 				'autoload'      => false,
 				'capability'    => 'manage_options',
 				'icon_url'      => 'dashicons-alpine-hikers',
+			));
+			
+			// Smartsheet Settings
+			acf_add_options_page(array(
+				'page_title' 	=> 'Smartsheet (ah_smartsheet)',
+				'menu_title' 	=> 'Smartsheet Settings',
+				'post_id'       => 'ah_smartsheet',
+				'slug'          => 'acf-ah-smartsheet',
+				'autoload'      => false,
+				'capability'    => 'manage_options',
+				'icon_url'      => 'dashicons-smartsheet',
 			));
 			
 		}

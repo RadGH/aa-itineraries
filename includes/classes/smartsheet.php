@@ -121,7 +121,7 @@ class Class_AH_Smartsheet {
 	
 	public function get_api_key() {
 		if ( $this->api_key === null ) {
-			$this->api_key = get_field( 'smartsheet_api_key', 'ah_settings' );
+			$this->api_key = get_field( 'smartsheet_api_key', 'ah_smartsheet' );
 		}
 		
 		return $this->api_key;
@@ -171,7 +171,7 @@ class Class_AH_Smartsheet {
 	 * @return void
 	 */
 	public function get_sheet_id_from_settings( $key ) {
-		$settings = get_field( $key, 'ah_settings' );
+		$settings = get_field( $key, 'ah_smartsheet' );
 		
 		return $settings['sheet_id'] ?? false;
 	}
@@ -185,7 +185,7 @@ class Class_AH_Smartsheet {
 	 * @return void
 	 */
 	public function get_webhook_action_from_settings( $key ) {
-		$settings = get_field( $key, 'ah_settings' );
+		$settings = get_field( $key, 'ah_smartsheet' );
 		
 		return $settings['webhook_action'] ?? false;
 	}
@@ -198,7 +198,7 @@ class Class_AH_Smartsheet {
 	 * @return array
 	 */
 	public function get_column_ids_from_settings( $key ) {
-		$settings = get_field( $key, 'ah_settings' );
+		$settings = get_field( $key, 'ah_smartsheet' );
 		
 		$cols = array();
 		
