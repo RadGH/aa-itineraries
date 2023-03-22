@@ -132,12 +132,20 @@ class Class_AH_Smartsheet_Webhooks  {
 		// get_query_var( 'ah_webhook' ) = 'SOMETHING'
 		if ( get_query_var( 'ah_action' ) != 'smartsheet_webhook' ) return;
 		
+		// Get the webhook that was triggered
 		$webhook_action = get_query_var( 'ah_webhook' );
 		$saved_webhook = $this->get_saved_webhook_from_action( $webhook_action );
 		
+		// Get the challenge header
 		$headers = getallheaders();
+		$challenge = $headers['Smartsheet-Hook-Challenge'] ?? false; // "8467a664-e08d-4f3b-b493-85fa13060622"
 		
+		// Allow testing with a URL that does not have the header
+		if ( isset($_GET['ah_challenge']) ) $challenge = stripslashes($_GET['ah_challenge']);
+		
+		// @debugging
 		$debug_data = array(
+			'challenge' => $challenge,
 			'webhook_action' => $webhook_action,
 			'saved_webhook' => $saved_webhook,
 			'headers' => $headers,
@@ -147,16 +155,15 @@ class Class_AH_Smartsheet_Webhooks  {
 			'SERVER' => $_SERVER,
 		);
 		
-		AH_Admin()->add_notice( 'info', 'A webhook was triggered', $debug_data, 'webhook_' . $webhook_action );
-		
 		if ( isset($headers['Smartsheet-Hook-Challenge']) ) {
 			// Verifying a webhook
 			// A webhook must be re-verified every 100 callbacks
 			// https://smartsheet.redoc.ly/tag/webhooksDescription#section/Creating-a-Webhook/Webhook-Verification
-			$challenge = $headers['Smartsheet-Hook-Challenge']; // "8467a664-e08d-4f3b-b493-85fa13060622"
-			$debug_data['challenge'] = $challenge;
+			
+			// @debugging
 			AH_Admin()->add_notice( 'info', 'A webhook verification was sent', $debug_data, 'webhook_verification_' . $webhook_action );
 			
+			// Respond with the challenge code using a custom header and also as the message body
 			ob_clean();
 			header( 'HTTP/1.1 200 OK', true, 200 );
 			header( 'Smartsheet-Hook-Challenge: ' . $challenge );
@@ -165,7 +172,7 @@ class Class_AH_Smartsheet_Webhooks  {
 			exit;
 		}
 		
-		AH_Admin()->add_notice( 'info', 'A webhook was not handled properly', $debug_data, 'webhook_not_handled' );
+		AH_Admin()->add_notice( 'info', 'A webhook was not handled properly. The header "Smartsheet-Hook-Challenge" was not defined.', $debug_data, 'webhook_not_handled' );
 		
 		echo 1;
 		exit;

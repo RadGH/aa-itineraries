@@ -101,18 +101,20 @@ class Class_AH_Smartsheet {
 		if ( isset($_GET['ah_smartsheet_list_webhooks']) ) add_action( 'init', array( $this, 'ah_smartsheet_list_webhooks' ) );
 		
 		// Add a webhook
-		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_add_webhook&sheet_id=7609265092355972&webhook_action=640510876576c&scope=sheet&title=Example%20Webhook
-		// Invoice: https://alpinehikerdev.wpengine.com/?ah_smartsheet_add_webhook&sheet_id=7609265092355972&webhook_action=invoice&scope=sheet&title=Invoice
+		// Example Webhook (not recommended): https://alpinehikerdev.wpengine.com/?ah_smartsheet_add_webhook&sheet_id=7609265092355972&webhook_action=640510876576c&scope=sheet&title=Example%20Webhook
+		// Action (invoice): https://alpinehikerdev.wpengine.com/?ah_smartsheet_add_webhook&sheet_id=7609265092355972&webhook_action=invoice&scope=sheet&title=Invoice
 		if ( isset($_GET['ah_smartsheet_add_webhook']) ) add_action( 'init', array( $this, 'ah_smartsheet_add_webhook' ) );
 		
 		// Delete a webhook
-		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_delete_webhook&webhook_action=640510876576c
-		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_delete_webhook&webhook_id=7322288048629636
+		// Webhook ID (not recommended): https://alpinehikerdev.wpengine.com/?ah_smartsheet_delete_webhook&webhook_id=7609265092355972
+		// Action (invoice): https://alpinehikerdev.wpengine.com/?ah_smartsheet_delete_webhook&webhook_action=invoice
 		if ( isset($_GET['ah_smartsheet_delete_webhook']) ) add_action( 'init', array( $this, 'ah_smartsheet_delete_webhook' ) );
 		
 		// Enable or disable a webhook
-		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_toggle_webhook&webhook_action=invoice&enabled=1
+		// Action (invoice): https://alpinehikerdev.wpengine.com/?ah_smartsheet_toggle_webhook&webhook_action=invoice&enabled=1
 		if ( isset($_GET['ah_smartsheet_toggle_webhook']) ) add_action( 'init', array( $this, 'ah_smartsheet_toggle_webhook' ) );
+		
+		// Once enabled, a callback is sent that is handled by smartsheet-webhooks.php -> capture_webhook_callback()
 		
 		// @todo Update one cell
 		// @todo https://alpinehikerdev.wpengine.com/?ah_smartsheet_update_row&sheet_id=7609265092355972&row_id=7654311241181060&cell_id=XXX&value=YYY
@@ -527,7 +529,7 @@ class Class_AH_Smartsheet {
 		
 		$result = $this->request( $url, $method, $data, $body, $headers );
 		
-		pre_dump($result);
+		// pre_dump($result);
 		
 		// $result['data'] = https://radleysustaire.com/s3/8de5e6/
 		// result['data']['result'] = array: id, name, scope, ...
