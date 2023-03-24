@@ -19,17 +19,19 @@ if ( $owner_id != $user_id ) {
 	
 	if ( current_user_can( 'administrator' ) ) {
 		if ( $owner_id ) {
-			echo '<p><strong>ADMIN NOTICE: You are viewing an invoice that belongs to another user ('.$edit_user_link.').</strong></p>';
+			ah_add_theme_notice( 'warning', '<strong>ADMIN NOTICE:</strong> You are viewing an invoice that belongs to another user ('.$edit_user_link.').');
 		}else{
-			echo '<p><strong>ADMIN NOTICE: You are viewing an invoice which is not assigned to a user.</strong></p>';
+			ah_add_theme_notice( 'warning', '<strong>ADMIN NOTICE:</strong> You are viewing an invoice which is not assigned to a user.');
 		}
 	}else{
-		echo '<p><strong>You do not have access to view this invoice.</strong></p>';
+		ah_add_theme_notice( 'error', 'You do not have access to view this invoice.');
 		return;
 	}
 }
 ?>
 <article <?php post_class( 'entry entry-single invoice' ); ?>>
+	
+	<p><strong>Invoice Number:</strong> <?php echo get_the_ID(); ?></p>
 	
 	<p><strong>Status:</strong> <?php echo $status_indicator, ' ', $status; ?></p>
 	

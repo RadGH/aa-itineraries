@@ -169,3 +169,32 @@ function ah_get_document_preview_image( $post_id ) {
 	$attachment_id = (int) get_field( 'preview_image', $post_id, false );
 	return $attachment_id ?: false;
 }
+
+/**
+ * Creates an admin notice that is displayed to any user on the admin dashboard
+ *
+ * @param $type
+ * @param $message
+ * @param $data
+ * @param $unique_key
+ * @param $auto_dismiss
+ *
+ * @return void
+ */
+function ah_add_admin_notice( $type, $message, $data = array(), $unique_key = null, $auto_dismiss = false ) {
+	AH_Admin()->add_notice( $type, $message, $data, $unique_key, $auto_dismiss );
+}
+
+/**
+ * Adds a notice to be displayed on the front-end to the current user.
+ *
+ * @param $type
+ * @param $message
+ * @param $data
+ * @param $unique_key
+ *
+ * @return void
+ */
+function ah_add_theme_notice( $type, $message, $data = array(), $unique_key = null ) {
+	AH_Theme()->add_notice( $type, $message, $data, $unique_key );
+}

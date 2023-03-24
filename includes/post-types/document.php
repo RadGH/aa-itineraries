@@ -15,7 +15,7 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 		parent::__construct();
 		
 		// Only allow access to document if you own the document
-		add_action( 'template_redirect', array( $this, 'restrict_document_access' ), 20 );
+		// add_action( 'template_redirect', array( $this, 'restrict_document_access' ), 20 );
 		
 		// Stream the file contents to the visitor's browser
 		add_action( 'template_redirect', array( $this, 'stream_document_to_visitor' ), 30 );
@@ -39,6 +39,17 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 		}
 		
 		return $template;
+	}
+	
+	/**
+	 * Checks if the visitor can access this item. Return false if the user does not have access.
+	 *
+	 * @return bool
+	 */
+	public function check_page_protection() {
+		$user_id = $this->get_owner( get_the_ID() );
+		if ( $this->user_has_access( $user_id ) ) return true;
+		return false;
 	}
 	
 	/**
@@ -226,6 +237,7 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 	 *
 	 * @return void
 	 */
+	/*
 	public function restrict_document_access() {
 		
 		// Only affect singular document page
@@ -247,6 +259,7 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 		exit;
 		
 	}
+	*/
 	
 	/**
 	 * Stream the file contents to the visitor's browser, or redirect to a URL, depending on document type.

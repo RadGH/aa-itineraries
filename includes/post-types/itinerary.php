@@ -23,6 +23,21 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 	}
 	
 	/**
+	 * Checks if the visitor can access this item. Return false if the user does not have access.
+	 *
+	 * @return bool
+	 */
+	public function check_page_protection() {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) return false;
+		
+		$owner_id = $this->get_owner( get_the_ID() );
+		if ( $owner_id != $user_id ) return false;
+		
+		return true;
+	}
+	
+	/**
 	 * When adding a new itinerary, ask if it should load a template instead
 	 *
 	 * @return void
@@ -219,7 +234,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 				$user_id = $this->get_owner( $post_id );
 				
 				if ( $user_id ) {
-					$name = $this->get_owner_full_name( $post_id );
+					$name = ah_get_user_full_name( $user_id );
 					$url = get_edit_user_link( $user_id );
 					echo sprintf(
 						'<a href="%s">%s</a>',

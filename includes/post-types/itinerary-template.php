@@ -16,6 +16,21 @@ class Class_Itinerary_Template_Post_Type extends Class_Abstract_Post_Type {
 		
 	}
 	
+	/**
+	 * Checks if the visitor can access this item. Return false if the user does not have access.
+	 *
+	 * @return bool
+	 */
+	public function check_page_protection() {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) return false;
+		
+		$owner_id = $this->get_owner( get_the_ID() );
+		if ( $owner_id != $user_id ) return false;
+		
+		return true;
+	}
+	
 	public function replace_page_template( $template ) {
 		global $post;
 		

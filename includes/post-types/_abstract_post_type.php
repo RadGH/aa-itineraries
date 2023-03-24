@@ -82,6 +82,26 @@ abstract class Class_Abstract_Post_Type {
 	}
 	
 	/**
+	 * Checks if the visitor can access this item. Return false if the user does not have access.
+	 *
+	 * @return bool
+	 */
+	public function check_page_protection() {
+		return true;
+	}
+	
+	public function protect_page() {
+		if ( ! $this->check_page_protection() ) {
+			if ( current_user_can( 'administrator') ) {
+				ah_add_theme_notice( 'warning', '<strong>ADMIN NOTICE:</strong> Your account does not have access to this item. You are previewing it as an administrator.');
+			}else{
+				include( AH_PATH . '/templates/no-access.php' );
+				exit;
+			}
+		}
+	}
+	
+	/**
 	 * Get the full name of the owner of this post.
 	 *
 	 * @param $post_id

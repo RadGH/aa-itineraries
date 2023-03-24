@@ -404,3 +404,32 @@ Start: Document Table [ah_documents]
 /*
 End: Document Table
 */
+
+/*
+Start: Theme Notices
+*/
+.ah-theme-notice {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	background: #f1f1f1;
+	padding: 15px 20px;
+	margin: 10px auto;
+	border-left: 5px solid gray;
+
+	max-width: 1120px;
+}
+
+.ah-theme-notice.notice-success { border-left-color: #4eaa23; }
+.ah-theme-notice.notice-error { border-left-color: #b72222; }
+.ah-theme-notice.notice-warning { border-left-color: #eeee46; }
+.ah-theme-notice.notice-info,
+.ah-theme-notice.notice-message { border-left-color: #287094; }
+
+.ah-theme-notice .ah-theme-dismiss {
+	grid-area: 1 / 2;
+	font-size: 28px;
+	line-height: 18px;
+}
+/*
+End: Theme Notices
+*/

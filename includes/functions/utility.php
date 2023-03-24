@@ -86,7 +86,7 @@ function ah_get_user_full_name( $user_id ) {
 	if ( ! $last_name ) $last_name = ah_get_user_field( $user_id, 'last_name');
 	
 	$full_name = trim( $first_name . ' ' . $last_name );
-	if ( !$full_name ) $full_name = 'User #'. $user_id;
+	if ( ! $full_name ) $full_name = 'User #'. $user_id;
 	
 	return $full_name;
 }

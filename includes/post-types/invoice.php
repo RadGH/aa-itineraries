@@ -60,7 +60,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		parent::__construct();
 		
 		// Only allow access to invoice if you own the invoice
-		add_action( 'template_redirect', array( $this, 'restrict_invoice_access' ) );
+		// add_action( 'template_redirect', array( $this, 'restrict_invoice_access' ) );
 		
 		// Calculate reminder notifications when due date changes
 		add_action( 'acf/save_post', array( $this, 'save_post_recalculate_reminders' ), 40 );
@@ -85,6 +85,27 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		// https://alpinehikerdev.wpengine.com/?test_invoice_merge_tags
 		if ( isset($_GET['test_invoice_merge_tags']) ) add_action( 'init', array( $this, 'test_invoice_merge_tags' ) );
 		
+	}
+	
+	/**
+	 * Checks if the visitor can access this item. Return false if the user does not have access.
+	 *
+	 * @return bool
+	 */
+	public function check_page_protection() {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) return false;
+		
+		$owner_id = $this->get_owner( get_the_ID() );
+		if ( $owner_id != $user_id ) {
+			if ( current_user_can( 'administrator' ) ) {
+				return true;
+			}else{
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	public function replace_page_template( $template ) {
@@ -190,7 +211,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 				$user = $user_id ? get_user_by( 'id', $user_id ) : false;
 				
 				if ( $user ) {
-					$name = $this->get_owner_full_name( $user->ID );
+					$name = ah_get_user_full_name( $user->ID );
 					$url = get_edit_user_link( $user->ID );
 					echo sprintf(
 						'<a href="%s">%s</a>',
@@ -200,6 +221,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 				}else{
 					echo '<em style="opacity: 0.5;">Nobody</em>';
 				}
+				
 				break;
 				
 		}
@@ -236,6 +258,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		}
 	}
 	
+	/*
 	public function restrict_invoice_access() {
 		
 		// Only affect singular invoice page
@@ -271,6 +294,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		exit;
 		
 	}
+	*/
 	
 	/**
 	 * When saving the post, set the "User" field as the post author.

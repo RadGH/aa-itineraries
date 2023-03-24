@@ -1,4 +1,8 @@
 <?php
+
+// Apply page protection
+AH_Itinerary()->protect_page();
+
 get_header();
 
 $title = get_field( 'title', get_the_ID() );
@@ -22,6 +26,9 @@ $villages = get_field( 'villages', get_the_ID() );
 $hikes = get_field( 'hikes', get_the_ID() );
 
 ?>
+
+<?php do_action( 'ah_display_notices' ); ?>
+
 <div class="container">
 	<div class="content" data-aos="fade">
 		<article <?php post_class( 'entry entry-single itinerary' ); ?>>

@@ -117,7 +117,7 @@ class Class_AH_Admin {
 			if ( $message && $date ) $message .= "\n\n";
 			if ( $date && !$auto_dismiss ) $message .= '<em>' . human_time_diff(strtotime($date), current_time('timestamp')) . ' ago</em>';
 			
-			echo '<div class="ah-admin-notice notice notice-'. $type .' "">';
+			echo '<div class="ah-admin-notice notice notice-'. $type .' ">';
 			
 			echo wpautop($message);
 			

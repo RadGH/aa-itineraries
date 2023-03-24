@@ -26,6 +26,7 @@ function AH_Admin() { return AH_Plugin()->Admin; }
 function AH_Enqueue() { return AH_Plugin()->Enqueue; }
 function AH_Rewrites() { return AH_Plugin()->Rewrites; }
 function AH_Reminders() { return AH_Plugin()->Reminders; }
+function AH_Theme() { return AH_Plugin()->Theme; }
 function AH_Smartsheet() { return AH_Plugin()->Smartsheet; }
 function AH_Smartsheet_Invoices() { return AH_Plugin()->Smartsheet_Invoices; }
 function AH_Smartsheet_Webhooks() { return AH_Plugin()->Smartsheet_Webhooks; }
@@ -55,6 +56,7 @@ class Class_AH_Plugin {
 	public Class_AH_Enqueue                    $Enqueue;
 	public Class_AH_Rewrites                   $Rewrites;
 	public Class_AH_Reminders                  $Reminders;
+	public Class_AH_Theme                      $Theme;
 	public Class_AH_Smartsheet                 $Smartsheet;
 	public Class_AH_Smartsheet_Invoices        $Smartsheet_Invoices;
 	public Class_AH_Smartsheet_Webhooks        $Smartsheet_Webhooks;
@@ -119,6 +121,9 @@ class Class_AH_Plugin {
 		
 		include_once( __DIR__ . '/includes/classes/reminders.php' );
 		$this->Reminders = new Class_AH_Reminders();
+		
+		include_once( __DIR__ . '/includes/classes/theme.php' );
+		$this->Theme = new Class_AH_Theme();
 		
 		include_once( __DIR__ . '/includes/classes/rewrites.php' );
 		$this->Rewrites = new Class_AH_Rewrites();
