@@ -55,10 +55,44 @@ class Class_AH_PDF {
 			add_action( 'init', array( $this, 'display_pdf_to_visitor' ) );
 		}
 		
+		// Preview pdf with ?previewpdf in the URL
+		// Can be set externally, see theme.php -> load_template() for example
 		if ( isset($_GET['previewpdf']) ) {
 			$this->use_preview = true;
 		}
 		
+	}
+	
+	public function generate_from_html( $html, $title, $filename = null ) {
+		// Create PDF and load settings
+		$this->pdf = $this->create_pdf();
+		
+		$this->document_title = wp_strip_all_tags( $title );
+		
+		if ( $filename ) {
+			$this->filename = $filename;
+		}else{
+			$this->filename = $this->get_pdf_filename( $this->document_title );
+		}
+		
+		// Disable image srcset (breaks mpdf)
+		add_filter( 'max_srcset_image_width', '__return_false' );
+		add_filter( 'wp_calculate_image_srcset', '__return_false' );
+		add_filter( 'intermediate_image_sizes_advanced', '__return_false' );
+		
+		// Set document title
+		$this->pdf->SetTitle( $this->document_title );
+		
+		// Add CSS from pdf.css
+		$this->add_stylesheet();
+		
+		// Write HTML
+		$this->pdf->WriteHTML($html);
+		
+		// Finish
+		$this->send_pdf();
+		
+		exit;
 	}
 	
 	// https://alpinehikerdev.wpengine.com/?alpine_pdf=640b80a562034
@@ -105,7 +139,7 @@ class Class_AH_PDF {
 		
 		// mPDF settings
 		$this->document_title = wp_strip_all_tags( $this->title );
-		$this->filename = $this->get_pdf_filename( $this->entry );
+		$this->filename = $this->get_pdf_filename( $this->title );
 		
 		// Disable image srcset which breaks mpdf
 		add_filter( 'max_srcset_image_width', '__return_false' );
@@ -140,11 +174,8 @@ class Class_AH_PDF {
 	}
 	
 	public function get_pdf_filename( $entry ) {
-		$first_name = 'Radley';
-		$last_name = 'Sustaire';
-		$title = $this->get_pdf_setting( 'title' );
 		
-		$filename = wp_strip_all_tags( $first_name . ' ' . $last_name . ' - ' . $title );
+		$filename = wp_strip_all_tags( $entry );
 		$filename = preg_replace('/[^a-zA-Z0-9\-\_ ]+/', '', $filename);
 		$filename .= '.pdf';
 		

@@ -10,6 +10,43 @@ class Class_AH_Theme {
 		
 	}
 	
+	public function load_template( $template_path ) {
+		
+		// Check the action from a query var in the URL. See rewrites.php for details:
+		// 1. "download" = Generate PDF
+		// 2. "preview" = Generate PDF, but display as html pages
+		// 3. Else generate a regular web page
+		$action = get_query_var( 'ah_action' );
+		
+		$use_pdf = ( $action == 'preview' || $action == 'download' );
+		$preview_pdf = ( $action == 'preview' );
+		
+		// Get HTML
+		if ( $use_pdf ) {
+			
+			// Use PDF Preview?
+			if ( $action == 'preview' ) AH_PDF()->use_preview = true;
+			
+			// Get HTML for the PDF
+			ob_start();
+			include( AH_PATH . '/templates/parts/pdf-header.php' );
+			include( $template_path );
+			include( AH_PATH . '/templates/parts/pdf-footer.php' );
+			$html = ob_get_clean();
+			
+			$title = get_the_title();
+			
+			AH_PDF()->generate_from_html( $html, $title );
+			
+		}else{
+		
+			include( AH_PATH . '/templates/parts/page-header.php' );
+			include( $template_path );
+			include( AH_PATH . '/templates/parts/page-footer.php' );
+			
+		}
+	}
+	
 	
 	/**
 	 * Notices: Display, add, get, delete, and delete via ajax
