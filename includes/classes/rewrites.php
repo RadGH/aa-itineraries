@@ -34,7 +34,7 @@ class Class_AH_Rewrites {
 			'top'
 		);
 		
-		// Allow hikes, villages, and itineraries to "download" a pdf or "preview" a pdf
+		// Allow hikes, villages, itineraries, and itinerary templates; to "download" a pdf or "preview" a pdf
 		// see theme.php -> load_template()
 		add_rewrite_rule(
 			'hikes/([^/]+)/(download|preview)/?$',
@@ -49,6 +49,11 @@ class Class_AH_Rewrites {
 		add_rewrite_rule(
 			'itineraries/([^/]+)/(download|preview)/?$',
 			'index.php?post_type=ah_itinerary&ah_itinerary=$matches[1]&ah_action=$matches[2]',
+			'top'
+		);
+		add_rewrite_rule(
+			'itinerary-templates/([^/]+)/(download|preview)/?$',
+			'index.php?post_type=ah_itinerary_tpl&ah_itinerary=$matches[1]&ah_action=$matches[2]',
 			'top'
 		);
 		
