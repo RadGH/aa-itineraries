@@ -1,0 +1,63 @@
+/* This CSS is used in the PDF and on the front-end when displaying pdf-able content like villages, itineraries, hikes */
+
+.clear { clear: both; }
+
+.font-freight-text-pro {
+	font-family: 'freight-text-pro', serif;
+}
+
+.font-fraunces {
+	font-family: 'Fraunces', serif;
+}
+
+.font-montserrat {
+	font-family: 'Montserrat', sans-serif;
+}
+
+.font-ammer-handwriting {
+	font-family: 'ammer-handwriting', cursive;
+}
+
+/* Start: Columns */
+.pdf-row {}
+
+.pdf-row .column { float: left; }
+
+.pdf-row.columns-1 .column-1 { width: 48%; }
+
+.pdf-row.columns-2 .column-1 { width: 48%; padding-right: 2%; }
+.pdf-row.columns-2 .column-2 { width: 48%; padding-left: 2%; }
+
+.pdf-columns { columns: 2; }
+/* End: Columns */
+
+
+/* Start: Print pages */
+.pdf-page {
+	position: relative;
+}
+/* End: Print pages */
+
+
+/* Start: Page Heading */
+.section-heading {
+	padding: 40px 0 0;
+	text-align: right;
+}
+
+.section-heading h1 {
+	background: #204f66;
+	color: #fff;
+	padding: 20px 40px;
+	line-height: 1;
+
+	float: left;
+	border-radius: 0 60px 60px 0;
+}
+
+.section-heading h2 {
+	float: left;
+	clear: left;
+	padding: 10px 0 10px 40px;
+}
+/* End: Page Heading */

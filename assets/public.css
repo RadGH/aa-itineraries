@@ -433,3 +433,25 @@ Start: Theme Notices
 /*
 End: Theme Notices
 */
+
+
+/*
+Start: Grid content layout
+*/
+.row {
+	display: grid;
+	grid-gap: 20px 40px;
+}
+
+.row .column {
+	grid-area: 1;
+}
+
+.clear {
+	display: table;
+	clear: both;
+}
+/*
+End: Grid content layout
+*/
+

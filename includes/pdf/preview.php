@@ -1,5 +1,6 @@
 <?php
 
+/*
 class Class_AH_PDF_Preview {
 	
 	public $content = '';
@@ -23,7 +24,7 @@ class Class_AH_PDF_Preview {
 		$stylesheet = file_get_contents(__DIR__ . '/../../assets/pdf-preview.css');
 		$this->extra_css .= $stylesheet;
 		
-		$js = realpath(__DIR__ . '/../../assets/pdf-preview.js');
+		$js = realpath(__DIR__ . '/../../assets/pdf.js');
 		$js = str_replace( ABSPATH, '/', $js );
 		
 		echo '<div class="previewpdf">';
@@ -44,3 +45,4 @@ class Class_AH_PDF_Preview {
 	}
 	
 }
+*/

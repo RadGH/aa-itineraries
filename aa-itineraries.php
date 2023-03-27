@@ -177,7 +177,7 @@ class Class_AH_Plugin {
 		// ----------------------------------------
 		// 8. PDF Library
 		include_once( AH_PATH . '/includes/pdf/pdf.php' );
-		include_once( AH_PATH . '/includes/pdf/preview.php' );
+		// include_once( AH_PATH . '/includes/pdf/preview.php' );
 		$this->PDF = new Class_AH_PDF();
 	}
 	

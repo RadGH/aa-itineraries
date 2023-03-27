@@ -198,3 +198,21 @@ function ah_add_admin_notice( $type, $message, $data = array(), $unique_key = nu
 function ah_add_theme_notice( $type, $message, $data = array(), $unique_key = null ) {
 	AH_Theme()->add_notice( $type, $message, $data, $unique_key );
 }
+
+/**
+ * Return TRUE if viewing a PDF in preview mode. Configured in theme.php and stored in pdf.php
+ *
+ * @return bool|mixed
+ */
+function ah_is_pdf() {
+	return AH_PDF()->use_preview;
+}
+
+/**
+ * Return TRUE if viewing a PDF in preview mode. Configured in theme.php and stored in pdf.php
+ *
+ * @return bool|mixed
+ */
+function ah_is_pdf_preview() {
+	return AH_PDF()->use_preview;
+}

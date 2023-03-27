@@ -8,53 +8,101 @@ margin-left: 56px;
 margin-right: 56px;
 */
 
+/*
 @font-face {
-	font-family: 'juana';
-	src: url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/juana_regular-webfont.woff2') format('woff2');
+	font-family: 'fraunces';
+	src: url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/fraunces-regular.woff2') format('woff2'),
+	url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/fraunces-regular.woff') format('woff'),
+	url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/fraunces-regular.ttf') format('truetype');
 	font-weight: normal;
 	font-style: normal;
+	font-display: swap;
 }
 
 @font-face {
-	font-family: 'juana';
-	src: url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/juana_regular_it-webfont.woff2') format('woff2');
+	font-family: 'fraunces';
+	src: url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/fraunces-italic.woff2') format('woff2'),
+	url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/fraunces-italic.woff') format('woff'),
+	url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/fraunces-italic.ttf') format('truetype');
 	font-weight: normal;
 	font-style: italic;
+	font-display: swap;
 }
 
 @font-face {
-	font-family: 'lato';
-	src: url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/Lato-Regular.woff2') format('woff2');
+	font-family: 'fraunces';
+	src: url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/fraunces-bold-italic.woff2') format('woff2'),
+	url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/fraunces-bold-italic.woff') format('woff'),
+	url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/fraunces-bold-italic.ttf') format('truetype');
+	font-weight: bold;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'fraunces';
+	src: url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/fraunces-bold.woff2') format('woff2'),
+	url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/fraunces-bold.woff') format('woff'),
+	url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/fraunces-bold.ttf') format('truetype');
+	font-weight: bold;
+	font-style: normal;
+	font-display: swap;
+}
+
+
+@font-face {
+	font-family: 'freight-text-pro';
+	src: url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/freight-text-pro-bold-italic.woff2') format('woff2'),
+	url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/freight-text-pro-bold-italic.woff') format('woff'),
+	url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/freight-text-pro-bold-italic.ttf') format('truetype');
+	font-weight: bold;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'freight-text-pro';
+	src: url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/freight-text-pro-bold.woff2') format('woff2'),
+	url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/freight-text-pro-bold.woff') format('woff'),
+	url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/freight-text-pro-bold.ttf') format('truetype');
+	font-weight: bold;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'freight-text-pro';
+	src: url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/freight-text-pro-italic.woff2') format('woff2'),
+	url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/freight-text-pro-italic.woff') format('woff'),
+	url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/freight-text-pro-italic.ttf') format('truetype');
+	font-weight: normal;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'freight-text-pro';
+	src: url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/freight-text-pro-regular.woff2') format('woff2'),
+	url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/freight-text-pro-regular.woff') format('woff'),
+	url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/freight-text-pro-regular.ttf') format('truetype');
 	font-weight: normal;
 	font-style: normal;
+	font-display: swap;
+}
+*/
+
+
+html, body {
+	font-family: 'freight-text-pro', serif;
+	font-size: 16px;
+	line-height: 1.5em;
 }
 
-@font-face {
-	font-family: 'lato';
-	src: url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/Lato-Bold.woff2') format('woff2');
-	font-weight: 700;
-	font-style: normal;
-}
-
-@font-face {
-	font-family: 'lato';
-	src: url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/Lato-Italic.woff2') format('woff2');
-	font-weight: normal;
-	font-style: italic;
-}
-
-@font-face {
-	font-family: 'lato';
-	src: url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/Lato-BoldItalic.woff2') format('woff2');
-	font-weight: 700;
-	font-style: italic;
-}
-
-@font-face {
-	font-family: 'silversouthscript';
-	src: url('/wp-content/plugins/aa-alpine-hikers/assets/fonts/silver_south_script-webfont.woff2') format('woff2');
-	font-weight: 700;
-	font-style: italic;
+h1, h2, h3, h4, h5, h6 {
+	font-family: 'Fraunces', serif;
+	line-height: 1.35em;
+	margin: 0;
+	padding-bottom: 10px;
 }
 
 body {
@@ -62,12 +110,11 @@ body {
 	padding-top: 30px;
 }
 
-pagebreak {
+.pdf-page {
 	width: 1055px;
 	height: 815px;
 	display: block;
 	margin: 0 auto 40px;
 	box-shadow: 0 5px 20px #000;
 	background: #fff;
-	overflow: hidden;
 }

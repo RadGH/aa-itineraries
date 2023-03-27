@@ -19,13 +19,14 @@ class Class_AH_Theme {
 		$action = get_query_var( 'ah_action' );
 		
 		$use_pdf = ( $action == 'preview' || $action == 'download' );
-		$preview_pdf = ( $action == 'preview' );
+		$use_preview = ( $action == 'preview' );
 		
-		// Get HTML
+		AH_PDF()->use_pdf = $use_pdf;
+		AH_PDF()->use_preview = $use_preview;
+		
 		if ( $use_pdf ) {
 			
-			// Use PDF Preview?
-			if ( $action == 'preview' ) AH_PDF()->use_preview = true;
+			$title = get_the_title();
 			
 			// Get HTML for the PDF
 			ob_start();
@@ -34,12 +35,16 @@ class Class_AH_Theme {
 			include( AH_PATH . '/templates/parts/pdf-footer.php' );
 			$html = ob_get_clean();
 			
-			$title = get_the_title();
-			
+			// Generate PDF
 			AH_PDF()->generate_from_html( $html, $title );
+			exit;
 			
 		}else{
 		
+			// Enqueue CSS
+			wp_enqueue_style( 'ah-pdf-theme', ah_get_asset_url( 'pdf-shared.css' ) );
+			
+			// Get HTML as a regular page
 			include( AH_PATH . '/templates/parts/page-header.php' );
 			include( $template_path );
 			include( AH_PATH . '/templates/parts/page-footer.php' );

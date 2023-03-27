@@ -128,3 +128,166 @@ function ah_stream_file_to_browser( $attachment_id ) {
 	echo file_get_contents( $path );
 	exit();
 }
+
+/**
+ * Splits an HTML string approximately in half at a <p> tag. Returns an array in two parts [0] and [1].
+ *
+ * @param string $html
+ * @param int $min_chars
+ *
+ * @return array|string
+ */
+function ah_split_html_string( $html, $min_chars = 1000 ) {
+	if ( mb_strlen($html) < $min_chars ) return $html;
+	if ( !str_contains($html, '</p>') ) return $html;
+	
+	// Split the string into an array of <p> tags (the </p> gets removed at the end which we add back later)
+	$split = preg_split('/<\/p>\s*/', $html);
+	$length = mb_strlen($html);
+	$half_length = ceil($length / 2);
+	
+	$count_length = 0;
+	$count_index = 0;
+	
+	// Clean up and count characters in each item
+	foreach( $split as $k => &$s ) {
+		$s = trim($s);
+		
+		if ( empty($s) ) {
+			unset($split[$k]);
+		}else{
+			$s = $s . '</p>';
+		}
+		
+		// Keep counting until we have at least half characters needed. We split it at that index
+		if ( $count_length < $half_length ) {
+			$count_length += mb_strlen($s);
+			$count_index += 1;
+		}
+	}
+	
+	// Join the HTML parts back together at the half-way point.
+	$html = array(
+		0 => implode( "\n", array_slice( $split, 0, $count_index ) ),
+		1 => implode( "\n", array_slice( $split, $count_index, null ) ),
+	);
+	
+	return $html;
+}
+
+/**
+ * Get the URL to a CSS or JS file by url, with version
+ *
+ * @param $filename
+ *
+ * @return string
+ */
+function ah_get_asset_url( $filename ) {
+	$v = filemtime( AH_PATH . '/assets/' . $filename );
+	return AH_URL . '/assets/' . $filename . '?v=' . $v;
+}
+
+/**
+ * Display an HTML string with 2 columns.
+ *
+ * @param $html
+ *
+ * @return void
+ */
+function ah_display_content_columns( $html ) {
+	
+	echo '<div class="pdf-columns">';
+	echo $html;
+	echo '</div>';
+	return;
+	
+	$details_split = ah_split_html_string( $html, 1000 );
+	
+	if ( is_array( $details_split ) ) {
+		echo '<div class="pdf-row columns-2">';
+		
+		echo '<div class="column column-1">';
+		echo $details_split[0];
+		echo '</div>';
+		
+		echo '<div class="column column-2">';
+		echo $details_split[1];
+		echo '</div>';
+		
+		echo '<div class="clear"></div>';
+		
+		echo '</div>';
+	}else{
+		echo '<div class="pdf-row columns-1">';
+		
+		echo '<div class="column column-1">';
+		echo $details_split;
+		echo '</div>';
+		
+		echo '<div class="clear"></div>';
+		
+		echo '</div>';
+	}
+	
+}
+
+
+function ah_display_image( $image_id, $max_w = 1055, $max_h = 815 ) {
+	
+	$img = wp_get_attachment_image_src( $image_id, 'full' );
+	
+	$img_src = $img[0];
+	list( $img_w, $img_h ) = ah_fit_image_size( $img[1], $img[2], $max_w, $max_h );
+	
+	$alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
+	if ( !$alt ) $alt = get_the_title($image_id);
+	
+	echo sprintf(
+		'<img src="%s" class="ah-image" width="%d" height="%d" alt="%s">',
+		esc_attr($img_src),
+		intval($img_w),
+		intval($img_h),
+		esc_attr($alt)
+	);
+}
+
+/**
+ * Gets a width and height that will fix within the maximum width/height parameters.
+ *
+ * @param $original_w
+ * @param $original_h
+ * @param $max_w
+ * @param $max_h
+ *
+ * @return array|float[]|int[]
+ */
+function ah_fit_image_size( $original_w, $original_h, $max_w = 0, $max_h = 0 ) {
+	
+	$w = $original_w;
+	$h = $original_h;
+	
+	$ratio_h = $w / $h;
+	$ratio_w = $h / $w;
+	
+	// [based on ratio_w]
+	// for a 300x150 image (landscape orientation):
+	// h / w = r [ratio]
+	// 150 / 300 = 0.5
+	// if max_w = 200:
+	//   new_w = 200
+	//   new_h = 200 * r = 100
+	
+	// Fit width
+	if ( $max_w > 0 && $w > $max_w ) {
+		$w = $max_w;
+		$h = $w * $ratio_w;
+	}
+	
+	// Fit height
+	if ( $max_h > 0 && $h > $max_h ) {
+		$h = $max_h;
+		$w = $h * $ratio_h;
+	}
+	
+	return array( $w, $h );
+}
