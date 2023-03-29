@@ -210,8 +210,8 @@ class Class_AH_PDF {
 			// Page settings
 			'orientation' => 'P',
 			
-			// 'format' => 'LETTER',
-			'format' => [$w = 210, $w * (11/8.5)],
+			'format' => 'LETTER',
+			// 'format' => [$w = 210, $w * (11/8.5)],
 			// 815px x 1055px
 			
 			// 595pt @ 210mm = 2.8333pt per mm
@@ -231,8 +231,8 @@ class Class_AH_PDF {
 			'margin_right'  => 16,
 			'margin_top'    => 12,
 			'margin_bottom' => 12,
-			'margin_header' => 8,
-			'margin_footer' => 8,
+			'margin_header' => 12,
+			'margin_footer' => 12,
 			
 		));
 	}

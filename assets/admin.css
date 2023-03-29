@@ -3,9 +3,6 @@ Start: General admin dashboard
 */
 @import 'dashicon/AH.css';
 
-.wp-menu-separator {
-	border-bottom: 2px solid #515151;
-}
 /*
 End: General admin dashboard
 */

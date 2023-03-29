@@ -29,14 +29,11 @@ if ( !isset($title) ) $title = ucwords(get_the_title()) . ' PDF';
 </head>
 <body>
 
-<htmlpagefooter name="GeneralFooter" style="display: none;">
-	<table width="100%">
-		<tr>
-			<td width="33%"></td>
-			<td width="33%" align="center"></td>
-			<td width="33%" align="right">{PAGENO}</td>
-		</tr>
-	</table>
+<htmlpagefooter name="general_footer" style="display: none;">
+	<table class="footer-table" width="100%"><tr>
+		<td width="50%"></td>
+		<td width="50%" align="right">{PAGENO}</td>
+	</tr></table>
 </htmlpagefooter>
 
 <div class="pdf-container">

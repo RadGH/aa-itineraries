@@ -167,7 +167,18 @@ function ah_get_document_redirect_url( $post_id ) {
  */
 function ah_get_document_preview_image( $post_id ) {
 	$attachment_id = (int) get_field( 'preview_image', $post_id, false );
+	
+	if ( ! $attachment_id ) {
+		$type = get_field( 'type', $post_id );
+		if ( $type == 'image' ) $attachment_id = (int) get_field( 'image', $post_id, false );
+	}
+	
 	return $attachment_id ?: false;
+}
+
+function ah_get_document_embed( $post_id ) {
+	
+	$type = get_field( 'type', $post_id );
 }
 
 /**

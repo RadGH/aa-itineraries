@@ -11,23 +11,32 @@ margin-right: 30px or 50px;
 */
 
 @page {
-	even-footer-name: html_GeneralFooter;
-	odd-footer-name: html_GeneralFooter;
-	margin: 12mm 16mm;
+	even-footer-name: none;
+	odd-footer-name: none;
+	margin: 12mm 16mm 24mm;
 }
 
 @page default_page {
-	even-footer-name: html_GeneralFooter;
-	odd-footer-name: html_GeneralFooter;
-	margin: 12mm 16mm;
+	even-footer-name: html_general_footer;
+	odd-footer-name: html_general_footer;
 }
 
-@page fullpage {
-	margin: 0;
-	even-footer-name: none;
-	odd-footer-name: none;
+.page-default {
+	page: default_page;
 }
 
+.footer-table {
+	font-size: 14px;
+}
+
+.footer-table th,
+.footer-table td {
+	vertical-align: bottom;
+}
+
+.itinerary-contact p {
+	padding: 0;
+}
 
 html, body {
 	margin: 0;
@@ -40,12 +49,19 @@ html, body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-	font-family: 'fraunces', serif;
 	font-weight: bold;
 	line-height: 1.35em;
 	margin: 0;
 	padding-bottom: 10px;
 	color: #204F66;
+}
+
+h1 {
+	font-family: 'fraunces', serif;
+}
+
+h2, h3, h4, h5, h6 {
+	font-family: 'freight-text-pro', serif;
 }
 
 p, h1, h2, h3, h4, h5, h6 {
@@ -84,17 +100,6 @@ img {
 .section-heading h2 {
 }
 /* End: Page Heading */
-
-/* Start: Images */
-.full-page-image {
-	page: fullpage;
-}
-
-.full-page-image img {
-	width: 815px;
-	height: 1055px;
-}
-/* End: Images */
 
 /* Start: Hikes */
 .page-hike {

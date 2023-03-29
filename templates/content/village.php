@@ -17,9 +17,33 @@ $details = get_field( 'around_the_village', $post_id );
 if ( $additional_content ) $details .= "\n\n" . $additional_content;
 ?>
 
-<section id="village-<?php echo esc_attr($slug); ?>" class="pdf-section village village-<?php echo esc_attr($slug); ?> village-id-<?php the_ID(); ?>">
+<?php
+if ( ah_is_pdf() ) {
+	?>
+	<htmlpagefooter name="footer_village_main_<?php echo $post_id; ?>" style="display:none">
+		<table class="footer-table" width="100%"><tr>
+				<td width="50%"><?php echo $title . ' &ndash; ' . $subtitle; ?></td>
+				<td width="50%" align="right">{PAGENO}</td>
+			</tr></table>
+	</htmlpagefooter>
 	
-	<div class="pdf-page" id="village-main-<?php the_ID(); ?>">
+	<style>
+		#village-main-<?php echo $post_id; ?> {
+			page: village_main_<?php echo $post_id; ?>;
+		}
+
+		@page village_main_<?php echo $post_id; ?> {
+			even-footer-name: footer_village_main_<?php echo $post_id; ?>;
+			odd-footer-name: footer_village_main_<?php echo $post_id; ?>;
+		}
+	</style>
+	<?php
+}
+?>
+
+<section id="village-<?php echo esc_attr($slug); ?>" class="pdf-section village village-<?php echo esc_attr($slug); ?> village-id-<?php echo $post_id; ?>">
+	
+	<div class="pdf-page" id="village-main-<?php echo $post_id; ?>">
 	
 	<?php if ( $title || $subtitle ) { ?>
 	<div class="section-heading village-heading">

@@ -18,6 +18,53 @@
 	font-family: 'ammer-handwriting', cursive;
 }
 
+.pdf-page h1 {
+	font-family: 'fraunces', serif;
+}
+
+.pdf-page h2, .pdf-page h3,
+.pdf-page h4, .pdf-page h5,
+.pdf-page h6 {
+	font-family: 'freight-text-pro', serif;
+}
+
+.pdf-page img {
+	height: auto;
+	max-width: 100%;
+}
+
+.pdf-page table {
+	border-collapse: collapse;
+}
+
+.pdf-page table.schedule-table tr:nth-child(odd):not(:last-child) {
+	background: #f4f6f7;
+}
+
+.pdf-page [style="text-decoration: underline;"],
+.pdf-page strong {
+	text-decoration-color: #204f66 !important;
+}
+
+.pdf-page strong,
+.pdf-page table.phone-number-table .title,
+.pdf-page .country-codes strong {
+	color: #204f66;
+}
+
+.pdf-page li {
+	margin-bottom: 10px;
+}
+
+.section-logo {
+	margin: -20mm -20mm -8mm;
+	padding: 16mm 20mm;
+	background: #2a4e68;
+}
+
+.pdf-page .section-document {
+	margin: 0 0 20px;
+}
 
 /* Start: Typography */
 .pdf-page p {

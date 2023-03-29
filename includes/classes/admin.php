@@ -88,6 +88,7 @@ class Class_AH_Admin {
 	
 	public function register_image_sizes() {
 		add_image_size( 'document-preview', 300, 300, false );
+		add_image_size( 'document-embed', 660, 980, false );
 	}
 	
 	/**

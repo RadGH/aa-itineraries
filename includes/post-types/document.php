@@ -237,7 +237,6 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 	 *
 	 * @return void
 	 */
-	/*
 	public function restrict_document_access() {
 		
 		// Only affect singular document page
@@ -259,7 +258,6 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 		exit;
 		
 	}
-	*/
 	
 	/**
 	 * Stream the file contents to the visitor's browser, or redirect to a URL, depending on document type.
