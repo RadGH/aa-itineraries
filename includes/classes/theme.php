@@ -42,7 +42,8 @@ class Class_AH_Theme {
 		}else{
 		
 			// Enqueue CSS
-			wp_enqueue_style( 'ah-pdf-theme', ah_get_asset_url( 'pdf-shared.css' ) );
+			wp_enqueue_style( 'ah-pdf-shared', ah_get_asset_url( 'pdf-shared.css' ) );
+			wp_enqueue_style( 'ah-pdf-theme', ah_get_asset_url( 'pdf-theme.css' ) );
 			
 			// Get HTML as a regular page
 			include( AH_PATH . '/templates/parts/page-header.php' );

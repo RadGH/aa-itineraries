@@ -10,6 +10,25 @@ margin-right: 30px or 50px;
 50px = 4.74%
 */
 
+@page {
+	even-footer-name: html_GeneralFooter;
+	odd-footer-name: html_GeneralFooter;
+	margin: 12mm 16mm;
+}
+
+@page default_page {
+	even-footer-name: html_GeneralFooter;
+	odd-footer-name: html_GeneralFooter;
+	margin: 12mm 16mm;
+}
+
+@page fullpage {
+	margin: 0;
+	even-footer-name: none;
+	odd-footer-name: none;
+}
+
+
 html, body {
 	margin: 0;
 	padding: 0;
@@ -21,32 +40,16 @@ html, body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-	font-family: 'Fraunces', serif;
-	font-weight: 700;
+	font-family: 'fraunces', serif;
+	font-weight: bold;
 	line-height: 1.35em;
 	margin: 0;
 	padding-bottom: 10px;
 	color: #204F66;
 }
 
-.subheading {
-	font-family: 'Montserrat', sans-serif;
-}
-
-h1 {
-	font-size: 52px;
-	padding-bottom: 30px;
-}
-
-h2 {
-	font-size: 34px;
-	padding-bottom: 20px;
-}
-
-p {
-	display: block;
-	margin: 0;
-	padding: 0 0 20px;
+p, h1, h2, h3, h4, h5, h6 {
+	page-break-inside: avoid;
 }
 
 a {
@@ -65,176 +68,36 @@ a.button {
 	color: #fff;
 }
 
-/*
-
-reusable
-
-*/
-.logo {
-	z-index: 3;
+img {
 }
 
-.logo.left {
-	position: absolute;
-	bottom: 20px;
-	left: 50px;
-}
-.logo.right {
-	position: absolute;
-	bottom: 20px;
-	right: 50px;
-	text-align: right;
-}
-
-.logo img {
-	width: 288px;
-	height: 150px;
-}
-
-.copyright.left {
-	position: absolute;
-	bottom: 20px;
-	left: 50px;
-}
-
-.copyright.right {
-	position: absolute;
-	bottom: 20px;
-	right: 50px;
-	text-align: right;
-}
-
-.logo.chart-logo.left {
-	left: 0%;
-	width: 45%;
-	text-align: center;
-}
-
-.copyright {
-	margin-bottom: 10px;
-	z-index: 3;
-	font-size: 14px;
-	line-height: 1.2;
-}
-
-.copyright.light {
-	color: #fff;
-}
-
-.raised.logo {
-	bottom: 30px;
-}
-
-/*
-
-.intro-page
-
-*/
-
-.page.footer-sloped {
-	background: url(/wp-content/themes/northstar-child/_includes/functions/quiz/assets/slope-footer.png) top left no-repeat;
-	background-size: 100% 100%;
-	z-index: 2;
-}
-.page-intro {
-	background: url(/wp-content/themes/northstar-child/_includes/functions/quiz/assets/slope-main.png) top left no-repeat;
-	background-size: 100% 100%;
-}
-
-.page-intro .page-inner {
-	padding: 100px 50px 0;
-	color: #fff;
-}
-
-.page-intro .report-for {
-	margin-top: 120px;
-	font-size: 22px;
-}
-
-/*
-
-chart
-
-*/
-.chart-left,
-.chart-right {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-}
-
-.chart-left {
-	left: 0;
-	width: 39%;
-	padding: 70px 3%;
-	background: #11113c;
-	color: #ffffff;
-}
-
-.chart-right {
-	right: 0;
-	width: 49%;
-	padding: 70px 3%;
-	background: #ffffff;
-	text-align: center;
-}
-
-/*
-feedback
-*/
-.page-feedback .page-inner {
-	padding: 80px 50px;
-}
-
-/*
-next step
-*/
-.page-next-step .page-inner {
-	padding: 80px 50px 80px 50%;
-}
-.photo {
-	position: absolute;
-	z-index: 1;
-	top: 0;
-	left: 0;
-	bottom: 0;
-	width: 45%;
-	height: 100%;
-	background: #11113c right no-repeat;
-	background-size: 105%;
-
-	background-image-size: 4;
-}
-
-
-img.size-full {
-	max-width: 80%;
-	height: auto;
-}
-
-/* Start: Section Image */
-.section-image {
-	clear: both;
-	text-align: center;
-	margin: 0 0 20px;
-}
-
-/* End: Section Image */
+/* Start: Layout */
+/* End: Layout */
 
 /* Start: Page Heading */
 .section-heading {
-	padding: 40px 0 0;
-	text-align: right;
 }
 
 .section-heading h1 {
-	float: right;
-	border-radius: 60px 0 0 60px;
 }
 
 .section-heading h2 {
-	float: right;
-	clear: right;
-	padding: 10px 40px 10px 0;
 }
 /* End: Page Heading */
+
+/* Start: Images */
+.full-page-image {
+	page: fullpage;
+}
+
+.full-page-image img {
+	width: 815px;
+	height: 1055px;
+}
+/* End: Images */
+
+/* Start: Hikes */
+.page-hike {
+	page: default;
+}
+/* End: Hikes */

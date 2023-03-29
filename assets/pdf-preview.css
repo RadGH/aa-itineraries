@@ -111,10 +111,24 @@ body {
 }
 
 .pdf-page {
+	min-height: 1055px;
+	width: 815px;
+
+	/* Landscape
 	width: 1055px;
 	height: 815px;
+	*/
 	display: block;
 	margin: 0 auto 40px;
 	box-shadow: 0 5px 20px #000;
 	background: #fff;
+
+	/* mpdf margins */
+	box-sizing: border-box;
+	padding: 16mm 20mm;
+}
+
+
+.full-page-image {
+	margin: -16mm -20mm;
 }

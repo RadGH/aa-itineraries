@@ -195,40 +195,7 @@ function ah_get_asset_url( $filename ) {
  * @return void
  */
 function ah_display_content_columns( $html ) {
-	
-	echo '<div class="pdf-columns">';
-	echo $html;
-	echo '</div>';
-	return;
-	
-	$details_split = ah_split_html_string( $html, 1000 );
-	
-	if ( is_array( $details_split ) ) {
-		echo '<div class="pdf-row columns-2">';
-		
-		echo '<div class="column column-1">';
-		echo $details_split[0];
-		echo '</div>';
-		
-		echo '<div class="column column-2">';
-		echo $details_split[1];
-		echo '</div>';
-		
-		echo '<div class="clear"></div>';
-		
-		echo '</div>';
-	}else{
-		echo '<div class="pdf-row columns-1">';
-		
-		echo '<div class="column column-1">';
-		echo $details_split;
-		echo '</div>';
-		
-		echo '<div class="clear"></div>';
-		
-		echo '</div>';
-	}
-	
+	echo wpautop($html);
 }
 
 

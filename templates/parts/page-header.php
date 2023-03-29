@@ -7,3 +7,5 @@ get_header();
 <div class="container">
 	<div class="content" data-aos="fade">
 		<article <?php post_class( 'entry entry-single ' . get_post_type() ); ?>>
+
+			<div class="ah-page-view">

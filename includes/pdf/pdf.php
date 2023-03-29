@@ -57,8 +57,8 @@ class Class_AH_PDF {
 		add_filter( 'intermediate_image_sizes_advanced', '__return_false' );
 		
 		// Generate the PDF
-		$this->generate_with_wkhtmltopdf_api( $html, $title, $filename, $force_download );
-		// $this->generate_with_mpdf( $html, $title, $filename, $force_download ); // old method
+		// $this->generate_with_wkhtmltopdf_api( $html, $title, $filename, $force_download );
+		$this->generate_with_mpdf( $html, $title, $filename, $force_download ); // old method
 	}
 	
 	private function generate_with_wkhtmltopdf_api( $html, $title = '', $filename = '', $force_download = false ) {
@@ -76,7 +76,7 @@ class Class_AH_PDF {
 		$url = 'https://wkhtmltopdf.radgh.com/';
 		
 		$wkhtml_args = array(
-			'orientation' => 'landscape',
+			'orientation' => 'portrait',
 		);
 		
 		$headers = array();
@@ -142,7 +142,6 @@ class Class_AH_PDF {
 		return $filename;
 	}
 	
-	/*
 	// Create a PDF from HTML using MPDF
 	private function generate_with_mpdf( $html, $title, $filename, $force_download ) {
 		$this->pdf = $this->create_mpdf();
@@ -209,16 +208,31 @@ class Class_AH_PDF {
 				),
 			
 			// Page settings
-			'format' => 'LETTER',
-			'orientation' => 'L',
+			'orientation' => 'P',
+			
+			// 'format' => 'LETTER',
+			'format' => [$w = 210, $w * (11/8.5)],
+			// 815px x 1055px
+			
+			// 595pt @ 210mm = 2.8333pt per mm
+			// 815px / 2.8333
 			
 			// Margins
+			/*
 			'margin_left'   => 0, // 15,
 			'margin_right'  => 0, // 15,
 			'margin_top'    => 0, // 16,
 			'margin_bottom' => 0, // 16,
 			'margin_header' => 0, // 9,
 			'margin_footer' => 0, // 9,
+			*/
+			
+			'margin_left'   => 16,
+			'margin_right'  => 16,
+			'margin_top'    => 12,
+			'margin_bottom' => 12,
+			'margin_header' => 8,
+			'margin_footer' => 8,
 			
 		));
 	}
@@ -250,6 +264,5 @@ class Class_AH_PDF {
 		$stylesheet = file_get_contents(__DIR__ . '/../../assets/pdf.css');
 		$this->pdf->WriteHTML($stylesheet, 1); // The parameter 1 tells that this is css/style only and no body/html/text
 	}
-	*/
 	
 }

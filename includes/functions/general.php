@@ -205,7 +205,7 @@ function ah_add_theme_notice( $type, $message, $data = array(), $unique_key = nu
  * @return bool|mixed
  */
 function ah_is_pdf() {
-	return AH_PDF()->use_preview;
+	return AH_PDF()->use_pdf;
 }
 
 /**

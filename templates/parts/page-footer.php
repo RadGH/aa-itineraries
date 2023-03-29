@@ -1,3 +1,4 @@
+			</div>
 		</article>
 	</div>
 </div>

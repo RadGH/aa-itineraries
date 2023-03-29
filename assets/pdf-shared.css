@@ -7,16 +7,54 @@
 }
 
 .font-fraunces {
-	font-family: 'Fraunces', serif;
+	font-family: 'fraunces', serif;
 }
 
 .font-montserrat {
-	font-family: 'Montserrat', sans-serif;
+	font-family: 'montserrat', sans-serif;
 }
 
 .font-ammer-handwriting {
 	font-family: 'ammer-handwriting', cursive;
 }
+
+
+/* Start: Typography */
+.pdf-page p {
+	font-size: 16px;
+	line-height: 1.5em;
+}
+
+.pdf-page h1 {
+	font-size: 36px;
+	line-height: 1.1;
+}
+
+.pdf-page h2 {
+	font-size: 28px;
+	line-height: 1.1;
+}
+
+.pdf-page h3,
+.pdf-page h4,
+.pdf-page h5,
+.pdf-page h6 {
+	font-size: 20px;
+	line-height: 1.1;
+}
+
+.pdf-page .subheading {
+	font-family: 'Montserrat', sans-serif;
+}
+
+.pdf-page p {
+	display: block;
+	margin: 0;
+	padding: 0 0 20px;
+}
+
+/* End: Typography */
+
 
 /* Start: Columns */
 .pdf-row {}
@@ -27,8 +65,6 @@
 
 .pdf-row.columns-2 .column-1 { width: 48%; padding-right: 2%; }
 .pdf-row.columns-2 .column-2 { width: 48%; padding-left: 2%; }
-
-.pdf-columns { columns: 2; }
 /* End: Columns */
 
 
@@ -36,28 +72,125 @@
 .pdf-page {
 	position: relative;
 }
+
+.page-break {
+	page-break-before: always;
+}
 /* End: Print pages */
 
 
+/* Start: Logo */
+.section-logo {
+	margin-bottom: 40px;
+}
+
+.section-logo img {
+	width: 300px;
+	height: auto;
+}
+/* End: Logo */
+
+
+/* Start: Layout */
+.section-heading,
+.section-image,
+.section-content {
+	margin: 10px 0;
+}
+/* End: Layout */
+
 /* Start: Page Heading */
 .section-heading {
-	padding: 40px 0 0;
+	text-align: left;
+}
+
+.section-heading::after {
+	content: '';
+	display: table;
+	clear: both;
+}
+/* End: Page Heading */
+
+/* Start: Images */
+.section-image {
+	clear: both;
+	text-align: center;
+	margin: 0 0 20px;
+}
+/* End: Images */
+
+/* Start: Tables */
+.pdf-page table th,
+.pdf-page table td {
+	padding: 3px;
+}
+/* End: Tables */
+
+/* Start: Itinerary Schedule */
+table.schedule-table {
+	table-layout: fixed;
+	width: 100%;
+	margin: 0;
+}
+
+table.schedule-table .column {
+	vertical-align: top;
+	padding-bottom: 10px;
+}
+
+table.schedule-table .column-1 {
+	width: 150px;
+	padding-right: 20px;
+}
+
+table.schedule-table .column-2 {
+	width: auto;
+	padding-right: 20px;
+}
+
+table.schedule-table .column-3 {
+	width: 150px;
+	text-align: right;
+}
+/* End: Itinerary Schedule */
+
+/* Start: Itinerary Phone Numbers */
+table.phone-number-table {
+	table-layout: fixed;
+	width: 100%;
+	margin: 0;
+}
+
+table.phone-number-table .column {
+	padding-bottom: 2px;
+}
+
+table.phone-number-table .content.column {
+	padding-bottom: 10px;
+}
+
+table.phone-number-table .title,
+table.phone-number-table .phone-number {
+	font-family: 'Fraunces', serif;
+	font-weight: bold;
+}
+
+table.phone-number-table .content {
+
+}
+
+table.phone-number-table .column-1 {
+	width: auto;
+	padding-right: 20px;
+}
+
+table.phone-number-table .column-2 {
+	width: 150px;
 	text-align: right;
 }
 
-.section-heading h1 {
-	background: #204f66;
-	color: #fff;
-	padding: 20px 40px;
-	line-height: 1;
-
-	float: left;
-	border-radius: 0 60px 60px 0;
+.country-codes strong {
+	font-family: 'Fraunces', serif;
+	font-weight: bold;
 }
-
-.section-heading h2 {
-	float: left;
-	clear: left;
-	padding: 10px 0 10px 40px;
-}
-/* End: Page Heading */
+/* End: Itinerary Phone Numbers */

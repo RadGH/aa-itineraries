@@ -1,0 +1,33 @@
+/* This CSS is used in the PDF and on the front-end when displaying pdf-able content like villages, itineraries, hikes */
+.ah-page-view {
+	margin: 40px 0;
+}
+
+.pdf-page {
+	max-width: 815px;
+	margin: 0 auto 40px;
+}
+
+#content-wrapper {
+	overflow: hidden;
+}
+
+.section-image img {
+	width: auto;
+	height: auto;
+}
+
+.full-page-image img {
+	object-fit: contain;
+}
+
+/* Start: Images */
+.full-page-image {
+}
+
+.full-page-image img {
+	width: 100%;
+	max-width: 815px;
+	height: auto;
+}
+/* End: Images */

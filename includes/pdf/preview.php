@@ -1,6 +1,5 @@
 <?php
 
-/*
 class Class_AH_PDF_Preview {
 	
 	public $content = '';
@@ -45,4 +44,3 @@ class Class_AH_PDF_Preview {
 	}
 	
 }
-*/
