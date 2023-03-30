@@ -140,7 +140,10 @@
 
 
 /* Start: Layout */
-.section-heading,
+.section-heading {
+	margin: 0 0 10px;
+}
+
 .section-image,
 .section-content {
 	margin: 10px 0;

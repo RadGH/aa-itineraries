@@ -10,9 +10,6 @@ class Class_Account_Page_Post_Type extends Class_Abstract_Post_Type {
 		
 		parent::__construct();
 		
-		// Called by the theme (single-ah_account_page.php), displays the menu
-		add_action( 'ah_display_account_menu', array( $this, 'display_account_menu' ) );
-		
 		// When visiting the account page archive, redirect to the home page specified in the account page settings
 		add_action( 'template_redirect', array( $this, 'redirect_archive_to_account_home' ) );
 		
@@ -25,6 +22,19 @@ class Class_Account_Page_Post_Type extends Class_Abstract_Post_Type {
 		// Register each account menu as a nav menu location
 		add_filter( 'body_class', array( $this, 'add_body_class' ), 30 );
 		
+		// Custom page template
+		add_filter( 'single_template', array( $this, 'replace_page_template' ) );
+		
+	}
+	
+	public function replace_page_template( $template ) {
+		global $post;
+		
+		if ( $post->post_type == $this->get_post_type() ) {
+			$template = AH_PATH . '/templates/single-account-page.php';
+		}
+		
+		return $template;
 	}
 	
 	public function add_body_class( $classes ) {
@@ -73,39 +83,6 @@ class Class_Account_Page_Post_Type extends Class_Abstract_Post_Type {
 		$args['has_archive'] = true;
 		
 		return $args;
-	}
-	
-	public function display_account_menu() {
-		$menu = $this->get_active_menu();
-		if ( !$menu ) return;
-		
-		$location_name = $this->get_menu_location_name( $menu['unique_id'] );
-		
-		if ( $location_name ) {
-			if ( has_nav_menu( $location_name ) ) {
-				
-				echo '<input type="checkbox" class="screen-reader-text" id="ah-mobile-nav-toggle">';
-				
-				echo '<div class="ah-mobile-account-nav">';
-				
-				echo '<label id="ah-mobile-nav-label" for="ah-mobile-nav-toggle">My Account</label>';
-				
-				wp_nav_menu( array(
-					'theme_location' => $location_name,
-					'menu_class' => 'ah-account-menu',
-					'container' => 'nav',
-					'container_class' => 'ah-account-menu-nav',
-				) );
-				
-				echo '</div>';
-				
-			}else{
-				aa_die('Invalid account page menu: ' . $location_name, $menu );
-			}
-		}else{
-			aa_die('Invalid account page menu, missing unique ID', $menu );
-		}
-		
 	}
 	
 	/**

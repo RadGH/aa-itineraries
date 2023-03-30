@@ -46,9 +46,11 @@ class Class_AH_Theme {
 			wp_enqueue_style( 'ah-pdf-theme', ah_get_asset_url( 'pdf-theme.css' ) );
 			
 			// Get HTML as a regular page
-			include( AH_PATH . '/templates/parts/page-header.php' );
+			include( AH_PATH . '/templates/parts/itinerary-header.php' );
+			
 			include( $template_path );
-			include( AH_PATH . '/templates/parts/page-footer.php' );
+			
+			include( AH_PATH . '/templates/parts/itinerary-footer.php' );
 			
 		}
 	}

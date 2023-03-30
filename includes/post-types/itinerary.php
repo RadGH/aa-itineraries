@@ -31,8 +31,14 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) return false;
 		
+		/*
 		$owner_id = $this->get_owner( get_the_ID() );
 		if ( $owner_id != $user_id ) return false;
+		*/
+		
+		$document_user_ids = (array) get_field( 'user_ids' );
+		if ( ! in_array( $user_id, $document_user_ids, true ) ) return false;
+		
 		
 		return true;
 	}
@@ -313,6 +319,95 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		if ( ! $user_id ) $user_id = false;
 		
 		$this->set_owner( $post_id, $user_id );
+	}
+	
+	/**
+	 * Generate table of contents for an itinerary, an array of items that can be used in a nested list
+	 * Each item contains: title, link, children
+	 *
+	 * @param $itinerary_id
+	 *
+	 * @return array
+	 */
+	public function get_table_of_contents( $itinerary_id ) {
+		$toc_list = array();
+		
+		// Itinerary
+		$this->_add_toc_item( $toc_list, 'Introduction', '#intro' );
+		
+		$this->_add_toc_item( $toc_list, 'Schedule', '#schedule' );
+		
+		$this->_add_toc_item( $toc_list, 'Directory', '#directory' );
+		
+		$this->_add_toc_item( $toc_list, 'Tour Overview', '#tour-overview' );
+		
+		
+		// Villages
+		$villages = get_field( 'villages', $itinerary_id );
+		
+		if ( $villages ) {
+			$this->_add_toc_item( $toc_list, 'Villages', '#villages', $village_list );
+			
+			foreach( $villages as $s ) {
+				$village_id = (int) $s['village'];
+				$title = get_the_title( $village_id );
+				$link = '#village-' . esc_attr(get_post_field( 'post_name', $village_id ));
+				$this->_add_toc_item( $village_list['children'], $title, $link );
+			}
+		}
+		
+		
+		// Hikes
+		$hikes = get_field( 'hikes', $itinerary_id );
+		
+		if ( $hikes ) {
+			$this->_add_toc_item( $toc_list, 'Hikes', '#hikes', $hike_list );
+			
+			foreach( $hikes as $s ) {
+				$hike_id = (int) $s['hike'];
+				$title = get_the_title( $hike_id );
+				$link = '#hike-' . esc_attr(get_post_field( 'post_name', $hike_id ));
+				$this->_add_toc_item( $hike_list['children'], $title, $link );
+			}
+		}
+		
+		
+		// Documents
+		$attached_documents = get_field( 'attached_documents', $itinerary_id );
+		
+		if ( $attached_documents ) {
+			$this->_add_toc_item( $toc_list, 'Documents', '#documents', $document_list );
+			
+			foreach( $attached_documents as $document_id ) {
+				$title = get_the_title( $document_id );
+				$link = '#document-' . $document_id;
+				$this->_add_toc_item( $document_list['children'], $title, $link );
+			}
+		}
+		
+		return $toc_list;
+	}
+	
+	/**
+	 * Add an item to the table of contents, @see get_table_of_contents()
+	 *
+	 * @internal
+	 *
+	 * @param $list
+	 * @param $title
+	 * @param $link
+	 * @param $new_item
+	 *
+	 * @return void
+	 */
+	public function _add_toc_item( &$list, $title, $link, &$new_item = array() ) {
+		$new_item = array(
+			'title' => $title,
+			'link' => $link,
+			'children' => array(),
+		);
+		
+		$list[] = &$new_item;
 	}
 	
 }

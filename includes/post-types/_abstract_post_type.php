@@ -91,12 +91,10 @@ abstract class Class_Abstract_Post_Type {
 	}
 	
 	public function protect_page() {
-		// @todo: protect itinerary again
-		return;
 		
 		if ( ! $this->check_page_protection() ) {
 			if ( current_user_can( 'administrator') ) {
-				// ah_add_theme_notice( 'warning', '<strong>ADMIN NOTICE:</strong> Your account does not have access to this item. You are previewing it as an administrator.');
+				ah_add_theme_notice( 'warning', '<strong>ADMIN NOTICE:</strong> Your account does not have access to this item. You are previewing it as an administrator.');
 			}else{
 				include( AH_PATH . '/templates/no-access.php' );
 				exit;

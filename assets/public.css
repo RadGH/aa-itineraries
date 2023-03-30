@@ -30,6 +30,20 @@ Start: Account Menus
 		grid-template-columns: 1fr 4fr;
 		grid-gap: 0 40px;
 	}
+
+	/* Sticky account sidebar */
+	.account-sidebar {
+		position: relative;
+	}
+
+	.ah-mobile-account-nav {
+		position: sticky;
+		top: 50px;
+		overflow: auto;
+		max-height: calc( 100vh - 50px );
+	}
+	/* End sticky account sidebar */
+
 }
 
 @media ( max-width: 980px ) {
@@ -170,7 +184,7 @@ nav.ah-account-menu-nav ul.sub-menu li {
 	margin: 0 0 5px 10px;
 }
 
-nav.ah-account-menu-nav ul.sub-menu li::before {
+nav.ah-account-menu-nav ul.sub-menu li > a::before {
 	content: '•';
 	margin-right: 5px;
 }
@@ -188,6 +202,12 @@ nav.ah-account-menu-nav ul.sub-menu li a:active {
 
 nav.ah-account-menu-nav li.current-menu-item > a {
 	font-weight: 700;
+}
+
+nav.ah-account-menu-nav li.separator {
+	margin: 20px 0;
+	height: 1px;
+	background: #b3b3b3;
 }
 /*
 End: Account Sidebar
@@ -454,4 +474,3 @@ Start: Grid content layout
 /*
 End: Grid content layout
 */
-

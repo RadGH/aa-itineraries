@@ -2,7 +2,7 @@
 
 nocache_headers();
 
-$title = 'No Access';
+$account_page_title = 'No Access';
 
 include( __DIR__ . '/parts/account-header.php' );
 

@@ -28,10 +28,19 @@ $villages = get_field( 'villages', get_the_ID() );
 $hikes = get_field( 'hikes', get_the_ID() );
 
 $attached_documents = get_field( 'attached_documents', get_the_ID() );
-?>
 
-<?php
+if ( ! ah_is_pdf() ) {
+	// Web page view
+	?>
+	<div class="ah-pdf-download-button" style="float: right; position: relative; z-index: 2;">
+		<a href="<?php echo get_permalink(); ?>/download/" target="download_<?php the_ID(); ?>" class="button">Download PDF</a>
+	</div>
+	<?php
+}
+
+
 if ( ah_is_pdf() ) {
+	// PDF view
 	?>
 	<!-- Intro -->
 	<htmlpagefooter name="itinerary_intro_footer" style="display:none">
@@ -42,7 +51,12 @@ if ( ah_is_pdf() ) {
 	</htmlpagefooter>
 	
 	<style>
-		#page-itinerary-intro {
+		.footer-table-itinerary-intro {
+			font-weight: bold;
+			color: #204f66;
+		}
+		
+		#intro {
 			page: itinerary_intro;
 		}
 
@@ -63,13 +77,33 @@ if ( ah_is_pdf() ) {
 	</htmlpagefooter>
 	
 	<style>
-		#page-itinerary-schedule {
+		#schedule {
 			page: itinerary_schedule;
 		}
 
 		@page itinerary_schedule {
 			odd-footer-name: itinerary_schedule_footer;
 			even-footer-name: itinerary_schedule_footer;
+		}
+	</style>
+	
+	
+	<!-- Directory -->
+	<htmlpagefooter name="itinerary_directory_footer" style="display:none">
+		<table class="footer-table" width="100%"><tr>
+			<td width="50%">Directory</td>
+			<td width="50%" align="right">{PAGENO}</td>
+		</tr></table>
+	</htmlpagefooter>
+	
+	<style>
+		#directory {
+			page: itinerary_directory;
+		}
+
+		@page itinerary_directory {
+			odd-footer-name: itinerary_directory_footer;
+			even-footer-name: itinerary_directory_footer;
 		}
 	</style>
 	
@@ -83,7 +117,7 @@ if ( ah_is_pdf() ) {
 	</htmlpagefooter>
 	
 	<style>
-		#page-itinerary-tour-overview {
+		#tour-overview {
 			page: itinerary_tour_overview;
 		}
 		
@@ -118,7 +152,7 @@ if ( ah_is_pdf() ) {
 
 <section id="itinerary" class="pdf-section itinerary itinerary-<?php echo esc_attr($slug); ?> itinerary-id-<?php the_ID(); ?>">
 	
-	<div class="pdf-page" id="page-itinerary-intro">
+	<div class="pdf-page" id="intro">
 		
 		<?php if ( $title && !ah_is_pdf() ) { ?>
 			<div class="section-heading itinerary-heading">
@@ -126,7 +160,7 @@ if ( ah_is_pdf() ) {
 			</div>
 		<?php }else if ( $logo_id ) { ?>
 			<div class="section-logo itinerary-logo">
-				<?php ah_display_image( $logo_id, 250, 0 ); ?>
+				<a href="<?php echo site_url('/'); ?>"><?php ah_display_image( $logo_id, 250, 0 ); ?></a>
 			</div>
 		<?php } ?>
 		
@@ -145,7 +179,7 @@ if ( ah_is_pdf() ) {
 	
 	</div>
 	
-	<div class="pdf-page" id="page-itinerary-schedule">
+	<div class="pdf-page" id="schedule">
 		
 		<div class="section-heading itinerary-heading">
 			<?php if ( $title ) echo '<h1 class="pdf-title">', $title, '</h1>'; ?>
@@ -180,7 +214,20 @@ if ( ah_is_pdf() ) {
 				echo '</tbody></table>';
 				
 			}
+			?>
+		</div>
+		
+	</div>
+	
+	<div class="pdf-page" id="directory">
+		
+		<div class="section-heading itinerary-heading">
+			<h1>Directory</h1>
+		</div>
+		
+		<div class="section-directory">
 			
+			<?php
 			if ( $phone_numbers ) {
 				echo '<table class="phone-number-table columns-2"><tbody>';
 				foreach( $phone_numbers as $i ) {
@@ -209,7 +256,7 @@ if ( ah_is_pdf() ) {
 		
 	</div>
 	
-	<div class="pdf-page" id="page-itinerary-tour-overview">
+	<div class="pdf-page" id="tour-overview">
 		
 		<div class="section-heading itinerary-heading">
 			<?php echo '<h1 class="pdf-title">Tour Overview</h1>'; ?>
@@ -231,6 +278,8 @@ if ( ah_is_pdf() ) {
 
 <?php
 if ( $villages ) {
+	echo '<div id="villages"></div>';
+	
 	foreach( $villages as $i => $s ) {
 		$post_id = (int) $s['village'];
 		$additional_content = $s['add_text'] ? $s['content'] : '';
@@ -242,6 +291,8 @@ if ( $villages ) {
 
 <?php
 if ( $hikes ) {
+	echo '<div id="hikes"></div>';
+	
 	foreach( $hikes as $i => $s ) {
 		$post_id = (int) $s['hike'];
 		$additional_content = $s['add_text'] ? $s['content'] : '';
@@ -269,7 +320,7 @@ if ( $attached_documents ) {
 				$url = get_field( 'url', $post_id );
 				
 				?>
-				<div class="section-document document-image document-id-<?php echo $post_id; ?>">
+				<div id="document-<?php echo $post_id; ?>" class="section-document document-image document-id-<?php echo $post_id; ?>">
 					
 					<?php
 					if ( $title ) {
