@@ -1,6 +1,10 @@
 <?php
 global $post;
 
+// -------------------------------------------
+// This template is NOT used by the itinerary!
+// See content/itinerary.php for that.
+
 $document_url = ah_get_document_redirect_url( $post->ID );
 $date = date('m/d/Y', strtotime( $post->post_date ) );
 $image_id = ah_get_document_preview_image( $post->ID );

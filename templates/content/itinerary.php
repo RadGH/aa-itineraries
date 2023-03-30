@@ -272,9 +272,11 @@ if ( $attached_documents ) {
 				<div class="section-document document-image document-id-<?php echo $post_id; ?>">
 					
 					<?php
+					if ( $title ) {
+						echo '<h4 class="document-title">', $title, '</h4>';
+					}
+					
 					if ( $type == 'url' ) {
-						if ( $title ) echo '<h4 class="document-title">', $title, '</h1>';
-						
 						?>
 						<p><a href="<?php echo esc_attr($url); ?>"><?php echo $url; ?></a></p>
 						<?php

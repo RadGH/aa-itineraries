@@ -3,9 +3,13 @@
 	margin: 40px 0;
 }
 
-.pdf-page {
+.ah-page-view {
 	max-width: 815px;
-	margin: 0 auto 40px;
+	margin: 40px auto;
+}
+
+.pdf-page {
+	margin-bottom: 40px;
 }
 
 #content-wrapper {

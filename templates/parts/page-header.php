@@ -9,3 +9,7 @@ get_header();
 		<article <?php post_class( 'entry entry-single ' . get_post_type() ); ?>>
 
 			<div class="ah-page-view">
+				
+				<div style="float: right; position: relative; z-index: 2;">
+					<a href="<?php echo get_permalink(); ?>/download/" target="download_<?php the_ID(); ?>" class="button">Download PDF</a>
+				</div>
