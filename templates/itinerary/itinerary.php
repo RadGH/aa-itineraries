@@ -154,6 +154,8 @@ if ( ah_is_pdf() ) {
 	
 	<div class="pdf-page" id="intro">
 		
+		<?php ah_display_bookmark( 'Introduction', 0 ); ?>
+		
 		<?php if ( $title && !ah_is_pdf() ) { ?>
 			<div class="section-heading itinerary-heading">
 				<?php echo '<h1 class="pdf-title">', $title, '</h1>'; ?>
@@ -180,6 +182,8 @@ if ( ah_is_pdf() ) {
 	</div>
 	
 	<div class="pdf-page" id="schedule">
+		
+		<?php ah_display_bookmark( 'Schedule', 0 ); ?>
 		
 		<div class="section-heading itinerary-heading">
 			<?php if ( $title ) echo '<h1 class="pdf-title">', $title, '</h1>'; ?>
@@ -221,6 +225,8 @@ if ( ah_is_pdf() ) {
 	
 	<div class="pdf-page" id="directory">
 		
+		<?php ah_display_bookmark( 'Directory', 0 ); ?>
+		
 		<div class="section-heading itinerary-heading">
 			<h1>Directory</h1>
 		</div>
@@ -258,6 +264,8 @@ if ( ah_is_pdf() ) {
 	
 	<div class="pdf-page" id="tour-overview">
 		
+		<?php ah_display_bookmark( 'Tour Overview', 0 ); ?>
+		
 		<div class="section-heading itinerary-heading">
 			<?php echo '<h1 class="pdf-title">Tour Overview</h1>'; ?>
 		</div>
@@ -284,6 +292,8 @@ if ( $villages ) {
 		$post_id = (int) $s['village'];
 		$additional_content = $s['add_text'] ? $s['content'] : '';
 		
+		$first_bookmark = ($i == 0);
+		
 		if ( $post_id ) include( __DIR__ . '/village.php' );
 	}
 }
@@ -297,6 +307,8 @@ if ( $hikes ) {
 		$post_id = (int) $s['hike'];
 		$additional_content = $s['add_text'] ? $s['content'] : '';
 		
+		$first_bookmark = ($i == 0);
+		
 		if ( $post_id ) include( __DIR__ . '/hike.php' );
 	}
 }
@@ -308,6 +320,8 @@ if ( $attached_documents ) {
 	<section id="documents" class="pdf-section documents">
 	
 		<div class="pdf-page page-documents" id="page-documents">
+			
+			<?php ah_display_bookmark( 'Documents', 0 ); ?>
 		
 			<?php
 			foreach( $attached_documents as $post_id ) {
@@ -316,31 +330,12 @@ if ( $attached_documents ) {
 				$image_id = ah_get_document_preview_image( $post_id );
 				
 				$title = get_the_title($post_id);
-				$type = get_field( 'type', $post_id );
-				$url = get_field( 'url', $post_id );
-				
 				?>
 				<div id="document-<?php echo $post_id; ?>" class="section-document document-image document-id-<?php echo $post_id; ?>">
 					
-					<?php
-					if ( $title ) {
-						echo '<h4 class="document-title">', $title, '</h4>';
-					}
+					<?php ah_display_bookmark( $title, 1 ); ?>
 					
-					if ( $type == 'url' ) {
-						?>
-						<p><a href="<?php echo esc_attr($url); ?>"><?php echo $url; ?></a></p>
-						<?php
-					}
-					
-					if ( $type == 'file' ) {
-						$attachment_id = (int) get_field( 'file', $post_id, false );
-						$url = wp_get_attachment_link( $attachment_id, 'document-embed' );
-						?>
-						<p><a href="<?php echo esc_attr($url); ?>"><?php echo $url; ?></a></p>
-						<?php
-					}
-					?>
+					<?php ah_display_document_embed( $post_id ); ?>
 					
 				</div>
 				<?php

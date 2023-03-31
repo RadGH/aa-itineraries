@@ -31,16 +31,53 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) return false;
 		
-		/*
-		$owner_id = $this->get_owner( get_the_ID() );
-		if ( $owner_id != $user_id ) return false;
-		*/
+		$post_id = get_the_ID();
 		
-		$document_user_ids = (array) get_field( 'user_ids' );
-		if ( ! in_array( $user_id, $document_user_ids, true ) ) return false;
-		
+		$user_ids = $this->get_assigned_users( $post_id );
+		if ( ! in_array( $user_id, $user_ids, true ) ) return false;
 		
 		return true;
+	}
+	
+	/**
+	 * Get an array of user ids assigned to this itinerary
+	 *
+	 * @param $post_id
+	 *
+	 * @return int[]
+	 */
+	public function get_assigned_users( $post_id ) {
+		$user_ids = get_post_meta( $post_id, 'assigned_user_id' );
+		if ( ! is_array($user_ids) ) $user_ids = array();
+		
+		$user_ids = array_map( 'intval', $user_ids );
+		
+		return $user_ids;
+	}
+	
+	/**
+	 * Get itineraries assigned to a user
+	 *
+	 * @param int|null $user_id
+	 * @param array $custom_args
+	 *
+	 * @return WP_Query
+	 */
+	public function get_user_itineraries( $user_id = null, $custom_args = array() ) {
+		if ( $user_id === null ) $user_id = get_current_user_id();
+		
+		$args = array(
+			'post_type' => $this->get_post_type(),
+			'nopaging' => true,
+			'meta_query' => array(
+				array(
+					'key' => 'assigned_user_id',
+					'value' => $user_id,
+				),
+			),
+		);
+		
+		return new WP_Query( $args );
 	}
 	
 	/**
@@ -181,7 +218,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		$args['labels']['name']           = 'Itineraries';
 		$args['labels']['singular_name']  = 'Itinerary';
 		$args['labels']['menu_name']      = 'Itineraries';
-		$args['labels']['name_admin_bar'] = 'Itineraries';
+		$args['labels']['name_admin_bar'] = 'Itinerary';
 		
 		$args['labels']['add_new_item'] = 'Add New Itinerary';
 		$args['labels']['all_items'] = 'Itineraries';
@@ -219,7 +256,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 	public function customize_columns( $columns ) {
 		return array_merge(
 			array_slice( $columns, 0, 2),
-			array('ah_owner' => 'Assigned To'),
+			array('ah_users' => 'Assigned To'),
 			array_slice( $columns, 2, null),
 		);
 	}
@@ -236,19 +273,23 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 	public function display_columns( $column, $post_id ) {
 		switch( $column ) {
 
-			case 'ah_owner':
-				$user_id = $this->get_owner( $post_id );
+			case 'ah_users':
+				$user_ids = $this->get_assigned_users( $post_id );
 				
-				if ( $user_id ) {
-					$name = ah_get_user_full_name( $user_id );
-					$url = get_edit_user_link( $user_id );
-					echo sprintf(
-						'<a href="%s">%s</a>',
-						esc_attr($url),
-						esc_html($name)
-					);
+				if ( $user_ids ) {
+					$names = array();
+					foreach( $user_ids as $user_id ) {
+						$name = ah_get_user_full_name( $user_id );
+						$url = get_edit_user_link( $user_id );
+						$names[] = sprintf(
+							'<a href="%s">%s</a>',
+							esc_attr($url),
+							esc_html($name)
+						);
+					}
+					echo implode(', ', $names);
 				}else{
-					echo '<em style="opacity: 0.5;">Nobody</em>';
+					echo '<em style="opacity: 0.5;">Not assigned</em>';
 				}
 				break;
 			
@@ -267,12 +308,12 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		
 		if ( $enabled ) {
 			// Make the author match the assigned user for the post
-			add_action( 'acf/save_post', array( $this, 'save_post_reassign_author' ), 40 );
+			add_action( 'acf/save_post', array( $this, 'save_post_split_user_meta_keys' ), 40 );
 			
 			// Convert to itinerary template
 			add_action( 'acf/save_post', array( $this, 'save_post_convert_to_template' ), 50 );
 		}else{
-			remove_action( 'acf/save_post', array( $this, 'save_post_reassign_author' ), 40 );
+			remove_action( 'acf/save_post', array( $this, 'save_post_split_user_meta_keys' ), 40 );
 			remove_action( 'acf/save_post', array( $this, 'save_post_convert_to_template' ), 50 );
 		}
 	}
@@ -312,13 +353,16 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 	 *
 	 * @return void
 	 */
-	public function save_post_reassign_author( $post_id ) {
+	public function save_post_split_user_meta_keys( $post_id ) {
 		if ( ! $this->is_valid( $post_id ) ) return;
 		
-		$user_id = get_field( 'user', $post_id );
-		if ( ! $user_id ) $user_id = false;
+		delete_post_meta( $post_id, 'assigned_user_id' );
 		
-		$this->set_owner( $post_id, $user_id );
+		$user_ids = get_field( 'user_ids', $post_id );
+		
+		if ( $user_ids ) foreach( $user_ids as $user_id ) {
+			add_post_meta( $post_id, 'assigned_user_id', $user_id );
+		}
 	}
 	
 	/**

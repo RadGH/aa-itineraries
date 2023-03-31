@@ -54,7 +54,7 @@ class Class_Hike_Post_Type extends Class_Abstract_Post_Type {
 		$args['labels']['name']           = 'Hikes';
 		$args['labels']['singular_name']  = 'Hike';
 		$args['labels']['menu_name']      = 'Hikes';
-		$args['labels']['name_admin_bar'] = 'Hikes';
+		$args['labels']['name_admin_bar'] = 'Hike';
 		
 		$args['labels']['add_new_item'] = 'Add New Hike';
 		$args['labels']['all_items'] = 'Hikes';

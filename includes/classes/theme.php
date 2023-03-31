@@ -27,6 +27,7 @@ class Class_AH_Theme {
 		if ( $use_pdf ) {
 			
 			$title = get_the_title();
+			$pdf_title = get_the_title();
 			
 			// Get HTML for the PDF
 			ob_start();
@@ -36,7 +37,7 @@ class Class_AH_Theme {
 			$html = ob_get_clean();
 			
 			// Generate PDF
-			AH_PDF()->generate_from_html( $html, $title );
+			AH_PDF()->generate_from_html( $html, $pdf_title, null, true );
 			exit;
 			
 		}else{

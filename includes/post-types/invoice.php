@@ -135,7 +135,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		$args['labels']['name']           = 'Invoices';
 		$args['labels']['singular_name']  = 'Invoice';
 		$args['labels']['menu_name']      = 'Invoices';
-		$args['labels']['name_admin_bar'] = 'Invoices';
+		$args['labels']['name_admin_bar'] = 'Invoice';
 		
 		$args['labels']['add_new_item'] = 'Add New Invoice';
 		$args['labels']['all_items'] = 'All Invoices';
@@ -219,7 +219,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 						esc_html($name)
 					);
 				}else{
-					echo '<em style="opacity: 0.5;">Nobody</em>';
+					echo '<em style="opacity: 0.5;">Not assigned</em>';
 				}
 				
 				break;

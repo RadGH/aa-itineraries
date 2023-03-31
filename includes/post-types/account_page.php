@@ -58,7 +58,7 @@ class Class_Account_Page_Post_Type extends Class_Abstract_Post_Type {
 		$args['labels']['name']           = 'Account Pages';
 		$args['labels']['singular_name']  = 'Account Page';
 		$args['labels']['menu_name']      = 'Account Pages';
-		$args['labels']['name_admin_bar'] = 'Account Pages';
+		$args['labels']['name_admin_bar'] = 'Account Page';
 		
 		$args['labels']['add_new_item'] = 'Add New Account Page';
 		$args['labels']['all_items'] = 'All Account Pages';

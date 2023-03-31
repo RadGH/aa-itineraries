@@ -57,14 +57,21 @@
 }
 
 .section-logo {
-	margin: -20mm -20mm -8mm;
+	margin: -20mm -20mm 40px;
 	padding: 16mm 20mm;
 	background: #2a4e68;
+	color: #fff;
 }
 
 .pdf-page .section-document {
 	margin: 0 0 20px;
 	text-align: center;
+
+	page-break-inside: avoid;
+}
+
+bookmark {
+	display: none;
 }
 
 /* Start: Typography */
@@ -97,8 +104,8 @@
 
 .pdf-page p {
 	display: block;
-	margin: 0;
-	padding: 0 0 20px;
+	margin: 0 0 20px;
+	padding: 0;
 }
 
 /* End: Typography */
@@ -128,10 +135,6 @@
 
 
 /* Start: Logo */
-.section-logo {
-	margin-bottom: 40px;
-}
-
 .section-logo img {
 	width: 300px;
 	height: auto;

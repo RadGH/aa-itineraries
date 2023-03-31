@@ -258,3 +258,123 @@ function ah_fit_image_size( $original_w, $original_h, $max_w = 0, $max_h = 0 ) {
 	
 	return array( $w, $h );
 }
+
+/**
+ * Displays a <bookmark> element which is used by mPDF to generate a table of contents in the itinerary PDF.
+ * @see https://mpdf.github.io/reference/html-control-tags/bookmark.html
+ *
+ * @param $title
+ * @param $level
+ *
+ * @return void
+ */
+function ah_display_bookmark( $title, $level = 0 ) {
+	$title = str_replace( array('–', '—'), '-', $title ); // convert ndash and mdash to hyphen
+	$title = preg_replace('/[^a-zA-Z0-9 -._]/', '', $title ); // only alphanumeric and basic symbols
+	
+	?>
+	<bookmark content="<?php echo esc_attr($title); ?>" level="<?php echo $level; ?>"></bookmark>
+	<?php
+}
+
+/**
+ * Removes some unsupported html from image tags like srcset and sizes.
+ *
+ * @param $img_tag
+ *
+ * @return array|string|string[]|null
+ */
+function ah_sanitize_mpdf_img( $img_tag ) {
+	// Remove some attributes
+	$removal = array(
+		'/ loading="lazy"/',
+		'/ decoding="async"/',
+		'/ sizes="(.*?)"/',
+		'/ srcset="(.*?)"/',
+	);
+	
+	$img_tag = preg_replace( $removal, '', $img_tag );
+	
+	return $img_tag;
+}
+
+/**
+ * Get the attachment ID of the preview image to use for the document.
+ * If no preview image specified, uses the attached file to generate a preview.
+ * Returns false if no preview image is available.
+ *
+ * @param $post_id
+ *
+ * @return int|false
+ */
+function ah_get_document_preview_image( $post_id ) {
+	// use preview image first
+	$attachment_id = (int) get_field( 'preview_image', $post_id, false );
+	$img = wp_get_attachment_image( $attachment_id );
+	
+	if ( !$img ) {
+		// get image directly from the file
+		$attachment_id = (int) get_field( 'file', $post_id, false );
+		$img = wp_get_attachment_image( $attachment_id );
+		
+		if ( !$img ) {
+			$attachment_id = false;
+		}
+	}
+	
+	return $attachment_id ?: false;
+}
+
+/**
+ * Get the target of a document link.
+ * For files, this is a direct link to the attachment.
+ * For custom URLs, this links to that custom url.
+ *
+ * @param $post_id
+ *
+ * @return false|mixed|string
+ */
+function ah_get_document_link( $post_id ) {
+	$type = get_field( 'type', $post_id );
+	
+	$url = false;
+	
+	if ( $type == 'url' ) {
+		$url = get_field( 'url', $post_id );
+	}else if ( $type == 'file' ) {
+		$attachment_id = (int) get_field( 'file', $post_id, false );
+		$url = wp_get_attachment_url( $attachment_id );
+	}
+	
+	return $url ?: false;
+}
+
+/**
+ * Displays a document preview which links to the full size document on the website
+ *
+ * @param $post_id
+ *
+ * @return void
+ */
+function ah_display_document_embed( $post_id ) {
+	$url = ah_get_document_link( $post_id );
+	
+	$attachment_id = ah_get_document_preview_image( $post_id );
+	
+	// Display image tag
+	if ( $attachment_id ) {
+		$content = wp_get_attachment_image( $attachment_id, 'document-embed', false );
+	}else{
+		$content = $url;
+	}
+	
+	// Remove unsupported attributes from image tag(s)
+	$content = ah_sanitize_mpdf_img( $content );
+	
+	// Display the document
+	if ( $url ) echo '<a href="', esc_attr($url), '">';
+	
+	echo $content;
+	
+	if ( $url ) echo '</a>';
+}

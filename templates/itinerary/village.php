@@ -6,6 +6,8 @@
 if ( !isset($post_id) ) $post_id = get_the_ID();
 if ( !isset($additional_content) ) $additional_content = false;
 
+if ( !isset($first_bookmark) ) $first_bookmark = false;
+
 $slug = get_post_field( 'post_name', $post_id );
 
 $title = get_the_title( $post_id );
@@ -44,6 +46,11 @@ if ( ah_is_pdf() ) {
 <section id="village-<?php echo esc_attr($slug); ?>" class="pdf-section village village-<?php echo esc_attr($slug); ?> village-id-<?php echo $post_id; ?>">
 	
 	<div class="pdf-page" id="village-main-<?php echo $post_id; ?>">
+	
+	<?php if ( $first_bookmark ) { ?>
+		<?php ah_display_bookmark( 'Villages', 0 ); ?>
+	<?php } ?>
+		<?php ah_display_bookmark( $title, 1 ); ?>
 	
 	<?php if ( $title || $subtitle ) { ?>
 	<div class="section-heading village-heading">

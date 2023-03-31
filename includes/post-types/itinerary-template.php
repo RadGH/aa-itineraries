@@ -54,7 +54,7 @@ class Class_Itinerary_Template_Post_Type extends Class_Abstract_Post_Type {
 		$args['labels']['name']           = 'Itinerary Templates';
 		$args['labels']['singular_name']  = 'Itinerary Template';
 		$args['labels']['menu_name']      = 'Itinerary Templates';
-		$args['labels']['name_admin_bar'] = 'Itinerary Templates';
+		$args['labels']['name_admin_bar'] = 'Itinerary Template';
 		
 		$args['labels']['add_new_item'] = 'Add New Itinerary Template';
 		$args['labels']['all_items'] = 'Itinerary Templates';

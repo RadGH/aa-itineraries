@@ -92,7 +92,7 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 		$args['labels']['name']           = 'Documents';
 		$args['labels']['singular_name']  = 'Document';
 		$args['labels']['menu_name']      = 'Client Documents';
-		$args['labels']['name_admin_bar'] = 'Documents';
+		$args['labels']['name_admin_bar'] = 'Document';
 		
 		$args['labels']['add_new_item'] = 'Add New Document';
 		$args['labels']['all_items'] = 'All Documents';

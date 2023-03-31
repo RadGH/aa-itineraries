@@ -4,6 +4,8 @@
 if ( !isset($post_id) ) $post_id = get_the_ID();
 if ( !isset($additional_content) ) $additional_content = false;
 
+if ( !isset($first_bookmark) ) $first_bookmark = false;
+
 $slug = get_post_field( 'post_name', $post_id );
 
 $title = get_the_title( $post_id );
@@ -76,6 +78,12 @@ if ( ah_is_pdf() ) {
 <section id="hike-<?php echo esc_attr($slug); ?>" class="pdf-section hike hike-<?php echo esc_attr($slug); ?> hike-id-<?php echo $post_id; ?>">
 	
 	<div class="pdf-page page-hike" id="page-hike-main-<?php echo esc_attr($slug); ?>">
+		
+		<?php if ( $first_bookmark ) { ?>
+			<?php ah_display_bookmark( 'Hikes', 0 ); ?>
+		<?php } ?>
+		
+		<?php ah_display_bookmark( $title, 1 ); ?>
 		
 		<?php if ( $title ) { ?>
 			<div class="section-heading hike-heading">

@@ -126,6 +126,7 @@ class Class_AH_PDF {
 	}
 	
 	public function format_pdf_title( $title ) {
+		if ( !$title ) $title = get_bloginfo( 'name' );
 		
 		$title = wp_strip_all_tags( $title );
 		
@@ -133,9 +134,11 @@ class Class_AH_PDF {
 	}
 	
 	public function format_pdf_filename( $filename, $title ) {
-		if ( empty($filename) ) $filename = $title;
+		if ( !$filename ) $filename = $title;
+		if ( !$filename ) $filename = get_bloginfo( 'name' );
 		
 		$filename = wp_strip_all_tags( $filename );
+		$filename = str_replace(array('–', '—'), '-', $filename ); // ndash and mdash to hyphen
 		$filename = preg_replace('/[^a-zA-Z0-9\-\_ ]+/', '', $filename);
 		$filename .= '.pdf';
 		
@@ -143,11 +146,14 @@ class Class_AH_PDF {
 	}
 	
 	// Create a PDF from HTML using MPDF
-	private function generate_with_mpdf( $html, $title, $filename, $force_download ) {
+	private function generate_with_mpdf( $html, $title = '', $filename = '', $force_download = false ) {
+		$title = $this->format_pdf_title( $title );
+		$filename = $this->format_pdf_filename( $filename, $title );
+		
 		$this->pdf = $this->create_mpdf();
 		
 		// Set document title
-		$this->pdf->SetTitle( $this->document_title );
+		$this->pdf->SetTitle( $title );
 		
 		// Add CSS from pdf.css
 		$this->add_mpdf_stylesheet();
@@ -156,7 +162,7 @@ class Class_AH_PDF {
 		$this->pdf->WriteHTML($html);
 		
 		// Finish
-		$this->send_mpdf();
+		$this->send_mpdf( $filename, $force_download );
 		
 		exit;
 	}
@@ -238,7 +244,7 @@ class Class_AH_PDF {
 	}
 	
 	// Sends headers and then streams PDF to the browser
-	public function send_mpdf() {
+	public function send_mpdf( $filename = 'document.pdf', $force_download = false ) {
 		
 		// Clear output buffer - Without this the PDF fails to load.
 		ob_end_clean();
@@ -254,7 +260,9 @@ class Class_AH_PDF {
 		header( "Cache-Control: post-check=0, pre-check=0", false );
 		
 		// Send PDF to browser
-		$this->pdf->Output( $this->filename, 'I' );
+		// D = force download
+		// I = stream inline (to browser)
+		$this->pdf->Output( $filename, ($force_download ? 'D' : 'I') );
 		exit;
 		
 	}
