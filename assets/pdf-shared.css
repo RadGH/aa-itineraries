@@ -47,7 +47,7 @@
 }
 
 .pdf-page strong,
-.pdf-page table.phone-number-table .title,
+.pdf-page table.directory-table .title,
 .pdf-page .country-codes strong {
 	color: #204f66;
 }
@@ -209,36 +209,35 @@ table.schedule-table .column-3 {
 /* End: Itinerary Schedule */
 
 /* Start: Itinerary Phone Numbers */
-table.phone-number-table {
+table.directory-table {
 	table-layout: fixed;
 	width: 100%;
 	margin: 0;
 }
 
-table.phone-number-table .column {
+table.directory-table .column {
 	padding-bottom: 2px;
 }
 
-table.phone-number-table .content.column {
+table.directory-table .content.column {
 	padding-bottom: 10px;
 }
 
-table.phone-number-table .title,
-table.phone-number-table .phone-number {
+table.directory-table .title {
 	font-family: 'Fraunces', serif;
 	font-weight: bold;
 }
 
-table.phone-number-table .content {
+table.directory-table .content {
 
 }
 
-table.phone-number-table .column-1 {
+table.directory-table .column-1 {
 	width: auto;
 	padding-right: 20px;
 }
 
-table.phone-number-table .column-2 {
+table.directory-table .column-2 {
 	width: 150px;
 	text-align: right;
 }

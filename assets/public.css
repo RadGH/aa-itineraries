@@ -68,12 +68,76 @@ Start: Account Menus
 
 @media ( max-width: 980px ) {
 	.account-sidebar {
-		margin-bottom: 20px;
+		margin-bottom: 15px;
 	}
 
 	.account-content .content-block {
 		padding-left: 0 !important;
 		padding-right: 0 !important;
+	}
+}
+
+/* Fixed (sticky) account menu navigation */
+@media ( max-width: 980px ) {
+	body .account-sidebar {
+		position: relative;
+		z-index: 1000;
+	}
+
+	body.scrolled-past-account-sidebar .account-sidebar {
+		position: sticky;
+		top: 0;
+	}
+
+	body.admin-bar.scrolled-past-account-sidebar  .account-sidebar {
+		top: 32px;
+	}
+
+	.ah-account-menu-nav {
+		max-height: calc(100vh - 46px);
+		overflow-y: auto;
+	}
+
+	/* Scroll to hide/show the navigation */
+	.account-sidebar {
+		transform: translateY(0%);
+		transition: transform 0.2s linear;
+		margin-top: -1px;
+	}
+
+	body.scrolled-past-account-sidebar .account-sidebar {
+		margin-left: -32px;
+		margin-right: -32px;
+	}
+
+	body.scrolled-past-account-sidebar .ah-account-menu-nav {
+		padding: 20px 32px;
+	}
+
+	body.scrolled-past-account-sidebar #ah-mobile-nav-label {
+		padding-left: 32px;
+		padding-right: 50px;
+	}
+	body.scrolled-past-account-sidebar #ah-mobile-nav-label::after {
+		right: 32px;
+	}
+
+	body.scrolled-past-account-sidebar.scrolled-down .account-sidebar {
+		transform: translateY(-110%);
+	}
+}
+
+@media ( max-width: 782px ) {
+	/* At 782px, the admin bar becomes 46px tall */
+	body.admin-bar.scrolled-past-account-sidebar .account-sidebar {
+		top: 46px;
+	}
+}
+
+@media ( max-width: 600px ) {
+	/* At 600px, the admin bar is no longer fixed */
+	body.admin-bar.scrolled-past-account-sidebar .account-sidebar {
+		top: 0;
 	}
 }
 /*
@@ -217,7 +281,8 @@ nav.ah-account-menu-nav ul.sub-menu li a {
 
 nav.ah-account-menu-nav ul.sub-menu li a:hover,
 nav.ah-account-menu-nav ul.sub-menu li a:active {
-	text-decoration: underline;
+	text-decoration: none;
+	color: #AA4A3B;
 }
 
 nav.ah-account-menu-nav li.current-menu-item > a {
@@ -527,13 +592,13 @@ End: Grid content layout
 	counter-increment: itinerary-counter;
 }
 
-@media ( max-width: 799.9px ) {
+@media ( max-width: 767.9px ) {
 	.itinerary-list .itinerary-item .title::before {
 		content: counter(itinerary-counter) ". ";
 	}
 }
 
-@media ( min-width: 800px ) {
+@media ( min-width: 768px ) {
 	.itinerary-list .itinerary-item {
 		position: relative;
 		padding-left: 60px;

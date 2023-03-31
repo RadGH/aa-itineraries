@@ -24,6 +24,21 @@
 	object-fit: contain;
 }
 
+@media ( min-width: 768px ) {
+	.ah-pdf-download-button {
+		float: right;
+		position: relative;
+		z-index: 2;
+		margin: 0 0 10px 15px;
+	}
+}
+
+@media ( max-width: 767.9px ) {
+	.ah-pdf-download-button {
+		margin: 20px 0;
+	}
+}
+
 /* Start: Images */
 .full-page-image {
 }
@@ -34,3 +49,49 @@
 	height: auto;
 }
 /* End: Images */
+
+/* Start: Schedule */
+@media ( max-width: 650px ) {
+	table.schedule-table .column {
+		display: block;
+		padding: 5px 15px;
+		text-align: left;
+		width: auto;
+		border: none;
+	}
+
+	table.schedule-table .column-1 { padding-top: 15px; }
+	table.schedule-table .column-3 { padding-bottom: 15px; }
+
+	table.schedule-table .column-1 {
+		font-weight: bold;
+	}
+}
+/* End: Schedule */
+
+/* Start: Directory */
+@media ( max-width: 650px ) {
+	table.directory-table,
+	table.directory-table tbody,
+	table.directory-table tr {
+		display: block;
+	}
+
+	table.directory-table tr {
+		margin-bottom: 10px;
+	}
+
+	table.directory-table .column {
+		display: block;
+		padding: 0;
+		margin: 0;
+		text-align: left;
+		width: auto;
+		border: none;
+	}
+
+	table.directory-table .column.phone-number {
+		font-weight: bold;
+	}
+}
+/* End: Directory */

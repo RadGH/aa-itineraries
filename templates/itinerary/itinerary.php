@@ -32,7 +32,7 @@ $attached_documents = get_field( 'attached_documents', get_the_ID() );
 if ( ! ah_is_pdf() ) {
 	// Web page view
 	?>
-	<div class="ah-pdf-download-button" style="float: right; position: relative; z-index: 2;">
+	<div class="ah-pdf-download-button">
 		<a href="<?php echo get_permalink(); ?>/download/" target="download_<?php the_ID(); ?>" class="button">Download PDF</a>
 	</div>
 	<?php
@@ -235,12 +235,12 @@ if ( ah_is_pdf() ) {
 			
 			<?php
 			if ( $phone_numbers ) {
-				echo '<table class="phone-number-table columns-2"><tbody>';
+				echo '<table class="directory-table columns-2"><tbody>';
 				foreach( $phone_numbers as $i ) {
 					echo '<tr>';
 					if ( $i['phone_number'] ) {
 						echo '<td class="column column-1 title">', esc_html($i['title']), '</td>';
-						echo '<td class="column column-2 phone_number">', esc_html($i['phone_number']), '</td>';
+						echo '<td class="column column-2 phone-number">', esc_html($i['phone_number']), '</td>';
 					}else{
 						echo '<td class="column column-1-2 title" colspan="2">', esc_html($i['title']), '</td>';
 					}
