@@ -37,7 +37,7 @@ class Class_AH_Theme {
 			$html = ob_get_clean();
 			
 			// Generate PDF
-			AH_PDF()->generate_from_html( $html, $pdf_title, null, true );
+			AH_PDF()->generate_from_html( $html, $pdf_title, null, false );
 			exit;
 			
 		}else{

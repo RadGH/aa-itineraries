@@ -112,6 +112,7 @@ bookmark {
 
 
 /* Start: Columns */
+/*
 .pdf-row {}
 
 .pdf-row .column { float: left; }
@@ -120,6 +121,7 @@ bookmark {
 
 .pdf-row.columns-2 .column-1 { width: 48%; padding-right: 2%; }
 .pdf-row.columns-2 .column-2 { width: 48%; padding-left: 2%; }
+*/
 /* End: Columns */
 
 
@@ -156,12 +158,6 @@ bookmark {
 /* Start: Page Heading */
 .section-heading {
 	text-align: left;
-}
-
-.section-heading::after {
-	content: '';
-	display: table;
-	clear: both;
 }
 /* End: Page Heading */
 
