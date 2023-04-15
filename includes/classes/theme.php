@@ -10,7 +10,7 @@ class Class_AH_Theme {
 		
 	}
 	
-	public function load_template( $template_path ) {
+	public function load_template( $template_path, $vars = null ) {
 		
 		// Check the action from a query var in the URL. See rewrites.php for details:
 		// 1. "download" = Generate PDF
@@ -24,6 +24,9 @@ class Class_AH_Theme {
 		AH_PDF()->use_pdf = $use_pdf;
 		AH_PDF()->use_preview = $use_preview;
 		
+		// Expand variables to be usable in the template
+		if ( $vars !== null ) extract( $vars );
+		
 		if ( $use_pdf ) {
 			
 			$title = get_the_title();
@@ -35,6 +38,7 @@ class Class_AH_Theme {
 			include( $template_path );
 			include( AH_PATH . '/templates/parts/pdf-footer.php' );
 			$html = ob_get_clean();
+			
 			
 			// Generate PDF
 			AH_PDF()->generate_from_html( $html, $pdf_title, null, false );
@@ -48,9 +52,7 @@ class Class_AH_Theme {
 			
 			// Get HTML as a regular page
 			include( AH_PATH . '/templates/parts/itinerary-header.php' );
-			
 			include( $template_path );
-			
 			include( AH_PATH . '/templates/parts/itinerary-footer.php' );
 			
 		}

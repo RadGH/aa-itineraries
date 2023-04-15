@@ -36,6 +36,7 @@ function AH_Invoice() { return AH_Plugin()->Invoice; }
 function AH_Itinerary() { return AH_Plugin()->Itinerary; }
 function AH_Itinerary_Template() { return AH_Plugin()->Itinerary_Template; }
 function AH_Village() { return AH_Plugin()->Village; }
+function AH_Hotel() { return AH_Plugin()->Hotel; }
 function AH_Hike() { return AH_Plugin()->Hike; }
 function AH_PDF() { return AH_Plugin()->PDF; }
 
@@ -57,15 +58,18 @@ class Class_AH_Plugin {
 	public Class_AH_Rewrites                   $Rewrites;
 	public Class_AH_Reminders                  $Reminders;
 	public Class_AH_Theme                      $Theme;
+	
 	public Class_AH_Smartsheet                 $Smartsheet;
 	public Class_AH_Smartsheet_Invoices        $Smartsheet_Invoices;
 	public Class_AH_Smartsheet_Webhooks        $Smartsheet_Webhooks;
+	
 	public Class_Account_Page_Post_Type        $Account_Page;
 	public Class_Document_Post_Type            $Document;
 	public Class_Invoice_Post_Type             $Invoice;
 	public Class_Itinerary_Post_Type           $Itinerary;
 	public Class_Itinerary_Template_Post_Type  $Itinerary_Template;
 	public Class_Village_Post_Type             $Village;
+	public Class_Hotel_Post_Type               $Hotel;
 	public Class_Hike_Post_Type                $Hike;
 	public Class_AH_PDF                        $PDF;
 	
@@ -101,84 +105,87 @@ class Class_AH_Plugin {
 		
 		// ----------------------------------------
 		// 2. Include debug features
-		include_once( AH_PATH . '/includes/functions/debug.php' );
+		require_once( AH_PATH . '/includes/functions/debug.php' );
 		
 		// ----------------------------------------
 		// 3. Include instance classes which can be instantiated multiple times
-		include_once( AH_PATH . '/includes/instances/api.php' );
+		require_once( AH_PATH . '/includes/instances/api.php' );
 		
 		
 		// ----------------------------------------
 		// 4. Include controller classes which must be instantiated once
-		include_once( __DIR__ . '/includes/classes/cron.php' );
+		require_once( __DIR__ . '/includes/classes/cron.php' );
 		$this->Cron = new Class_AH_Cron();
 		
-		include_once( __DIR__ . '/includes/classes/admin.php' );
+		require_once( __DIR__ . '/includes/classes/admin.php' );
 		$this->Admin = new Class_AH_Admin();
 		
-		include_once( __DIR__ . '/includes/classes/enqueue.php' );
+		require_once( __DIR__ . '/includes/classes/enqueue.php' );
 		$this->Enqueue = new Class_AH_Enqueue();
 		
-		include_once( __DIR__ . '/includes/classes/reminders.php' );
+		require_once( __DIR__ . '/includes/classes/reminders.php' );
 		$this->Reminders = new Class_AH_Reminders();
 		
-		include_once( __DIR__ . '/includes/classes/theme.php' );
+		require_once( __DIR__ . '/includes/classes/theme.php' );
 		$this->Theme = new Class_AH_Theme();
 		
-		include_once( __DIR__ . '/includes/classes/rewrites.php' );
+		require_once( __DIR__ . '/includes/classes/rewrites.php' );
 		$this->Rewrites = new Class_AH_Rewrites();
 		
-		include_once( __DIR__ . '/includes/classes/smartsheet.php' );
+		require_once( __DIR__ . '/includes/classes/smartsheet.php' );
 		$this->Smartsheet = new Class_AH_Smartsheet();
 		
-		include_once( __DIR__ . '/includes/classes/smartsheet-invoices.php' );
+		require_once( __DIR__ . '/includes/classes/smartsheet-invoices.php' );
 		$this->Smartsheet_Invoices = new Class_AH_Smartsheet_Invoices();
 		
-		include_once( __DIR__ . '/includes/classes/smartsheet-webhooks.php' );
+		require_once( __DIR__ . '/includes/classes/smartsheet-webhooks.php' );
 		$this->Smartsheet_Webhooks = new Class_AH_Smartsheet_Webhooks();
 		
 		// ----------------------------------------
 		// 5. Custom post types controllers
-		include_once( AH_PATH . '/includes/post-types/_abstract_post_type.php' );
+		require_once( AH_PATH . '/includes/post-types/_abstract_post_type.php' );
 		
-		include_once( __DIR__ . '/includes/post-types/account_page.php' );
+		require_once( __DIR__ . '/includes/post-types/account_page.php' );
 		$this->Account_Page = new Class_Account_Page_Post_Type();
 		
-		include_once( __DIR__ . '/includes/post-types/document.php' );
+		require_once( __DIR__ . '/includes/post-types/document.php' );
 		$this->Document = new Class_Document_Post_Type();
 		
-		include_once( __DIR__ . '/includes/post-types/invoice.php' );
+		require_once( __DIR__ . '/includes/post-types/invoice.php' );
 		$this->Invoice = new Class_Invoice_Post_Type();
 		
-		include_once( __DIR__ . '/includes/post-types/itinerary.php' );
+		require_once( __DIR__ . '/includes/post-types/itinerary.php' );
 		$this->Itinerary = new Class_Itinerary_Post_Type();
 		
-		include_once( __DIR__ . '/includes/post-types/itinerary-template.php' );
+		require_once( __DIR__ . '/includes/post-types/itinerary-template.php' );
 		$this->Itinerary_Template = new Class_Itinerary_Template_Post_Type();
 		
-		include_once( __DIR__ . '/includes/post-types/village.php' );
+		require_once( __DIR__ . '/includes/post-types/village.php' );
 		$this->Village = new Class_Village_Post_Type();
 		
-		include_once( __DIR__ . '/includes/post-types/hike.php' );
+		require_once( __DIR__ . '/includes/post-types/hotel.php' );
+		$this->Hotel = new Class_Hotel_Post_Type();
+		
+		require_once( __DIR__ . '/includes/post-types/hike.php' );
 		$this->Hike = new Class_Hike_Post_Type();
 		
 		// ----------------------------------------
 		// 6. Include other functions
-		include_once( AH_PATH . '/includes/functions/general.php' );
-		include_once( AH_PATH . '/includes/functions/utility.php' );
+		require_once( AH_PATH . '/includes/functions/general.php' );
+		require_once( AH_PATH . '/includes/functions/utility.php' );
 		
 		// ----------------------------------------
 		// 7. Shortcodes
-		include_once( AH_PATH . '/includes/shortcodes/ah_documents.php' );
-		include_once( AH_PATH . '/includes/shortcodes/ah_invoice_merge_tags_preview.php' );
-		include_once( AH_PATH . '/includes/shortcodes/ah_invoices.php' );
-		include_once( AH_PATH . '/includes/shortcodes/ah_itineraries.php' );
-		include_once( AH_PATH . '/includes/shortcodes/ah_login_form.php' );
+		require_once( AH_PATH . '/includes/shortcodes/ah_documents.php' );
+		require_once( AH_PATH . '/includes/shortcodes/ah_invoice_merge_tags_preview.php' );
+		require_once( AH_PATH . '/includes/shortcodes/ah_invoices.php' );
+		require_once( AH_PATH . '/includes/shortcodes/ah_itineraries.php' );
+		require_once( AH_PATH . '/includes/shortcodes/ah_login_form.php' );
 		
 		// ----------------------------------------
 		// 8. PDF Library
-		include_once( AH_PATH . '/includes/pdf/pdf.php' );
-		include_once( AH_PATH . '/includes/pdf/preview.php' );
+		require_once( AH_PATH . '/includes/pdf/pdf.php' );
+		require_once( AH_PATH . '/includes/pdf/preview.php' );
 		$this->PDF = new Class_AH_PDF();
 	}
 	
@@ -207,7 +214,7 @@ class Class_AH_Plugin {
 	public function plugin_activated() {
 		
 		// Include database so that it may add tables
-		// include_once( __DIR__ . '/includes/classes/upgrade.php' );
+		// require_once( __DIR__ . '/includes/classes/upgrade.php' );
 		// $this->Upgrade = new Class_AH_Upgrade();
 		
 		// Perform upgrades
@@ -223,7 +230,7 @@ class Class_AH_Plugin {
 	public function plugin_deactivated() {
 		
 		// Clear cron schedules
-		include_once( __DIR__ . '/includes/classes/cron.php' );
+		require_once( __DIR__ . '/includes/classes/cron.php' );
 		$this->Cron = new Class_AH_Cron();
 		
 		// Clear the schedule

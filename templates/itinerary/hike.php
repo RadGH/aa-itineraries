@@ -14,6 +14,11 @@ $elevation_diagram = get_field( 'elevation_diagram', $post_id, false );
 $topographic_map = get_field( 'topographic_map', $post_id, false );
 $content = get_field( 'content', $post_id );
 
+$links_title = get_field( 'link_title', $post_id );
+$link_items = get_field( 'link_links', $post_id );
+// Remove empty links
+if ( $link_items ) foreach( $link_items as $k => $l ) if ( empty($l['url']) ) unset($link_items[$k]);
+
 $topographic_map_image = wp_get_attachment_image_src( $topographic_map, 'full' );
 
 if ( $additional_content ) $content .= "\n\n" . $additional_content;
@@ -94,6 +99,31 @@ if ( ah_is_pdf() ) {
 		<?php if ( $summary ) { ?>
 			<div class="section-content hike-summary">
 				<?php ah_display_content_columns( $summary ); ?>
+			</div>
+		<?php } ?>
+		
+		<?php if ( $link_items ) { ?>
+			<div class="section-content hike-links">
+				<?php if ( $links_title ) echo '<h3>', $links_title, '</h3>'; ?>
+				
+				<ul class="hike-link-list">
+					<?php
+					foreach( $link_items as $l ) {
+						$url = $l['url'];
+						$label = $l['label'];
+						
+						echo '<li>';
+						
+						echo sprintf(
+							'<a href="%s" target="_blank" rel="external">%s</a>',
+							esc_attr($url),
+							esc_html($label)
+						);
+						
+						echo '</li>';
+					}
+					?>
+				</ul>
 			</div>
 		<?php } ?>
 		

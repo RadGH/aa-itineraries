@@ -166,6 +166,9 @@ if ( ah_is_pdf() ) {
 			</div>
 		<?php } ?>
 		
+		<!-- Clear float for download PDF button -->
+		<div style="overflow: hidden;clear: both;"></div>
+		
 		<?php if ( $introduction_message ) { ?>
 			<div class="section-content itinerary-summary">
 				<?php ah_display_content_columns( $introduction_message ); ?>
@@ -237,18 +240,26 @@ if ( ah_is_pdf() ) {
 			if ( $phone_numbers ) {
 				echo '<table class="directory-table columns-2"><tbody>';
 				foreach( $phone_numbers as $i ) {
-					echo '<tr>';
-					if ( $i['phone_number'] ) {
-						echo '<td class="column column-1 title">', esc_html($i['title']), '</td>';
-						echo '<td class="column column-2 phone-number">', esc_html($i['phone_number']), '</td>';
-					}else{
-						echo '<td class="column column-1-2 title" colspan="2">', esc_html($i['title']), '</td>';
-					}
-					echo '</tr>';
 					
-					echo '<tr>';
-					echo '<td class="column column-1-2 content" colspan="2">', esc_html($i['content']), '</td>';
-					echo '</tr>';
+					if ( $i['title'] || $i['phone_number'] ) {
+						echo '<tr>';
+						
+						if ( $i['phone_number'] ) {
+							echo '<td class="column column-1 title">', esc_html($i['title']), '</td>';
+							echo '<td class="column column-2 phone-number">', esc_html($i['phone_number']), '</td>';
+						}else{
+							echo '<td class="column column-1-2 title" colspan="2">', esc_html($i['title']), '</td>';
+						}
+						
+						echo '</tr>';
+					}
+					
+					if ( $i['content'] ) {
+						echo '<tr>';
+						echo '<td class="column column-1-2 content" colspan="2">', esc_html($i['content']), '</td>';
+						echo '</tr>';
+					}
+					
 				}
 				echo '</tbody></table>';
 			}
@@ -289,12 +300,12 @@ if ( $villages ) {
 	echo '<div id="villages"></div>';
 	
 	foreach( $villages as $i => $s ) {
-		$post_id = (int) $s['village'];
+		$village_id = (int) $s['village'];
+		$hotel_id = $s['hotel'] ?? false;
 		$additional_content = $s['add_text'] ? $s['content'] : '';
-		
 		$first_bookmark = ($i == 0);
 		
-		if ( $post_id ) include( __DIR__ . '/village.php' );
+		if ( $village_id ) include( __DIR__ . '/village.php' );
 	}
 }
 ?>

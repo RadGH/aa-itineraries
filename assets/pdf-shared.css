@@ -76,7 +76,7 @@ bookmark {
 
 /* Start: Typography */
 .pdf-page p {
-	font-size: 16px;
+	font-size: 18px; /* 16px on pdf, see pdf.css */
 	line-height: 1.5em;
 }
 
@@ -243,3 +243,9 @@ table.directory-table .column-2 {
 	font-weight: bold;
 }
 /* End: Itinerary Phone Numbers */
+
+/* Start: Hikes */
+ul.hike-link-list {
+	margin: 10px 0;
+}
+/* End: Hikes */

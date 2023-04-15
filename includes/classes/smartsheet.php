@@ -488,7 +488,9 @@ class Class_AH_Smartsheet {
 		$method = 'POST';
 		$headers = array( 'Content-Type' => 'application/json' );
 		
+		// @todo test callback url with other domain
 		$callback_url = site_url('/smartsheet/'. urlencode($action) .'/');
+		// $callback_url = 'https://radleysustaire.com:443/sscallback.php?action=' . urlencode($action);
 		
 		$body['callbackUrl'] = $callback_url;
 		$body['name'] = $title;

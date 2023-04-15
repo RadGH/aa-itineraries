@@ -29,6 +29,9 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 		// Custom page template
 		add_filter( 'single_template', array( $this, 'replace_page_template' ) );
 		
+		// Exclude document category from yoast sitemap
+		add_filter( 'wpseo_sitemap_exclude_taxonomy', array( $this, 'yoast_exclude_category_from_sitemap' ), 10, 2 );
+		
 	}
 	
 	public function replace_page_template( $template ) {
@@ -145,11 +148,8 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 				'menu_name'         => __( 'Document Categories' ),
 			),
 			// Control the slugs used for this taxonomy
-			'rewrite' => array(
-				'slug'         => 'documents/categories',
-				'with_front'   => true,
-				'hierarchical' => true,
-			),
+			'rewrite' => false,
+			'publicly_queryable' => false,
 		);
 		
 		register_taxonomy( $taxonomy, $this->get_post_type(), $args );
@@ -541,6 +541,19 @@ MySQL;
 		if ( $custom_args ) $args = array_merge( $args, $custom_args );
 		
 		return new WP_Query($args);
+	}
+	
+	/**
+	 * Exclude document category from yoast sitemap
+	 *
+	 * @param bool $excluded
+	 * @param string $taxonomy
+	 *
+	 * @return bool
+	 */
+	function yoast_exclude_category_from_sitemap( $excluded, $taxonomy ) {
+		if ( $taxonomy == 'ah_document_category' ) return true;
+		return $excluded;
 	}
 	
 }

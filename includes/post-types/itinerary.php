@@ -376,6 +376,10 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 	public function get_table_of_contents( $itinerary_id ) {
 		$toc_list = array();
 		
+		if ( get_post_type( $itinerary_id ) != $this->get_post_type() ) {
+			return array();
+		}
+		
 		// Itinerary
 		$this->_add_toc_item( $toc_list, 'Introduction', '#intro' );
 		

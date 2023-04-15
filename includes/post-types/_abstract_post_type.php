@@ -7,6 +7,7 @@ abstract class Class_Abstract_Post_Type {
 	public $use_custom_title = false;
 	public $use_custom_slug = false;
 	public $custom_slug_prefix = null; // post type if null
+	public $exclude_from_sitemap = true;
 	
 	// Do not override this directly, instead use $this->get_post_type_args()
 	public $default_args = array(
@@ -79,6 +80,10 @@ abstract class Class_Abstract_Post_Type {
 		
 		// Remove unwanted columns from list screen
 		add_filter( "manage_edit-{$this->post_type}_columns", array( $this, 'remove_unwanted_post_columns' ), 30 );
+		
+		// Remove from Yoast sitemap if $this->exclude_from_sitemap is true
+		add_filter( 'wpseo_sitemap_exclude_post_type', array( $this, 'yoast_exclude_from_sitemap' ), 10, 2 );
+		
 	}
 	
 	/**
@@ -377,6 +382,22 @@ abstract class Class_Abstract_Post_Type {
 		$columns['date'] = $date;
 		
 		return $columns;
+	}
+	
+	/**
+	 * Remove from Yoast sitemap if $this->exclude_from_sitemap is true
+	 *
+	 * @param bool $is_excluded
+	 * @param string $post_type
+	 *
+	 * @return bool
+	 */
+	public function yoast_exclude_from_sitemap( $is_excluded, $post_type ) {
+		if ( $post_type == $this->get_post_type() && $this->exclude_from_sitemap ) {
+			return true;
+		}
+		
+		return $is_excluded;
 	}
 	
 	/**

@@ -28,12 +28,13 @@ if ( !function_exists('_recurse_ah_itinerary_nav') ) {
 	
 	<li><a href="/account/">My Account</a></li>
 	
-	<li class="separator"></li>
-	
 	<?php
 	$toc = AH_Itinerary()->get_table_of_contents( get_the_ID() );
 	
 	if ( $toc ) {
+		
+		echo '<li class="separator"></li>';
+		
 		_recurse_ah_itinerary_nav( $toc );
 	}
 	?>
