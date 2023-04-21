@@ -378,3 +378,24 @@ function ah_display_document_embed( $post_id ) {
 	
 	if ( $url ) echo '</a>';
 }
+
+/**
+ * Return an item from the array which matches the given key/value.
+ *
+ * If you have an array of customers each with a "first_name" property, this can locate the item whose "first_name" = "radley".
+ *
+ * @param array $array
+ * @param mixed $key
+ * @param mixed $value
+ *
+ * @return mixed|null
+ */
+function ah_find_in_array( $array, $key, $value ) {
+	if ( is_array($array) ) foreach( $array as $a ) {
+		if ( isset($a[$key]) && $a[$key] == $value ) {
+				return $a;
+		}
+	}
+	
+	return null;
+}

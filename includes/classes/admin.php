@@ -5,7 +5,7 @@ class Class_AH_Admin {
 	public function __construct() {
 		
 		// Register ACF settings pages
-		add_action( 'admin_menu', array( $this, 'register_menus' ), 20 );
+		add_action( 'admin_menu', array( $this, 'register_admin_menus' ), 20 );
 		
 		// Register custom image sizes
 		add_action( 'after_setup_theme', array( $this, 'register_image_sizes' ) );
@@ -13,8 +13,14 @@ class Class_AH_Admin {
 		// Displays errors on the account dashboard
 		add_action( 'admin_notices', array( $this, 'display_notices' ) );
 		
+		// Show warning that Theme Settings page is different than Alpine Hiker's theme settings
+		add_action( 'admin_notices', array( $this, 'display_theme_setting_warning' ) );
+		
 		// Allows clearing a notice
 		add_action( 'admin_init', array( $this, 'ajax_remove_notice' ) );
+		
+		// Loads notices from the query arg "ah_notice"
+		add_action( 'admin_init', array( $this, 'prepare_url_notices' ) );
 		
 		// Add a test notice
 		// https://alpinehikerdev.wpengine.com/?ah_test_notice
@@ -36,7 +42,7 @@ class Class_AH_Admin {
 		exit;
 	}
 	
-	public function register_menus() {
+	public function register_admin_menus() {
 		if ( function_exists('acf_add_options_page') ) {
 			
 			// Account Pages -> Settings
@@ -63,25 +69,67 @@ class Class_AH_Admin {
 			
 			// Alpine Hikers Settings
 			acf_add_options_page(array(
-				'page_title' 	=> 'Alpine Hikers (ah_settings)',
+				'menu_slug'     => 'acf-ah-settings-parent',
+				'page_title' 	=> null, // 'Alpine Hikers (ah_settings)',
 				'menu_title' 	=> 'Alpine Hikers Settings',
-				'post_id'       => 'ah_settings',
-				'slug'          => 'acf-ah-settings',
+				'post_id'       => null, //'ah_settings',
 				'autoload'      => false,
 				'capability'    => 'manage_options',
 				'icon_url'      => 'dashicons-alpine-hikers',
+				'redirect' 		=> true, // True = Use first sub-page instead
 			));
 			
+			// Alpine Hikers Settings -> General Settings (Duplicate of the above)
+			acf_add_options_sub_page( array(
+				'parent_slug' => 'acf-ah-settings-parent',
+				'menu_slug'   => 'acf-ah-settings',
+				'page_title'  => 'General Settings (ah_settings)',
+				'menu_title'  => 'General Settings',
+				'capability'  => 'manage_options',
+				'post_id'     => 'ah_settings',
+				'autoload'      => false,
+			) );
+			
 			// Smartsheet Settings
-			acf_add_options_page(array(
-				'page_title' 	=> 'Smartsheet (ah_smartsheet)',
+			/*
+			acf_add_options_sub_page(array(
+				'parent_slug'   => 'acf-ah-settings',
+				'page_title' 	=> 'Smartsheet Settings (ah_smartsheet)',
 				'menu_title' 	=> 'Smartsheet Settings',
 				'post_id'       => 'ah_smartsheet',
-				'slug'          => 'acf-ah-smartsheet',
-				'autoload'      => false,
+				'menu_slug'     => 'acf-ah-smartsheet-parent',
 				'capability'    => 'manage_options',
 				'icon_url'      => 'dashicons-smartsheet',
+				'autoload'      => false,
+				'redirect' 		=> true, // True = Use first sub-page instead
 			));
+			*/
+			/*
+			acf_add_options_page(array(
+				'page_title' 	=> 'Smartsheet Settings (ah_smartsheet)',
+				'menu_title' 	=> 'Smartsheet Settings',
+				'post_id'       => 'ah_smartsheet',
+				'menu_slug'     => 'acf-ah-smartsheet-parent',
+				'capability'    => 'manage_options',
+				'icon_url'      => 'dashicons-smartsheet',
+				'autoload'      => false,
+				'redirect' 		=> true, // True = Use first sub-page instead
+			));
+			*/
+			
+			// Smartsheet Settings -> Settings (Duplicate of the above)
+			acf_add_options_sub_page( array(
+				'parent_slug' => 'acf-ah-settings', //'acf-ah-smartsheet-parent',
+				'page_title'  => 'Smartsheet Settings (ah_smartsheet)',
+				'menu_title'  => 'Smartsheet Settings',
+				'capability'  => 'manage_options',
+				'post_id'     => 'ah_smartsheet',
+				'menu_slug'   => 'acf-ah-smartsheet',
+				'autoload'      => false,
+			) );
+			
+			// Smartsheet Settings -> Hotel Info
+			// Moved to: smartsheet-hotel-info.php
 			
 		}
 	}
@@ -118,7 +166,7 @@ class Class_AH_Admin {
 			if ( $message && $date ) $message .= "\n\n";
 			if ( $date && !$auto_dismiss ) $message .= '<em>' . human_time_diff(strtotime($date), current_time('timestamp')) . ' ago</em>';
 			
-			echo '<div class="ah-admin-notice notice notice-'. $type .' ">';
+			echo '<div class="ah-admin-notice notice notice-'. $type .' '. ($auto_dismiss ? 'ah-auto-dismiss' : 'ah-ajax-dismiss') .'">';
 			
 			echo wpautop($message);
 			
@@ -134,6 +182,18 @@ class Class_AH_Admin {
 			
 			echo '</div>';
 		}
+	}
+	
+	/**
+	 * Show warning that Theme Settings page is different than Alpine Hiker's theme settings
+	 *
+	 * @return void
+	 */
+	public function display_theme_setting_warning() {
+		if ( ! acf_is_screen( 'theme-general-settings' ) ) return;
+		
+		echo 1;
+		exit;
 	}
 	
 	/**
@@ -186,6 +246,32 @@ class Class_AH_Admin {
 				wp_redirect( $url );
 				exit;
 			}
+		}
+	}
+	
+	public function prepare_url_notices() {
+		if ( ! isset($_GET['ah_notice']) ) return;
+		
+		$notice = stripslashes($_GET['ah_notice']);
+		
+		switch($notice) {
+			
+			case 'settings_saved':
+				$this->add_notice( 'success', 'Settings saved', null, null, true );
+				break;
+				
+			case 'sync_hotels_success':
+				$this->add_notice( 'success', 'Hotel data has been updated to match Smartsheet', null, null, true );
+				break;
+				
+			case 'sync_hotels_failed':
+				$this->add_notice( 'success', 'Failed to sync hotel information', null, null, true );
+				break;
+				
+			default:
+				$this->add_notice( 'error', 'Unsupported notice type: "'. esc_html($notice) .'"', null, null, true );
+				break;
+				
 		}
 	}
 	

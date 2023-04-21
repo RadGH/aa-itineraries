@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: A+A - Alpine Hikers
-Description: Account pages, Deposit form, Document storage, Itineraries, and Smartsheet integrations
+Description: Account pages, invoices, payment form, client documents, itineraries, and Smartsheet integration.
 Author: Radley Sustaire, Alchemy and Aim
 Version: 1.1.0
 */
@@ -28,6 +28,8 @@ function AH_Rewrites() { return AH_Plugin()->Rewrites; }
 function AH_Reminders() { return AH_Plugin()->Reminders; }
 function AH_Theme() { return AH_Plugin()->Theme; }
 function AH_Smartsheet() { return AH_Plugin()->Smartsheet; }
+function AH_Smartsheet_Hotels() { return AH_Plugin()->Smartsheet_Hotels; }
+function AH_Smartsheet_Rooms() { return AH_Plugin()->Smartsheet_Rooms; }
 function AH_Smartsheet_Invoices() { return AH_Plugin()->Smartsheet_Invoices; }
 function AH_Smartsheet_Webhooks() { return AH_Plugin()->Smartsheet_Webhooks; }
 function AH_Account_Page() { return AH_Plugin()->Account_Page; }
@@ -47,7 +49,7 @@ function AH_PDF() { return AH_Plugin()->PDF; }
  */
 class Class_AH_Plugin {
 	
-	public $plugin_name = 'A+A - Alpine Hikers Itineraries';
+	public $plugin_name = 'A+A - Alpine Hikers';
 	
 	public $missing_plugins = array();
 	
@@ -60,6 +62,8 @@ class Class_AH_Plugin {
 	public Class_AH_Theme                      $Theme;
 	
 	public Class_AH_Smartsheet                 $Smartsheet;
+	public Class_AH_Smartsheet_Hotels          $Smartsheet_Hotels;
+	public Class_AH_Smartsheet_Rooms           $Smartsheet_Rooms;
 	public Class_AH_Smartsheet_Invoices        $Smartsheet_Invoices;
 	public Class_AH_Smartsheet_Webhooks        $Smartsheet_Webhooks;
 	
@@ -134,6 +138,12 @@ class Class_AH_Plugin {
 		
 		require_once( __DIR__ . '/includes/classes/smartsheet.php' );
 		$this->Smartsheet = new Class_AH_Smartsheet();
+		
+		require_once( __DIR__ . '/includes/classes/smartsheet-sync-hotels.php' );
+		$this->Smartsheet_Hotels = new Class_AH_Smartsheet_Hotels();
+		
+		require_once( __DIR__ . '/includes/classes/smartsheet-sync-rooms.php' );
+		$this->Smartsheet_Rooms = new Class_AH_Smartsheet_Rooms();
 		
 		require_once( __DIR__ . '/includes/classes/smartsheet-invoices.php' );
 		$this->Smartsheet_Invoices = new Class_AH_Smartsheet_Invoices();

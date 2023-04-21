@@ -18,7 +18,7 @@ get_sheet_id_from_settings( $key )
 
 # SHEETS
 search_for_sheet( $search )
-@todo get_sheet_by_id( $sheet_id )
+get_sheet_by_id( $sheet_id )
 
 # ROWS
 insert_row( $sheet_id, $cells )
@@ -72,6 +72,10 @@ class Class_AH_Smartsheet {
 		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_search_sheets
 		if ( isset($_GET['ah_smartsheet_search_sheets']) ) add_action( 'init', array( $this, 'ah_smartsheet_search_sheets' ) );
 		
+		// Get a specific sheet by ID
+		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_get_sheet_by_id&sheet_id=7567715780061060
+		if ( isset($_GET['ah_smartsheet_get_sheet_by_id']) ) add_action( 'init', array( $this, 'ah_smartsheet_get_sheet_by_id' ) );
+		
 		// Get a list of columns within a sheet
 		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_view_column_ids=7609265092355972
 		if ( isset($_GET['ah_smartsheet_view_column_ids']) ) add_action( 'init', array( $this, 'ah_smartsheet_view_column_ids' ) );
@@ -80,9 +84,13 @@ class Class_AH_Smartsheet {
 		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_insert_invoice_row
 		if ( isset($_GET['ah_smartsheet_insert_invoice_row']) ) add_action( 'init', array( $this, 'ah_smartsheet_insert_invoice_row' ) );
 		
-		// Test row creation into the invoice sheet
+		// Search for a row within a sheet
 		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_search_for_row
 		if ( isset($_GET['ah_smartsheet_search_for_row']) ) add_action( 'init', array( $this, 'ah_smartsheet_search_for_row' ) );
+		
+		// Search for a row within a sheet - for invoices
+		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_search_for_row_invoices
+		if ( isset($_GET['ah_smartsheet_search_for_row_invoices']) ) add_action( 'init', array( $this, 'ah_smartsheet_search_for_row_invoices' ) );
 		
 		// Get a row
 		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_get_row&sheet_id=7609265092355972&row_id=7654311241181060
@@ -234,6 +242,74 @@ class Class_AH_Smartsheet {
 		}else{
 			return $result['data']['results'] ?: array();
 		}
+	}
+	
+	public function get_sheet_by_id( $sheet_id ) {
+		$url = 'https://api.smartsheet.com/2.0/sheets/'. esc_attr($sheet_id);
+		$data = array();
+		$body = array();
+		$method = 'GET';
+		$headers = array( 'Content-Type' => 'application/json' );
+		
+		$result = $this->request( $url, $method, $data, $body, $headers );
+		
+		if ( ! $result['success'] || empty($result['data']) ) {
+			return false;
+		}else{
+			return $result['data'];
+		}
+	}
+	
+	/**
+	 * Returns an array of columns for a sheet
+	 *
+	 * @param int $sheet_id
+	 *
+	 * @return false|array {
+	 *      @type int $id           8615385139832708
+	 *      @type int $version      0
+	 *      @type int $index        0
+	 *      @type string $title     "Hotel"
+	 *      @type string $type      TEXT_NUMBER
+	 *      @type bool $primary     true
+	 *      @type bool $validation  false
+	 *      @type int $width        266
+	 * }
+	 */
+	public function get_columns_from_sheet( $sheet_id ) {
+		$sheet_data =  $this->get_sheet_by_id( $sheet_id );
+		if ( !isset( $sheet_data['columns'] ) ) return false;
+		
+		return $sheet_data['columns'];
+	}
+	
+	/**
+	 * Returns an array of rows for a sheet. Each row contains an array of cells as well.
+	 *
+	 * @param int $sheet_id
+	 *
+	 * @return false|array {
+	 *      @type int $id             8046223133501316
+	 *      @type int $rowNumber      1 (rows start at 1)
+	 *      @type bool $expanded      true
+	 *      @type string $createdAt   "2023-04-03T21:06:24Z"
+	 *      @type string $modifiedAt  "2023-04-03T23:01:30Z"
+	 *      @type array $cells {
+	 *
+	 *           @type int $columnId         452610815223684
+	 *           @type string $value         "Gasterntal - CH"
+	 *           @type string $displayValue  "Gasterntal - CH"
+	 *
+	 *      }
+	 *
+	 *      The first row does not contain this, but others do:
+	 *      @type int $siblingId      8046223133501316
+	 */
+	public function get_rows_from_sheet( $sheet_id ) {
+		$sheet_data =  $this->get_sheet_by_id( $sheet_id );
+		if ( !isset( $sheet_data['rows'] ) ) return false;
+		
+		return $sheet_data['rows'];
 	}
 	
 	/**
@@ -606,7 +682,10 @@ class Class_AH_Smartsheet {
 		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
 		
 		$search = (string) stripslashes($_GET['ah_smartsheet_search_sheets']);
-		if ( ! $search || $search === '1' || $search === '0' ) $search = 'A+A';
+		if ( ! $search || $search === '1' || $search === '0' ) {
+			echo 'Enter search term in url';
+			exit;
+		}
 		
 		$results = $this->search_for_sheet( $search );
 		
@@ -618,6 +697,32 @@ class Class_AH_Smartsheet {
 		}
 		
 		pre_dump_table( $results );
+		
+		echo '<p><strong>Last request:</strong></p>';
+		pre_dump( $this->last_request );
+		
+		exit;
+	}
+
+	public function ah_smartsheet_get_sheet_by_id() {
+		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
+		
+		$sheet_id = $_GET['sheet_id'] ?? false;
+		if ( ! $sheet_id ) {
+			echo 'Enter search_id in url';
+			exit;
+		}
+		
+		$results = $this->get_sheet_by_id( $sheet_id );
+		
+		echo '<p><strong>Sheet details for "'. esc_html( $sheet_id ) .'":</strong></p>';
+		
+		if ( ! $results ) {
+			echo '<em>No results found</em>';
+			exit;
+		}
+		
+		pre_dump( $results );
 		
 		echo '<p><strong>Last request:</strong></p>';
 		pre_dump( $this->last_request );
@@ -700,8 +805,40 @@ class Class_AH_Smartsheet {
 		pre_dump( $this->last_request );
 		exit;
 	}
-
 	public function ah_smartsheet_search_for_row() {
+		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
+		
+		$sheet_id = $_GET['sheet_id'] ?? false;
+		$column_ids = $_GET['column_ids'] ?? false;
+		$search = $_GET['search'] ?? false;
+		$column_ids = explode(',', $column_ids);
+		
+		if ( ! $sheet_id || ! $column_ids ) {
+			echo 'Specify sheet_id, column_ids, and search parameters in the URL. Column IDs should be comma separated';
+			exit;
+		}
+		
+		try {
+			
+			$post_id_column_id = $column_ids['post_id'];
+			
+			$row_id = AH_Smartsheet()->lookup_row_by_column_value( $sheet_id, $post_id_column_id, $search );
+			if ( ! $row_id ) throw new Exception( 'Row lookup failed');
+			
+			echo '<strong>Success: Row lookup success</strong>';
+			
+		} catch( Exception $e ) {
+			echo '<strong>Error: '. $e->getMessage() .'</strong>';
+		}
+		
+		pre_dump(compact('sheet_id', 'column_ids', 'post_id_column_id', 'search', 'row_id'));
+		
+		echo '<p><strong>Last request:</strong></p>';
+		pre_dump( $this->last_request );
+		exit;
+	}
+
+	public function ah_smartsheet_search_for_row_invoices() {
 		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
 		
 		try {

@@ -35,6 +35,31 @@ if ( ! function_exists('aa_is_developer') ) {
 	}
 }
 
+/**
+ * Displays your IP address
+ *
+ * @see https://example.com/?whatismyip
+ */
+if ( ! function_exists('aa_whatismyip') ) {
+	function aa_whatismyip() {
+		$msg = '<pre>';
+		$msg .= 'aa_get_ip_address():               ' . aa_get_ip_address();
+		$msg .= '<br>';
+		$msg .= '<br>$_SERVER[\'HTTP_CF_CONNECTING_IP\']: ' . ($_SERVER['HTTP_CF_CONNECTING_IP'] ?? 'undefined');
+		$msg .= '<br>$_SERVER[\'HTTP_X_FORWARDED_FOR\']:  ' . ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? 'undefined');
+		$msg .= '<br>$_SERVER[\'REMOTE_ADDR\']:           ' . ($_SERVER['REMOTE_ADDR'] ?? 'undefined');
+		if ( current_user_can('administrator') || is_radley() ) {
+			$msg .= '<br>$_SERVER[\'SERVER_ADDR\']:           ' . ($_SERVER['SERVER_ADDR'] ?? 'undefined');
+		}else{
+			$msg .= '<br>$_SERVER[\'SERVER_ADDR\']:           ' . '(Sign in as an admin to view)';
+		}
+		$msg .= '<pre>';
+		wp_die( $msg, 'IP Info' );
+		exit;
+	}
+	if ( isset($_GET['whatismyip']) ) add_action( 'init', 'aa_whatismyip', 1 );
+}
+
 // https://alpinehikerdev.wpengine.com/?amideveloper
 if ( ! function_exists('aa_developer_check') ) {
 	function aa_developer_check() {
@@ -344,6 +369,16 @@ function rs_stop_timer( $reset = null ) {
 		$seconds = microtime(true);
 }
 
+/* Show current screen ID and Base in the bottom left of the dashboard footer. Hidden until you hover over it. */
+function rs_display_screen_id_in_footer( $text ) {
+	if ( ! function_exists('get_current_screen') ) return;
+	if ( ! aa_is_developer() ) return;
+	
+	$screen = get_current_screen();
+	
+	return $text . ' <span style="opacity: 0; text-transform: none;" onmouseover="jQuery(this).css(\'opacity\', 1);" onmouseout="jQuery(this).css(\'opacity\', 0);">screen id: '. $screen->id . '; base: ' . $screen->base . '</span>';
+}
+add_action( 'admin_footer_text', 'rs_display_screen_id_in_footer', 20 );
 
 
 // https://alpinehikerdev.wpengine.com/?rad_20234821_34819

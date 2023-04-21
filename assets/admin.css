@@ -3,6 +3,9 @@ Start: General admin dashboard
 */
 @import 'dashicon/AH.css';
 
+html { background: #f0f0f1; }
+body { background: none; }
+
 /*
 End: General admin dashboard
 */
@@ -70,4 +73,69 @@ Start: Admin notices
 }
 /*
 End: Admin notices
+*/
+
+/*
+Start: Custom admin page form
+       (see: Smartsheet Settings -> Hotel Info)
+*/
+.ah-admin-field {
+	margin: 5px 0 10px;
+}
+
+.ah-admin-field .ah-label {
+	margin-bottom: 5px;
+}
+
+.ah-admin-field .ah-label label {
+	font-weight: 500;
+}
+
+/* Field list */
+.ah-field-list {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 10px 5px;
+}
+
+.ah-field-list label {
+	grid-column: 1;
+	text-align: right;
+	margin-top: 6px;
+}
+
+.ah-field-list .ah-field {
+	grid-column: 2;
+}
+/*
+End: Custom admin page form
+*/
+
+/*
+Start: Hotel Info page
+*/
+.ah-hotel-table {
+	table-layout: fixed;
+	width: 100%;
+}
+
+.ah-hotel-table th,
+.ah-hotel-table td {
+	vertical-align: top;
+	text-align: left;
+}
+
+.ah-hotel-table tr span.cell:not(:hover) {
+	display: block;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.ah-hotel-table tr:hover {
+	background: rgba(255,255,0,0.15);
+}
+/*
+End: Hotel Info page
 */
