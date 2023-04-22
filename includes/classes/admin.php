@@ -256,12 +256,13 @@ class Class_AH_Admin {
 		
 		switch($notice) {
 			
-			case 'settings_saved':
-				$this->add_notice( 'success', 'Settings saved', null, null, true );
+			case 'hotel_list_updated':
+				$this->add_notice( 'success', 'Hotel Smartsheet settings updated. You probably want to sync with smartsheet next.', null, null, true );
 				break;
 				
 			case 'sync_hotels_success':
-				$this->add_notice( 'success', 'Hotel data has been updated to match Smartsheet', null, null, true );
+				$count = (int) $_GET['ah_notice_count'];
+				$this->add_notice( 'success', 'Hotel information has been updated to match Smartsheet. ' . $count . ' Hotels were found.', null, null, true );
 				break;
 				
 			case 'sync_hotels_failed':

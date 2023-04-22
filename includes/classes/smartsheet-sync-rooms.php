@@ -3,14 +3,14 @@
 class Class_AH_Smartsheet_Rooms  {
 	
 	public $columns = array(
-		'hotel_name'      => 'Hotel Name',
+		'room_name'      => 'Room Name',
 		'proprietor_name' => 'Proprietor Name',
 		'location'        => 'Location',
 		'email'           => 'Email',
 		'phone'           => 'Phone',
 		'wordpress_id'    => 'WordPress ID',
 		
-		// Each hotel also includes "smartsheet_row_id" which is not displayed
+		// Each room also includes "smartsheet_row_id" which is not displayed
 	);
 	
 	public function __construct() {
@@ -22,62 +22,62 @@ class Class_AH_Smartsheet_Rooms  {
 		add_action( 'admin_init', array( $this, 'save_admin_menu_settings' ) );
 		
 		// Sync rooms button from the settings page
-		add_action( 'admin_init', array( $this, 'process_hotel_info_sync' ) );
+		add_action( 'admin_init', array( $this, 'process_room_info_sync' ) );
 		
 	}
 	
 	public function register_admin_menus() {
 		if ( function_exists('acf_add_options_page') ) {
-			// Smartsheet Settings -> Hotel Info
+			// Smartsheet Settings -> Room Info
 			// NOTE: Must be defined by ACF first, then override with a WP submenu page
 			acf_add_options_sub_page( array(
 				'parent_slug' => 'acf-ah-settings-parent',
-				'page_title'  => 'Hotel Info',
-				'menu_title'  => 'Hotel Info',
+				'page_title'  => 'Room Info',
+				'menu_title'  => 'Room Info',
 				'capability' => 'manage_options',
-				'menu_slug'   => 'ah-smartsheet-hotel-info',
+				'menu_slug'   => 'ah-smartsheet-room-info',
 			) );
 			add_submenu_page(
 				null,
-				'Hotel Info',
-				'Hotel Info',
+				'Room Info',
+				'Room Info',
 				'manage_options',
-				'ah-smartsheet-hotel-info',
-				array( $this, 'display_admin_page_hotel_info' )
+				'ah-smartsheet-room-info',
+				array( $this, 'display_admin_page_room_info' )
 			);
 			
 		}
 	}
 	
-	public function display_admin_page_hotel_info() {
-		include( AH_PATH . '/templates/admin/smartsheet-hotel-info.php' );
+	public function display_admin_page_room_info() {
+		include( AH_PATH . '/templates/admin/smartsheet-room-info.php' );
 	}
 	
 	public function save_admin_menu_settings() {
 		$action = $_POST['ah-action'] ?? false;
-		if ( ! wp_verify_nonce( $action, 'save-hotel-info' ) ) return;
+		if ( ! wp_verify_nonce( $action, 'save-room-info' ) ) return;
 		
 		$data = stripslashes_deep($_POST['ah']);
 		
 		// Sheet ID
 		$sheet_id = $data['sheet_id'];
-		update_option( 'ah_hotel_info_sheet_id', $sheet_id, false );
+		update_option( 'ah_room_info_sheet_id', $sheet_id, false );
 		
 		// Column IDs
 		$column_ids = $this->format_column_ids( $data['column_ids'] );
-		update_option( 'ah_hotel_info_column_ids', $column_ids, false );
+		update_option( 'ah_room_info_column_ids', $column_ids, false );
 		
 		// Reload the form (to clear post data from browser history)
-		wp_redirect(add_query_arg(array('ah_notice' => 'settings_saved')));
+		wp_redirect(add_query_arg(array('ah_notice' => 'room_list_updated')));
 		exit;
 	}
 	
 	public function get_sheet_id() {
-		return get_option( 'ah_hotel_info_sheet_id' );
+		return get_option( 'ah_room_info_sheet_id' );
 	}
 	
 	public function get_column_ids() {
-		$column_ids = get_option( 'ah_hotel_info_column_ids' );
+		$column_ids = get_option( 'ah_room_info_column_ids' );
 		
 		$column_ids = $this->format_column_ids( $column_ids );
 		
@@ -92,7 +92,7 @@ class Class_AH_Smartsheet_Rooms  {
 	 * @param array $column_data
 	 *
 	 * @return array {
-	 *      @type string|null $hotel_name
+	 *      @type string|null $room_name
 	 * }
 	 */
 	public function format_column_ids( $column_data ) {
@@ -108,11 +108,11 @@ class Class_AH_Smartsheet_Rooms  {
 	}
 	
 	/**
-	 * Get list of stored hotel data which came from Smartsheet
+	 * Get list of stored room data which came from Smartsheet
 	 *
 	 * @return array {
 	 *      @type int $smartsheet_row_id
-	 *      @type string $hotel_name
+	 *      @type string $room_name
 	 *      @type string $proprietor_name
 	 *      @type string $location
 	 *      @type string $email
@@ -120,11 +120,11 @@ class Class_AH_Smartsheet_Rooms  {
 	 *      @type int $wordpress_id
 	 * }
 	 */
-	public function get_stored_hotel_list() {
-		$hotel_list = get_option( 'ah_hotel_list' );
-		if ( empty($hotel_list) ) $hotel_list = array();
+	public function get_stored_room_list() {
+		$room_list = get_option( 'ah_room_list' );
+		if ( empty($room_list) ) $room_list = array();
 		
-		return $hotel_list;
+		return $room_list;
 	}
 	
 	/**
@@ -137,7 +137,7 @@ class Class_AH_Smartsheet_Rooms  {
 	 * }
 	 */
 	public function get_stored_sheet_data() {
-		$sheet_data = get_option( 'ah_hotel_sheet' );
+		$sheet_data = get_option( 'ah_room_sheet' );
 		if ( empty($sheet_data) ) $sheet_data = false;
 		
 		return $sheet_data;
@@ -154,11 +154,11 @@ class Class_AH_Smartsheet_Rooms  {
 	}
 	
 	/**
-	 * Get a formatted list of hotel data from the master hotel sheet which is defined in Smartsheet Settings > Hotel Info
+	 * Get a formatted list of room data from the master room sheet which is defined in Smartsheet Settings > Room Info
 	 *
 	 * @return bool
 	 */
-	public function sync_hotel_info_from_smartsheet() {
+	public function sync_room_info_from_smartsheet() {
 		// Get the sheet ID
 		$sheet_id = $this->get_sheet_id();
 		if ( ! $sheet_id ) return false;
@@ -174,16 +174,16 @@ class Class_AH_Smartsheet_Rooms  {
 		// Store information about the sheet itself
 		$sheet_data = array(
 			'sheet_id' => $sheet['id'], // 7567715780061060
-			'name' => $sheet['name'], // "Copy of Master List - Hotel Info"
+			'name' => $sheet['name'], // "Copy of Master List - Room Info"
 			'permalink' => $sheet['permalink'], // "https://app.smartsheet.com/sheets/FXq9cXvg56pv22JCpVCPC69mW2j7jf29PHRr7x31"
 		);
 		
-		update_option( 'ah_hotel_sheet', $sheet_data );
+		update_option( 'ah_room_sheet', $sheet_data );
 		
 		// Get rows from the sheet
 		$rows = AH_Smartsheet()->get_rows_from_sheet( $sheet_id );
 		
-		// Get each hotel
+		// Get each room
 		$rooms = array();
 		
 		// Loop through each row
@@ -192,43 +192,43 @@ class Class_AH_Smartsheet_Rooms  {
 			$id = $r['id'];
 			$raw_cells = $r['cells'];
 			
-			// Set up the hotel item
-			$hotel = array();
-			$hotel['smartsheet_row_id'] = $id;
+			// Set up the room item
+			$room = array();
+			$room['smartsheet_row_id'] = $id;
 			
 			// Locate each cell by the cell ID from the settings page.
 			foreach( $column_ids as $key => $column_id ) {
 				$cell = ah_find_in_array( $raw_cells, 'columnId', $column_id );
-				$hotel[$key] = $cell['value'] ?? null;
+				$room[$key] = $cell['value'] ?? null;
 			}
 			
-			// Stop at the first empty hotel
-			if ( empty($hotel['hotel_name']) ) break;
+			// Stop at the first empty room
+			if ( empty($room['room_name']) ) break;
 			
-			$rooms[$id] = $hotel;
+			$rooms[$id] = $room;
 		}
 		
 		if ( empty($rooms) ) return false;
 		
 		
-		update_option( 'ah_hotel_list', $rooms );
+		update_option( 'ah_room_list', $rooms );
 		
 		return true;
 	}
 	
 	/**
-	 * When visiting the link to sync from the hotel info page, loads the hotel sheet from Smartsheet and updates each row.
+	 * When visiting the link to sync from the room info page, loads the room sheet from Smartsheet and updates each row.
 	 *
 	 * @return void
 	 */
-	public function process_hotel_info_sync() {
+	public function process_room_info_sync() {
 		if ( ! isset($_GET['ah_sync_rooms']) ) return;
 		
 		$url = remove_query_arg('ah_sync_rooms');
 		
-		$hotel_list = $this->sync_hotel_info_from_smartsheet();
+		$room_list = $this->sync_room_info_from_smartsheet();
 		
-		if ( $hotel_list === null ) {
+		if ( $room_list === null ) {
 			$url = add_query_arg(array('ah_notice' => 'sync_rooms_failed'), $url);
 			wp_redirect($url);
 			exit;

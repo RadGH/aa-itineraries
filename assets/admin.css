@@ -6,6 +6,10 @@ Start: General admin dashboard
 html { background: #f0f0f1; }
 body { background: none; }
 
+.dashicons.ah-dashicon-inline {
+	vertical-align: text-bottom;
+}
+
 /*
 End: General admin dashboard
 */
@@ -112,11 +116,55 @@ End: Custom admin page form
 */
 
 /*
+Start: Custom admin postbox with scrolling sidebar
+*/
+@media ( min-width: 1000px ) {
+	.postbox-container {
+		position: relative;
+	}
+
+	.postbox-container .ah-postbox-sticky {
+		position: sticky;
+		top: 50px;
+		overflow: auto;
+		max-height: calc(100vh - 50px);
+	}
+
+	.ah-metabox-holder {
+		margin-right: 0 !important;
+		display: grid;
+		grid-template-columns: 1fr 280px;
+		grid-gap: 20px;
+	}
+
+	.ah-metabox-holder > .ah-postbox-sidebar {
+		grid-area: 1 / 2;
+	}
+
+	.ah-metabox-holder > .ah-postbox-main {
+		grid-area: 1 / 1;
+	}
+}
+/*
+End: Custom admin postbox with scrolling sidebar
+*/
+
+/*
 Start: Hotel Info page
 */
 .ah-hotel-table {
 	table-layout: fixed;
 	width: 100%;
+	margin: 10px 0 20px;
+	padding: 10px;
+
+	border: 1px solid #dfdfdf;
+	border-radius: 3px;
+}
+
+.ah-hotel-table th {
+	padding-bottom: 8px;
+	border-bottom: 1px solid #dfdfdf;
 }
 
 .ah-hotel-table th,
@@ -125,7 +173,7 @@ Start: Hotel Info page
 	text-align: left;
 }
 
-.ah-hotel-table tr span.cell:not(:hover) {
+.ah-hotel-table tbody tr td:not(:hover) span.cell {
 	display: block;
 	max-width: 100%;
 	overflow: hidden;
@@ -133,7 +181,7 @@ Start: Hotel Info page
 	white-space: nowrap;
 }
 
-.ah-hotel-table tr:hover {
+.ah-hotel-table tbody tr:hover {
 	background: rgba(255,255,0,0.15);
 }
 /*
