@@ -5,12 +5,6 @@ class Class_AH_Smartsheet_Hotels  {
 	public $columns = array(
 		'hotel_name'      => 'Hotel Name',
 		'village_name'    => 'Village Name',
-		// 'proprietor_name' => 'Proprietor Name',
-		// 'location'        => 'Location',
-		// 'email'           => 'Email', // 7208010256279428
-		// 'phone'           => 'Phone', // 1578510722066308
-		'wordpress_id'    => 'WordPress ID',
-		
 		// Each hotel item also includes "smartsheet_row_id" which is not displayed
 	);
 	
@@ -25,8 +19,8 @@ class Class_AH_Smartsheet_Hotels  {
 		// Sync hotels button from the settings page
 		add_action( 'admin_init', array( $this, 'process_hotel_info_sync' ) );
 		
-		// Create a hotel from a row in the spreadsheet (within the "Hotel Info" settings screen)
-		add_action( 'admin_init', array( $this, 'create_hotel_from_smartsheet' ) );
+		// Create a village or hotel from a link in the settings page
+		add_action( 'admin_init', array( $this, 'create_village_or_hotel_from_link' ) );
 		
 	}
 	
@@ -117,11 +111,7 @@ class Class_AH_Smartsheet_Hotels  {
 	 * @return array {
 	 *      @type int $smartsheet_row_id
 	 *      @type string $hotel_name
-	 *      @type string $proprietor_name
-	 *      @type string $location
-	 *      @type string $email
-	 *      @type string $phone
-	 *      @type int $wordpress_id
+	 *      @type string $village_name
 	 * }
 	 */
 	public function get_stored_hotel_list() {
@@ -170,7 +160,7 @@ class Class_AH_Smartsheet_Hotels  {
 	}
 	
 	/**
-	 * Get a formatted list of hotel data from the master hotel sheet which is defined in Smartsheet Settings > Hotel Info
+	 * Get a list of hotel and village names from the master hotel spreadsheet
 	 *
 	 * @return array|false
 	 */
@@ -200,52 +190,47 @@ class Class_AH_Smartsheet_Hotels  {
 		$rows = AH_Smartsheet()->get_rows_from_sheet( $sheet_id );
 		
 		// Get each hotel and village
-		$hotels = array();
-		$villages = array();
+		$hotel_list = array();
+		$village_list = array();
 		
 		// Loop through each row
-		if ( $rows ) foreach( $rows as $r ) {
-			// $r = id, rowNumber, cells
-			$id = $r['id'];
-			$raw_cells = $r['cells'];
+		if ( $rows ) foreach( $rows as $row ) {
+			// $row keys = id, rowNumber, cells
+		
+			// Get hotel name from the hotel row
+			$hotel_cell = ah_find_in_array( $row['cells'], 'columnId', $column_ids['hotel_name'] );
+			$hotel_name = $hotel_cell['value'] ?? false;
 			
-			// Set up the hotel item
-			$hotel = array();
-			$hotel['smartsheet_row_id'] = $id;
-			
-			// Locate each cell by the cell ID from the settings page.
-			foreach( $column_ids as $key => $column_id ) {
-				$cell = ah_find_in_array( $raw_cells, 'columnId', $column_id );
-				$hotel[$key] = $cell['value'] ?? null;
+			if ( $hotel_name && $hotel_name != '#INVALID OPERATION' ) {
+				$hotel_list[] = $hotel_name;
 			}
 			
-			// Add to the list of villages
-			if ( $hotel['village_name'] ) {
-				$villages[] = $hotel['village_name'];
+			// Get village name from the hotel row
+			$village_cell = ah_find_in_array( $row['cells'], 'columnId', $column_ids['village_name'] );
+			$village_name = $village_cell['value'] ?? false;
+			
+			if ( $village_name && $village_name != '#INVALID OPERATION' ) {
+				$village_list[] = $village_name;
 			}
-			
-			// Ignore empty hotel names
-			if ( empty($hotel['hotel_name']) ) continue;
-			
-			// Ignore hotels with the name "#INVALID OPERATION"
-			if ( $hotel['hotel_name'] == '#INVALID OPERATION' ) continue;
-			
-			$hotels[$id] = $hotel;
 		}
 		
-		if ( $hotels ) {
-			update_option( 'ah_hotel_list', $hotels );
-		}
-		
-		if ( $villages ) {
-			// Remove duplicates and empty values
-			$villages = array_unique($villages);
-			$villages = array_filter($villages);
+		// Remove duplicates and empty values
+		if ( $hotel_list ) {
+			$hotel_list = array_unique($hotel_list);
+			$hotel_list = array_filter($hotel_list);
 			
-			update_option( 'ah_village_list', $villages );
+			update_option( 'ah_hotel_list', $hotel_list );
 		}
 		
-		return $hotels;
+		// Remove duplicates and empty values
+		if ( $village_list ) {
+			$village_list = array_unique($village_list);
+			$village_list = array_filter($village_list);
+			
+			update_option( 'ah_village_list', $village_list );
+		}
+		
+		return array( 'hotel_list' => $hotel_list, 'village_list' => $village_list );
 	}
 	
 	/**
@@ -258,15 +243,27 @@ class Class_AH_Smartsheet_Hotels  {
 		
 		$url = remove_query_arg('ah_sync_hotels');
 		
-		$hotel_list = $this->sync_hotel_info_from_smartsheet();
+		// Perform the sync with Smartsheet's API
+		$result = $this->sync_hotel_info_from_smartsheet();
 		
-		if ( $hotel_list === false ) {
+		if ( $result === false ) {
 			$url = add_query_arg(array('ah_notice' => 'sync_hotels_failed'), $url);
 			wp_redirect($url);
 			exit;
 		}
 		
-		$url = add_query_arg(array('ah_notice' => 'sync_hotels_success', 'ah_notice_count' => count($hotel_list) ), $url);
+		// Data to send in the URL, used in the notice popup
+		$data = array(
+			'hotels' => count($result['hotel_list']),
+			'villages' => count($result['village_list']),
+		);
+		
+		// Build URL to redirect to
+		$url = add_query_arg(array(
+			'ah_notice' => 'sync_hotels_success',
+			'ah_notice_data' => urlencode(json_encode($data))
+		), $url);
+		
 		wp_redirect($url);
 		exit;
 	}
@@ -278,6 +275,7 @@ class Class_AH_Smartsheet_Hotels  {
 	 *
 	 * @return array|false
 	 */
+	/*
 	public function get_hotel_by_row_id( $row_id ) {
 		$hotel_list = $this->get_stored_hotel_list();
 		
@@ -285,40 +283,86 @@ class Class_AH_Smartsheet_Hotels  {
 		
 		return $hotel ?: false;
 	}
+	*/
+	
+	/**
+	 * Get the post ID of a hotel by the hotel name. The hotel name must exactly match the post title.
+	 * 
+	 * @param $hotel_name
+	 *
+	 * @return int|false
+	 */
+	public function get_hotel_id_by_name( $hotel_name ) {
+		global $wpdb;
+		
+		$sql = $wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = %s AND post_status IN ( 'publish', 'draft', 'private', 'pending' ) LIMIT 1;",
+			$hotel_name,
+			AH_Hotel()->get_post_type()
+		);
+		
+		$id = (int) $wpdb->get_var( $sql );
+		
+		return $id ?: false;
+	}
+	
+	/**
+	 * Get the post ID of a village by the village name. The village name must exactly match the post title.
+	 * 
+	 * @param $village_name
+	 *
+	 * @return int|false
+	 */
+	public function get_village_id_by_name( $village_name ) {
+		global $wpdb;
+		
+		$sql = $wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = %s AND post_status IN ( 'publish', 'draft', 'private', 'pending' ) LIMIT 1;",
+			$village_name,
+			AH_Village()->get_post_type()
+		);
+		
+		$id = (int) $wpdb->get_var( $sql );
+		
+		return $id ?: false;
+	}
 	
 	/**
 	 * Create a hotel from a row in the spreadsheet (within the "Hotel Info" settings screen)
 	 *
 	 * @return void
 	 */
-	public function create_hotel_from_smartsheet() {
-		if ( ! isset($_GET['ah_insert_smartsheet_hotel']) ) return;
+	public function create_village_or_hotel_from_link() {
 		
-		$row_id = (int) $_GET['ah_insert_smartsheet_hotel'];
-		$hotel = $this->get_hotel_by_row_id( $row_id );
-		
-		if ( ! $hotel ) {
-			wp_die('Error: Row ID "'. esc_html($row_id) .'" was not found in the Hotels spreadsheet.' );
-			exit;
+		if ( isset($_GET['ah_create_village']) ) {
+			$type_name = 'Village';
+			$title = stripslashes($_GET['ah_create_village']);
+			$post_type = AH_Village()->get_post_type();
+			$existing_post_id = $this->get_village_id_by_name($title);
+			
+		}else if ( isset($_GET['ah_create_hotel']) ) {
+			$type_name = 'Hotel';
+			$title = stripslashes($_GET['ah_create_hotel']);
+			$post_type = AH_Hotel()->get_post_type();
+			$existing_post_id = $this->get_hotel_id_by_name($title);
+			
+		}else{
+			return;
 		}
 		
-		$existing_post_id = $hotel['wordpress_id'] ?? false;
-		if ( $existing_post_id && AH_Hotel()->is_valid($existing_post_id) ) {
-			$link = sprintf(
-				'<a href="%s">%s</a> (Post #%d)',
-				esc_attr( get_edit_post_link($existing_post_id) ),
-				esc_html( get_the_title($existing_post_id) ),
-				$existing_post_id
+		if ( $existing_post_id ) {
+			$message = sprintf(
+				'%s already exists: <a href="%s">%s #%d</a>',
+				esc_html($type_name),
+				esc_attr(get_edit_post_link($existing_post_id)),
+				esc_html($title),
+				esc_html($existing_post_id)
 			);
-			wp_die('Error: The hotel "'. esc_html($hotel['hotel_name']) .'" is already assigned to '. $link .'.' );
+			wp_die($message);
 			exit;
 		}
 		
-		// Format data to use in the post
-		$post_title =
-		
-		pre_dump($row_id);
-		pre_dump($hotel);
+		echo 'TODO: Create ' . $type_name . ' with title ' . $title;
 		exit;
 	}
 	

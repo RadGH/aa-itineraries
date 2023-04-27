@@ -142,8 +142,8 @@ class Class_AH_Plugin {
 		require_once( __DIR__ . '/includes/classes/smartsheet-sync-hotels.php' );
 		$this->Smartsheet_Hotels = new Class_AH_Smartsheet_Hotels();
 		
-		require_once( __DIR__ . '/includes/classes/smartsheet-sync-rooms.php' );
-		$this->Smartsheet_Rooms = new Class_AH_Smartsheet_Rooms();
+		//require_once( __DIR__ . '/includes/classes/smartsheet-sync-rooms.php' );
+		//$this->Smartsheet_Rooms = new Class_AH_Smartsheet_Rooms();
 		
 		require_once( __DIR__ . '/includes/classes/smartsheet-invoices.php' );
 		$this->Smartsheet_Invoices = new Class_AH_Smartsheet_Invoices();

@@ -253,6 +253,7 @@ class Class_AH_Admin {
 		if ( ! isset($_GET['ah_notice']) ) return;
 		
 		$notice = stripslashes($_GET['ah_notice']);
+		$data = isset($_GET['ah_notice_data']) ? stripslashes($_GET['ah_notice_data']) : false;
 		
 		switch($notice) {
 			
@@ -261,8 +262,10 @@ class Class_AH_Admin {
 				break;
 				
 			case 'sync_hotels_success':
-				$count = (int) $_GET['ah_notice_count'];
-				$this->add_notice( 'success', 'Hotel information has been updated to match Smartsheet. ' . $count . ' Hotels were found.', null, null, true );
+				$data = json_decode($data, true);
+				$hotel_count = $data['hotels'] ?? 0;
+				$village_count = $data['villages'] ?? 0;
+				$this->add_notice( 'success', 'Sync complete. Found ' . $village_count . ' village(s) and '. $hotel_count .' hotels.', null, null, true );
 				break;
 				
 			case 'sync_hotels_failed':

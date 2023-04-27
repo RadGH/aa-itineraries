@@ -23,7 +23,7 @@ window.AH_Admin = new (function() {
 		let new_url = window.location.href;
 		if ( new_url.indexOf('ah_notice') !== false ) {
 			new_url = o.remove_query_param_from_url( new_url, 'ah_notice' );
-			new_url = o.remove_query_param_from_url( new_url, 'ah_notice_count' );
+			new_url = o.remove_query_param_from_url( new_url, 'ah_notice_data' );
 			history.replaceState(null, null, new_url);
 		}
 

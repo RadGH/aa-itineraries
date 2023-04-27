@@ -10,6 +10,10 @@ body { background: none; }
 	vertical-align: text-bottom;
 }
 
+.acf-field .acf-label > p.description:first-child {
+	margin-top: 0;
+}
+
 /*
 End: General admin dashboard
 */
@@ -183,6 +187,11 @@ Start: Hotel Info page
 
 .ah-hotel-table tbody tr:hover {
 	background: rgba(255,255,0,0.15);
+}
+
+.ah-hotel-table .col-village_name,
+.ah-hotel-table .col-hotel_name {
+	width: 150px;
 }
 /*
 End: Hotel Info page
