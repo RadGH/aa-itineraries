@@ -258,18 +258,33 @@ class Class_AH_Admin {
 		switch($notice) {
 			
 			case 'hotel_list_updated':
-				$this->add_notice( 'success', 'Hotel Smartsheet settings updated. You probably want to sync with smartsheet next.', null, null, true );
+				$this->add_notice( 'success', 'Village and Hotel settings have been updated. Consider running the sync to update the list from the spreadsheet.', null, null, true );
 				break;
 				
 			case 'sync_hotels_success':
 				$data = json_decode($data, true);
 				$hotel_count = $data['hotels'] ?? 0;
 				$village_count = $data['villages'] ?? 0;
-				$this->add_notice( 'success', 'Sync complete. Found ' . $village_count . ' village(s) and '. $hotel_count .' hotels.', null, null, true );
+				$this->add_notice( 'success', 'Sync complete. Found '. $hotel_count .' hotels and ' . $village_count . ' villages.', null, null, true );
 				break;
 				
 			case 'sync_hotels_failed':
-				$this->add_notice( 'success', 'Failed to sync hotel information', null, null, true );
+				$this->add_notice( 'success', 'Failed to sync hotel and village information from the spreadsheet.', null, null, true );
+				break;
+			
+			case 'room_list_updated':
+				$this->add_notice( 'success', 'Rooms and Meals settings have been updated. Consider running the sync to update the list from the spreadsheet.', null, null, true );
+				break;
+			
+			case 'sync_rooms_success':
+				$data = json_decode($data, true);
+				$rooms_count = $data['rooms'] ?? 0;
+				$meals_count = $data['meals'] ?? 0;
+				$this->add_notice( 'success', 'Sync complete. Found ' . $rooms_count . ' room types and '. $meals_count .' meal types.', null, null, true );
+				break;
+			
+			case 'sync_rooms_failed':
+				$this->add_notice( 'success', 'Failed to sync room and meal information from the spreadsheet.', null, null, true );
 				break;
 				
 			default:

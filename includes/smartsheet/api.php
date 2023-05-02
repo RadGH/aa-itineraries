@@ -43,7 +43,7 @@ list_webhooks( $sheet_id )
 /**
  * Smartsheet API Manager
  */
-class Class_AH_Smartsheet {
+class Class_AH_Smartsheet_API {
 	
 	// Config
 	public $api_key = null;
@@ -764,11 +764,11 @@ class Class_AH_Smartsheet {
 		
 		try {
 			
-			$sheet_id = AH_Smartsheet()->get_sheet_id_from_settings( 'invoices' );
-			$column_ids = AH_Smartsheet()->get_column_ids_from_settings( 'invoices' );
+			$sheet_id = AH_Smartsheet_API()->get_sheet_id_from_settings( 'invoices' );
+			$column_ids = AH_Smartsheet_API()->get_column_ids_from_settings( 'invoices' );
 			if ( !$sheet_id || !$column_ids ) throw new Exception( 'Sheet or column IDs not provided in settings.');
 			
-			$sheet_cols = AH_Smartsheet()->get_sheet_columns( $sheet_id );
+			$sheet_cols = AH_Smartsheet_API()->get_sheet_columns( $sheet_id );
 			if ( !$sheet_cols ) throw new Exception( 'API could not load column settings from Smartsheet.');
 			
 			$cells = array();
@@ -789,7 +789,7 @@ class Class_AH_Smartsheet {
 				);
 			}
 			
-			$row_id = AH_Smartsheet()->insert_row( $sheet_id, $cells );
+			$row_id = AH_Smartsheet_API()->insert_row( $sheet_id, $cells );
 			if ( ! $row_id ) throw new Exception( 'Row could not be inserted');
 			
 			echo '<strong>Success: Row inserted</strong>';
@@ -822,7 +822,7 @@ class Class_AH_Smartsheet {
 			
 			$post_id_column_id = $column_ids['post_id'];
 			
-			$row_id = AH_Smartsheet()->lookup_row_by_column_value( $sheet_id, $post_id_column_id, $search );
+			$row_id = AH_Smartsheet_API()->lookup_row_by_column_value( $sheet_id, $post_id_column_id, $search );
 			if ( ! $row_id ) throw new Exception( 'Row lookup failed');
 			
 			echo '<strong>Success: Row lookup success</strong>';
@@ -843,14 +843,14 @@ class Class_AH_Smartsheet {
 		
 		try {
 			
-			$sheet_id = AH_Smartsheet()->get_sheet_id_from_settings( 'invoices' );
-			$column_ids = AH_Smartsheet()->get_column_ids_from_settings( 'invoices' );
+			$sheet_id = AH_Smartsheet_API()->get_sheet_id_from_settings( 'invoices' );
+			$column_ids = AH_Smartsheet_API()->get_column_ids_from_settings( 'invoices' );
 			if ( !$sheet_id || !$column_ids ) throw new Exception( 'Sheet or column IDs not provided in settings.');
 			
 			$post_id_column_id = $column_ids['post_id'];
 			$search = '6118';
 			
-			$row_id = AH_Smartsheet()->lookup_row_by_column_value( $sheet_id, $post_id_column_id, $search );
+			$row_id = AH_Smartsheet_API()->lookup_row_by_column_value( $sheet_id, $post_id_column_id, $search );
 			if ( ! $row_id ) throw new Exception( 'Row lookup failed');
 			
 			echo '<strong>Success: Row lookup success</strong>';
@@ -874,7 +874,7 @@ class Class_AH_Smartsheet {
 			$sheet_id = (int) $_GET['sheet_id'];
 			$row_id = (int) $_GET['row_id'];
 			
-			$row = AH_Smartsheet()->get_row( $sheet_id, $row_id );
+			$row = AH_Smartsheet_API()->get_row( $sheet_id, $row_id );
 			if ( ! $row ) throw new Exception( 'No results');
 			
 			echo '<strong>Success: Row found</strong>';
@@ -938,7 +938,7 @@ class Class_AH_Smartsheet {
 				),
 			);
 			
-			$result = AH_Smartsheet()->update_row( $sheet_id, $row_id, $cells );
+			$result = AH_Smartsheet_API()->update_row( $sheet_id, $row_id, $cells );
 			if ( ! $result ) throw new Exception( 'Update failed');
 			
 			echo '<strong>Success: Row updated</strong>';
@@ -962,7 +962,7 @@ class Class_AH_Smartsheet {
 		
 		try {
 			
-			$user = AH_Smartsheet()->get_current_user();
+			$user = AH_Smartsheet_API()->get_current_user();
 			if ( ! $user ) throw new Exception( 'Failed to get current user');
 			
 		} catch( Exception $e ) {
@@ -986,7 +986,7 @@ class Class_AH_Smartsheet {
 			
 			$sheet_id = (int) $_GET['sheet_id'];
 			
-			$webhooks = AH_Smartsheet()->list_webhooks( $sheet_id );
+			$webhooks = AH_Smartsheet_API()->list_webhooks( $sheet_id );
 			if ( ! $webhooks ) throw new Exception( 'Failed to get list of webhooks');
 			
 		} catch( Exception $e ) {
@@ -1021,7 +1021,7 @@ class Class_AH_Smartsheet {
 			
 			// secret: 1oc4lqv5g8wrpblfefvwyprhrz
 			
-			$result = AH_Smartsheet()->add_webhook( $sheet_id, $scope, $title, $action );
+			$result = AH_Smartsheet_API()->add_webhook( $sheet_id, $scope, $title, $action );
 			if ( ! $result ) throw new Exception( 'Could not insert webhook');
 			
 			$webhook_id = $result['id'];
@@ -1063,7 +1063,7 @@ class Class_AH_Smartsheet {
 			$action = $saved_webhook['action'];
 			$webhook_id = $saved_webhook['webhook_id'];
 			
-			$result = AH_Smartsheet()->delete_webhook( $webhook_id );
+			$result = AH_Smartsheet_API()->delete_webhook( $webhook_id );
 			if ( ! $result ) throw new Exception( 'Could not delete webhook');
 			
 			AH_Smartsheet_Webhooks()->delete_saved_webhook( $webhook_id );
@@ -1094,7 +1094,7 @@ class Class_AH_Smartsheet {
 			
 			$webhook_id = $saved_webhook['webhook_id'];
 			
-			$result = AH_Smartsheet()->toggle_webhook( $webhook_id, $enabled );
+			$result = AH_Smartsheet_API()->toggle_webhook( $webhook_id, $enabled );
 			if ( ! $result ) throw new Exception( 'Could not toggle webhook');
 			
 		} catch( Exception $e ) {

@@ -1,6 +1,24 @@
 <?php
 
 /**
+ * Create a new alert which is displayed in the backend
+ * Wrapper of aa_add_alert from the aa-alerts plugin.
+ * If plugin is not loaded the alert will not be created and this returns false.
+ *
+ * @param string $type     error, warning, info, success
+ * @param string $title
+ * @param string $message
+ * @param array $data
+ *
+ * @return int|false
+ */
+function ah_add_alert( $type, $title, $message = '', $data = array() ) {
+	if ( ! function_exists('aa_add_alert') ) return false;
+	
+	return aa_add_alert( $type, $title, $message, $data );
+}
+
+/**
  * Adjust a date such as "+30 days" with standard php date formatting.
  *
  * @param string $offset           "+30 days" or "-1 month"

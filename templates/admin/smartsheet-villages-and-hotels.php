@@ -1,71 +1,32 @@
 <?php
 // Base URL for this page
-$base_url = admin_url('admin.php?page=ah-smartsheet-hotel-info');
-
-$sheet_id = AH_Smartsheet_Hotels()->get_sheet_id();
-$column_ids = AH_Smartsheet_Hotels()->get_column_ids();
-$columns = AH_Smartsheet_Hotels()->columns;
-$sheet_url = AH_Smartsheet_Hotels()->get_smartsheet_permalink();
+$base_url = admin_url('admin.php?page=ah-smartsheet-hotels-and-villages');
 
 // Visiting this URL loads data from smartsheet
-$sync_url = add_query_arg(array('ah_sync_hotels' => 1), $base_url);
+$sync_url = add_query_arg(array('ah_sync_hotels_and_villages' => 1), $base_url);
+
+// Get sheet settings
+$sheet_id = AH_Smartsheet_Sync_Hotels_And_Villages()->get_sheet_id();
+$column_ids = AH_Smartsheet_Sync_Hotels_And_Villages()->get_column_ids();
+$sheet_url = AH_Smartsheet_Sync_Hotels_And_Villages()->get_smartsheet_permalink();
+$columns = AH_Smartsheet_Sync_Hotels_And_Villages()->columns;
+
+// Preload the list of hotel and village post IDs along with their smartsheet name
+$hotel_posts = AH_Smartsheet_Sync_Hotels_And_Villages()->preload_hotel_post_list();
+$village_posts = AH_Smartsheet_Sync_Hotels_And_Villages()->preload_village_post_list();
 
 // Get hotels from a prior Smartsheet sync
-$hotel_list = AH_Smartsheet_Hotels()->get_stored_hotel_list();
-$village_list = AH_Smartsheet_Hotels()->get_stored_village_list();
+$hotel_list = AH_Smartsheet_Sync_Hotels_And_Villages()->get_stored_hotel_list();
+$village_list = AH_Smartsheet_Sync_Hotels_And_Villages()->get_stored_village_list();
 
-// Get all hotel post IDs
-$all_hotel_ids = get_posts(array('post_type' => AH_Hotel()->get_post_type(), 'nopaging' => true, 'fields' => 'ids'));
-$all_village_ids = get_posts(array('post_type' => AH_Village()->get_post_type(), 'nopaging' => true, 'fields' => 'ids'));
-
-/*
-// -- HOTELS --
-
-// Calculate lists of hotels to display:
-// 1. $valid_hotels = Rows with a valid post ID
-// 2. $deleted_hotels = Rows that have a post ID which does not exist on the website
-// 3. $new_hotels = Rows with no post ID specified
-// 4. $unassigned_post_ids = Hotels on the website that do not have a corresponding row on the spreadsheet
-$valid_hotels = array();
-$deleted_hotels = array();
-$new_hotels = array();
-$unassigned_post_ids = $all_hotel_ids; // starts with all post ids, ids get removed if they are found in a row
-
-// Loop through each hotel to add it to one of the above groups
-if ( $hotel_list ) foreach( $hotel_list as $h ) {
-	$post_id = $h['wordpress_id'];
-	
-	if ( $post_id ) {
-		// Post ID exists, check if it is valid
-		$post_exists = in_array( $post_id, $all_hotel_ids );
-		$post_valid = $post_exists && AH_Hotel()->is_valid($post_id);
-		
-		if ( $post_exists && $post_valid ) {
-			$valid_hotels[] = $h;
-		}else{
-			$deleted_hotels[] = $h;
-		}
-		
-		// Remove the post ID from the list, since this is not a new hotel to be added
-		$key = array_search( $post_id, $unassigned_post_ids );
-		if ( $key !== false ) unset($unassigned_post_ids[$key]);
-		
-	}else{
-		// Post ID does not exist for this one
-		$new_hotels[] = $h;
-	}
-	
-}
-
-// -- VILLAGES --
-$village_list = AH_Smartsheet_Hotels()->get_stored_village_list();
-*/
-
+// Find which hotels and villages do not match a row in the spreadsheet
+$unassigned_hotels = AH_Smartsheet_Sync()->get_unassigned_post_list( $hotel_posts, $hotel_list );
+$unassigned_villages = AH_Smartsheet_Sync()->get_unassigned_post_list( $village_posts, $village_list );
 ?>
 
 <div class="wrap">
 	
-	<h1>Villages and Hotels</h1>
+	<h1>Smartsheet - Sync Villages and Hotels</h1>
 	
 	<?php
 	AH_Admin()->display_notices();
@@ -183,15 +144,59 @@ $village_list = AH_Smartsheet_Hotels()->get_stored_village_list();
 						
 						<div class="inside">
 							
+							<?php if ( $unassigned_villages ) { ?>
+								<p class="description">The villages below were not found in the spreadsheet but exist on the website. You may need to enter the smartsheet name manually by editing the village.</p>
+							
+								<table class="ah-admin-table">
+									
+									<thead>
+									<tr>
+										<th class="col-village_name">Village Title</th>
+										<th class="col-smartsheet_name">Smartsheet Name</th>
+										<th class="col-actions">Actions</th>
+									</tr>
+									</thead>
+									
+									<tbody>
+									<?php
+									foreach( $unassigned_villages as $post_id ) {
+										$title = get_the_title( $post_id );
+										$name = get_field( 'smartsheet_name', $post_id );
+										$edit_url = get_edit_post_link( $post_id );
+										?>
+										<tr>
+											<td class="col-village_name"><span class="cell"><?php echo esc_html( $title ); ?></span></td>
+											<td class="col-smartsheet_name"><span class="cell"><?php echo esc_html( $name ) ?: '<span style="opacity: 0.5;">(none)</span>'; ?></span></td>
+											
+											<td class="col-actions">
+												<?php
+												// Edit the post
+												echo sprintf(
+													'<a href="%s" class="button button-small button-link" target="_blank">Edit %s #%d</a>',
+													esc_attr( $edit_url ),
+													esc_html( $name ),
+													esc_html( $post_id )
+												);
+												?>
+											</td>
+										</tr>
+										<?php
+									}
+									?>
+									</tbody>
+								</table>
+								
+							<?php } ?>
+							
 							<?php if ( ! $village_list ) { ?>
 								
-								<p><em>No villages found</em></p>
+								<p class="description"><em>No villages found.</em></p>
 							
 							<?php }else{ ?>
 								
 								<p class="description">The villages listed below are assigned to one or more hotel in the spreadsheet.</p>
 								
-								<table class="ah-hotel-table">
+								<table class="ah-admin-table">
 									
 									<thead>
 									<tr>
@@ -202,10 +207,8 @@ $village_list = AH_Smartsheet_Hotels()->get_stored_village_list();
 									
 									<tbody>
 									<?php
-									sort($village_list);
-									
 									foreach( $village_list as $village_name ) {
-										$village_id = AH_Smartsheet_Hotels()->get_village_id_by_name( $village_name );
+										$village_id = AH_Smartsheet_Sync_Hotels_And_Villages()->get_village_id_by_name( $village_name );
 										?>
 										<tr>
 											<td class="col-village_name"><span class="cell"><?php echo esc_html($village_name ?: '&ndash;'); ?></span></td>
@@ -251,15 +254,59 @@ $village_list = AH_Smartsheet_Hotels()->get_stored_village_list();
 						
 						<div class="inside">
 							
+							<?php if ( $unassigned_hotels ) { ?>
+								<p class="description">The hotels below were not found in the spreadsheet but exist on the website. You may need to enter the smartsheet name manually by editing the hotel.</p>
+								
+								<table class="ah-admin-table">
+									
+									<thead>
+									<tr>
+										<th class="col-hotel_name">Hotel Title</th>
+										<th class="col-smartsheet_name">Smartsheet Name</th>
+										<th class="col-actions">Actions</th>
+									</tr>
+									</thead>
+									
+									<tbody>
+									<?php
+									foreach( $unassigned_hotels as $post_id ) {
+										$title = get_the_title( $post_id );
+										$name = get_field( 'smartsheet_name', $post_id );
+										$edit_url = get_edit_post_link( $post_id );
+										?>
+										<tr>
+											<td class="col-hotel_name"><span class="cell"><?php echo esc_html( $title ); ?></span></td>
+											<td class="col-smartsheet_name"><span class="cell"><?php echo esc_html( $name ) ?: '<span style="opacity: 0.5;">(none)</span>'; ?></span></td>
+											
+											<td class="col-actions">
+												<?php
+												// Edit the post
+												echo sprintf(
+													'<a href="%s" class="button button-small button-link" target="_blank">Edit %s #%d</a>',
+													esc_attr( $edit_url ),
+													esc_html( $name ),
+													esc_html( $post_id )
+												);
+												?>
+											</td>
+										</tr>
+										<?php
+									}
+									?>
+									</tbody>
+								</table>
+							
+							<?php } ?>
+							
 							<?php if ( ! $hotel_list ) { ?>
 								
-								<p><em>No hotels found</em></p>
+								<p><em>No hotels found.</em></p>
 							
 							<?php }else{ ?>
 								
 								<p class="description">Each hotel corresponds to a row from the spreadsheet.</p>
 								
-								<table class="ah-hotel-table">
+								<table class="ah-admin-table">
 									
 									<thead>
 									<tr>
@@ -270,10 +317,8 @@ $village_list = AH_Smartsheet_Hotels()->get_stored_village_list();
 									
 									<tbody>
 									<?php
-									sort($hotel_list);
-									
 									foreach( $hotel_list as $hotel_name ) {
-										$hotel_id = AH_Smartsheet_Hotels()->get_hotel_id_by_name( $hotel_name );
+										$hotel_id = AH_Smartsheet_Sync_Hotels_And_Villages()->get_hotel_id_by_name( $hotel_name );
 										?>
 										<tr>
 											<td class="col-hotel_name"><span class="cell"><?php echo esc_html($hotel_name ?: '&ndash;'); ?></span></td>
@@ -322,23 +367,3 @@ $village_list = AH_Smartsheet_Hotels()->get_stored_village_list();
 	</form>
 	
 </div>
-
-<script type="text/javascript">
-// Clicking "Add hotel" buttons makes the button turn gray
-document.addEventListener('click', function(e) {
-	if ( ! e.target.classList.contains('ah-insert-button') ) return;
-	
-	e.target.classList.remove('button-primary');
-	e.target.classList.add('button-secondary');
-	
-	/*
-	if ( e.target.innerHTML === 'Create Village' ) {
-		e.target.innerHTML = 'Village created';
-	}
-	
-	if ( e.target.innerHTML === 'Create Hotel' ) {
-		e.target.innerHTML = 'Hotel created';
-	}
-	*/
-});
-</script>

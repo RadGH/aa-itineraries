@@ -88,9 +88,9 @@ class Class_AH_Smartsheet_Invoices  {
 	public function update_invoice_row( $post_id ) {
 		if ( ! AH_Invoice()->is_valid( $post_id ) ) return;
 		
-		$smartsheet_id = AH_Smartsheet()->get_sheet_id_from_settings( 'invoices' );
-		// $webhook_action = AH_Smartsheet()->get_webhook_action_from_settings( 'invoices' );
-		$column_ids = AH_Smartsheet()->get_column_ids_from_settings( 'invoices' );
+		$smartsheet_id = AH_Smartsheet_API()->get_sheet_id_from_settings( 'invoices' );
+		// $webhook_action = AH_Smartsheet_API()->get_webhook_action_from_settings( 'invoices' );
+		$column_ids = AH_Smartsheet_API()->get_column_ids_from_settings( 'invoices' );
 		
 		$post_id_column_id = array_search( 'post_id', $column_ids );
 		
@@ -110,11 +110,11 @@ class Class_AH_Smartsheet_Invoices  {
 		}
 		
 		// Find the row
-		$row = AH_Smartsheet()->lookup_row_by_column_value( $smartsheet_id, $post_id_column_id, $post_id );
+		$row = AH_Smartsheet_API()->lookup_row_by_column_value( $smartsheet_id, $post_id_column_id, $post_id );
 		$row_id = $row ? $row['id'] : false;
 		
 		// If row is missing, create a new row
-		if ( ! $row_id ) $row_id = AH_Smartsheet()->insert_row( $smartsheet_id, $cells );
+		if ( ! $row_id ) $row_id = AH_Smartsheet_API()->insert_row( $smartsheet_id, $cells );
 		
 		// If failed to insert row, abort
 		if ( ! $row_id ) {
@@ -123,7 +123,7 @@ class Class_AH_Smartsheet_Invoices  {
 		}
 		
 		// Update that row
-		$result = AH_Smartsheet()->update_row( $smartsheet_id, $row_id, $cells );
+		$result = AH_Smartsheet_API()->update_row( $smartsheet_id, $row_id, $cells );
 		
 		// If failed to update row, abort
 		if ( ! $result ) {

@@ -27,11 +27,15 @@ function AH_Enqueue() { return AH_Plugin()->Enqueue; }
 function AH_Rewrites() { return AH_Plugin()->Rewrites; }
 function AH_Reminders() { return AH_Plugin()->Reminders; }
 function AH_Theme() { return AH_Plugin()->Theme; }
-function AH_Smartsheet() { return AH_Plugin()->Smartsheet; }
-function AH_Smartsheet_Hotels() { return AH_Plugin()->Smartsheet_Hotels; }
-function AH_Smartsheet_Rooms() { return AH_Plugin()->Smartsheet_Rooms; }
+
+function AH_Smartsheet_API() { return AH_Plugin()->Smartsheet_API; }
 function AH_Smartsheet_Invoices() { return AH_Plugin()->Smartsheet_Invoices; }
 function AH_Smartsheet_Webhooks() { return AH_Plugin()->Smartsheet_Webhooks; }
+
+function AH_Smartsheet_Sync() { return AH_Plugin()->Smartsheet_Sync; }
+function AH_Smartsheet_Sync_Hotels_And_Villages() { return AH_Plugin()->Smartsheet_Sync_Hotels_And_Villages; }
+function AH_Smartsheet_Sync_Rooms_And_Meals() { return AH_Plugin()->Smartsheet_Sync_Rooms_And_Meals; }
+
 function AH_Account_Page() { return AH_Plugin()->Account_Page; }
 function AH_Document() { return AH_Plugin()->Document; }
 function AH_Invoice() { return AH_Plugin()->Invoice; }
@@ -40,6 +44,7 @@ function AH_Itinerary_Template() { return AH_Plugin()->Itinerary_Template; }
 function AH_Village() { return AH_Plugin()->Village; }
 function AH_Hotel() { return AH_Plugin()->Hotel; }
 function AH_Hike() { return AH_Plugin()->Hike; }
+
 function AH_PDF() { return AH_Plugin()->PDF; }
 
 /**
@@ -61,11 +66,13 @@ class Class_AH_Plugin {
 	public Class_AH_Reminders                  $Reminders;
 	public Class_AH_Theme                      $Theme;
 	
-	public Class_AH_Smartsheet                 $Smartsheet;
-	public Class_AH_Smartsheet_Hotels          $Smartsheet_Hotels;
-	public Class_AH_Smartsheet_Rooms           $Smartsheet_Rooms;
+	public Class_AH_Smartsheet_API             $Smartsheet_API;
 	public Class_AH_Smartsheet_Invoices        $Smartsheet_Invoices;
 	public Class_AH_Smartsheet_Webhooks        $Smartsheet_Webhooks;
+	
+	public Class_AH_Smartsheet_Sync            $Smartsheet_Sync;
+	public Class_AH_Smartsheet_Sync_Hotels_And_Villages  $Smartsheet_Sync_Hotels_And_Villages;
+	public Class_AH_Smartsheet_Sync_Rooms_And_Meals      $Smartsheet_Sync_Rooms_And_Meals;
 	
 	public Class_Account_Page_Post_Type        $Account_Page;
 	public Class_Document_Post_Type            $Document;
@@ -75,6 +82,7 @@ class Class_AH_Plugin {
 	public Class_Village_Post_Type             $Village;
 	public Class_Hotel_Post_Type               $Hotel;
 	public Class_Hike_Post_Type                $Hike;
+	
 	public Class_AH_PDF                        $PDF;
 	
 	/*
@@ -83,7 +91,7 @@ class Class_AH_Plugin {
 	public function __construct() {
 		
 		// Finish loading the plugin after all other plugins have loaded
-		add_action( 'plugins_loaded', array( $this, 'initialize_plugin' ) );
+		add_action( 'plugins_loaded', array( $this, 'initialize_plugin' ), 20 );
 		
 		// When plugin is activated from the plugins page, call $this->plugin_activated()
 		register_activation_hook( __FILE__, array( $this, 'plugin_activated' ) );
@@ -136,23 +144,29 @@ class Class_AH_Plugin {
 		require_once( __DIR__ . '/includes/classes/rewrites.php' );
 		$this->Rewrites = new Class_AH_Rewrites();
 		
-		require_once( __DIR__ . '/includes/classes/smartsheet.php' );
-		$this->Smartsheet = new Class_AH_Smartsheet();
+		// ----------------------------------------
+		// 5. Smartsheet Integrations		
+		require_once( __DIR__ . '/includes/smartsheet/api.php' );
+		$this->Smartsheet_API = new Class_AH_Smartsheet_API();
 		
-		require_once( __DIR__ . '/includes/classes/smartsheet-sync-hotels.php' );
-		$this->Smartsheet_Hotels = new Class_AH_Smartsheet_Hotels();
-		
-		//require_once( __DIR__ . '/includes/classes/smartsheet-sync-rooms.php' );
-		//$this->Smartsheet_Rooms = new Class_AH_Smartsheet_Rooms();
-		
-		require_once( __DIR__ . '/includes/classes/smartsheet-invoices.php' );
-		$this->Smartsheet_Invoices = new Class_AH_Smartsheet_Invoices();
-		
-		require_once( __DIR__ . '/includes/classes/smartsheet-webhooks.php' );
+		require_once( __DIR__ . '/includes/smartsheet/webhooks.php' );
 		$this->Smartsheet_Webhooks = new Class_AH_Smartsheet_Webhooks();
 		
+		require_once( __DIR__ . '/includes/smartsheet/invoices.php' );
+		$this->Smartsheet_Invoices = new Class_AH_Smartsheet_Invoices();
+		
+		// Smartsheet - Sync utilities
+		require_once( __DIR__ . '/includes/smartsheet/sync.php' );
+		$this->Smartsheet_Sync = new Class_AH_Smartsheet_Sync();
+		
+		require_once( __DIR__ . '/includes/smartsheet/sync-hotels-and-villages.php' );
+		$this->Smartsheet_Sync_Hotels_And_Villages = new Class_AH_Smartsheet_Sync_Hotels_And_Villages();
+		
+		require_once( __DIR__ . '/includes/smartsheet/sync-rooms-and-meals.php' );
+		$this->Smartsheet_Sync_Rooms_And_Meals = new Class_AH_Smartsheet_Sync_Rooms_And_Meals();
+		
 		// ----------------------------------------
-		// 5. Custom post types controllers
+		// 6. Custom post types controllers
 		require_once( AH_PATH . '/includes/post-types/_abstract_post_type.php' );
 		
 		require_once( __DIR__ . '/includes/post-types/account_page.php' );
@@ -180,12 +194,12 @@ class Class_AH_Plugin {
 		$this->Hike = new Class_Hike_Post_Type();
 		
 		// ----------------------------------------
-		// 6. Include other functions
+		// 7. Include other functions
 		require_once( AH_PATH . '/includes/functions/general.php' );
 		require_once( AH_PATH . '/includes/functions/utility.php' );
 		
 		// ----------------------------------------
-		// 7. Shortcodes
+		// 8. Shortcodes
 		require_once( AH_PATH . '/includes/shortcodes/ah_documents.php' );
 		require_once( AH_PATH . '/includes/shortcodes/ah_invoice_merge_tags_preview.php' );
 		require_once( AH_PATH . '/includes/shortcodes/ah_invoices.php' );
@@ -193,7 +207,7 @@ class Class_AH_Plugin {
 		require_once( AH_PATH . '/includes/shortcodes/ah_login_form.php' );
 		
 		// ----------------------------------------
-		// 8. PDF Library
+		// 9. PDF Library
 		require_once( AH_PATH . '/includes/pdf/pdf.php' );
 		require_once( AH_PATH . '/includes/pdf/preview.php' );
 		$this->PDF = new Class_AH_PDF();

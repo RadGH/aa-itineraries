@@ -14,18 +14,13 @@ window.AH_Admin = new (function() {
 		// Remove empty ACF labels
 		o.hide_empty_acf_labels();
 
+		// When editing an invoice, disable the post title. It is generated when the invoice is saved.
 		if ( is_post_edit_screen && post_type === 'ah_invoice' ) {
-			// When editing an invoice, disable the post title. It is generated when the invoice is saved.
 			o.disable_post_title();
 		}
 
-		// Delete ah_notice from url
-		let new_url = window.location.href;
-		if ( new_url.indexOf('ah_notice') !== false ) {
-			new_url = o.remove_query_param_from_url( new_url, 'ah_notice' );
-			new_url = o.remove_query_param_from_url( new_url, 'ah_notice_data' );
-			history.replaceState(null, null, new_url);
-		}
+		// When clicking to create a post (village, hotel, itinerary), change the button appearance
+		o.create_post_buttons();
 
 	};
 
@@ -33,6 +28,16 @@ window.AH_Admin = new (function() {
 	 * Allow clicking our custom admin notices to silently dismiss with ajax, rather than reloading the page.
 	 */
 	o.admin_notices = function() {
+
+		// Remove existing ah_notice and ah_notice_data arguments from url
+		let new_url = window.location.href;
+		if ( new_url.indexOf('ah_notice') !== false ) {
+			new_url = o.remove_query_param_from_url( new_url, 'ah_notice' );
+			new_url = o.remove_query_param_from_url( new_url, 'ah_notice_data' );
+			history.replaceState(null, null, new_url);
+		}
+
+		// Clicking the dismiss notice button closes the notice, and uses ajax to clear it from the database
 		jQuery(document.body).on('click', '.ah-admin-notice-dismiss', function(e) {
 			let $dismiss = jQuery(this);
 			let $notice = $dismiss.closest('.ah-admin-notice');
@@ -100,6 +105,23 @@ window.AH_Admin = new (function() {
 		if ( jQuery('#title').val() === '' && title_value ) jQuery('#title').val( title_value );
 	};
 
+	/**
+	 * Clicking "Create [item]" buttons makes the button turn gray
+	 */
+	o.create_post_buttons = function() {
+		jQuery(document.body).on( 'click', '.ah-insert-button', function() {
+			jQuery(this).removeClass('button-primary');
+			jQuery(this).addClass('button-secondary');
+		});
+	};
+
+	/**
+	 * Remove a URL arg from a given url
+	 *
+	 * @param url
+	 * @param parameter
+	 * @returns {string}
+	 */
 	o.remove_query_param_from_url = function(url, parameter) {
 		var urlParts = url.split('?');
 
