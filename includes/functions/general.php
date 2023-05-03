@@ -180,11 +180,26 @@ function ah_add_admin_notice( $type, $message, $data = array(), $unique_key = nu
  * @param $message
  * @param $data
  * @param $unique_key
+ * @param $class
  *
  * @return void
  */
-function ah_add_theme_notice( $type, $message, $data = array(), $unique_key = null ) {
-	AH_Theme()->add_notice( $type, $message, $data, $unique_key );
+function ah_add_theme_notice( $type, $message, $data = array(), $unique_key = null, $class = '' ) {
+	AH_Theme()->add_notice( $type, $message, $data, $unique_key, $class );
+}
+
+/**
+ * Immediately display a single notice on the front-end.
+ *
+ * @param $type
+ * @param $message
+ * @param $data
+ * @param $class
+ *
+ * @return void
+ */
+function ah_display_theme_notice( $type, $message, $data = array(), $class = '' ) {
+	AH_Theme()->add_notice( $type, $message, $data, null, $class, true );
 }
 
 /**

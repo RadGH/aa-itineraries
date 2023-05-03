@@ -205,6 +205,7 @@ class Class_AH_Plugin {
 		require_once( AH_PATH . '/includes/shortcodes/ah_invoices.php' );
 		require_once( AH_PATH . '/includes/shortcodes/ah_itineraries.php' );
 		require_once( AH_PATH . '/includes/shortcodes/ah_login_form.php' );
+		require_once( AH_PATH . '/includes/shortcodes/ah_profile.php' );
 		
 		// ----------------------------------------
 		// 9. PDF Library

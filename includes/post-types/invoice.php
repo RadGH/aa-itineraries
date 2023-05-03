@@ -169,12 +169,14 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	 * @return array
 	 */
 	public function customize_columns( $columns ) {
+		if ( isset($columns['ssid']) ) unset($columns['ssid']);
+		
 		return array_merge(
 			array_slice( $columns, 0, 2),
 			array('ah_status' => 'Status'),
 			array('ah_amount' => 'Remaining Balance'),
 			array('ah_name' => 'Name'),
-			array('ah_owner' => 'Assigned To'),
+			array('ah_owner' => 'Assigned User'),
 			array_slice( $columns, 2, null),
 		);
 	}
@@ -363,7 +365,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		}
 		
 		// Save additional fields
-		update_field( 'tour_date', $this->get_entry_value($entry, 'tour_date'), $invoice_id );
+		update_post_meta( $invoice_id, 'tour_date', $this->get_entry_value($entry, 'tour_date') );
 		
 		// Store the post on the entry, and vice versa
 		gform_update_meta( $entry['id'], $this->field_ids['invoice_id'], $invoice_id );

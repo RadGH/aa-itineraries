@@ -17,7 +17,7 @@ function shortcode_ah_invoices( $atts, $content = '', $shortcode_name = 'ah_invo
 	<table class="ah-table ah-table-responsive ah-invoice-table" cellspacing="0">
 		<thead>
 			<tr>
-				<th class="col col-id">ID</th>
+				<th class="col col-id">Invoice No.</th>
 				<th class="col col-status">Status</th>
 				<th class="col col-amount">Amount Due</th>
 				<th class="col col-actions">Actions</th>
@@ -42,7 +42,7 @@ function shortcode_ah_invoices( $atts, $content = '', $shortcode_name = 'ah_invo
 				$classes[] = 'status-' . $status_slug;
 				?>
 				<tr class="<?php echo esc_attr(implode(' ', $classes)); ?>">
-					<td class="col col-id" data-mobile-label="ID"><?php
+					<td class="col col-id" data-mobile-label="Invoice No."><?php
 						printf(
 							'<a href="%s">%s</a>',
 							esc_attr( $invoice_url ),
@@ -55,7 +55,7 @@ function shortcode_ah_invoices( $atts, $content = '', $shortcode_name = 'ah_invo
 						
 						// Action: View
 						printf(
-							'<a href="%s" class="button button-secondary ah-button">%s</a>',
+							'<a href="%s" class="button button-secondary ah-button button-small">%s</a>',
 							esc_attr( $invoice_url ),
 							esc_html( 'View' )
 						);
@@ -66,7 +66,7 @@ function shortcode_ah_invoices( $atts, $content = '', $shortcode_name = 'ah_invo
 							$form_url = ah_get_invoice_form_url( $post->ID );
 							
 							printf(
-								'<a href="%s" class="button button-primary ah-button">%s</a>',
+								'<a href="%s" class="button button-primary ah-button button-small">%s</a>',
 								esc_attr( $form_url ),
 								esc_html( 'Pay Invoice' )
 							);

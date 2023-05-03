@@ -105,6 +105,7 @@ abstract class Class_Abstract_Post_Type {
 				exit;
 			}
 		}
+		
 	}
 	
 	/**

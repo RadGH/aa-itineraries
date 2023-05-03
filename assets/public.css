@@ -182,7 +182,7 @@ html .ah-button.button {
 }
 
 @media ( min-width: 1200px ) {
-	html .ah-button.button {
+	html .ah-button.button:not(.button-small) {
 		font-size: 16px;
 		padding: 15px 25px;
 	}
@@ -212,13 +212,17 @@ End: Custom buttons
 */
 
 /*
-Start: Invoice singular page
+Start: Invoices
 */
+table.ah-invoice-table {
+	width: 100%;
+}
+
 .invoice-additional-details {
 	margin-top: 40px;
 }
 /*
-End: Invoice singular page
+End: Invoices
 */
 
 /*
@@ -684,3 +688,50 @@ End: Grid content layout
 .button-row .button.button-outline {
 }
 /* End: button row */
+
+/* Start: Profile form shortcode [ah_profile] */
+.ah-profile-form h3 {
+	font-size: 24px;
+	line-height: 1.1;
+	margin: 30px 0 20px;
+}
+
+.ah-profile-form h3:first-child {
+	margin-top: 0;
+}
+
+.ah-field {
+	max-width: 600px;
+	margin: 10px 0 20px;
+}
+
+.ah-field .ah-label {
+	font-size: 16px;
+	line-height: 1.1;
+	font-weight: 700;
+	margin: 0 0 3px;
+}
+
+.ah-field .ah-input input[type="text"],
+.ah-field .ah-input input[type="password"],
+.ah-field .ah-input select,
+.ah-field .ah-input textarea {
+	margin: 0;
+	width: 100%;
+}
+
+.ah-field.ah-field--name .ah-input {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 20px;
+}
+
+.ah-validation-error-message p {
+	font-size: 16px;
+	color: #b72222;
+}
+
+.ah-field.ah-submit input[type="submit"] {
+	margin-top: 0 !important;
+}
+/* End: Profile form shortcode [ah_profile] */

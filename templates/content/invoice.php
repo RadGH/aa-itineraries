@@ -55,6 +55,7 @@ if ( $owner_id != $user_id ) {
 	?>
 	
 	<?php
+	/*
 	if ( current_user_can( 'administrator' ) ) {
 		?>
 		<div class="invoice-additional-details">
@@ -74,8 +75,6 @@ if ( $owner_id != $user_id ) {
 				<tr><th>last_name</th><td><?php echo get_field( 'last_name', $invoice_id ); ?></td></tr>
 				<tr><th>email</th><td><?php echo get_field( 'email', $invoice_id ); ?></td></tr>
 				<tr><th>phone_number</th><td><?php echo get_field( 'phone_number', $invoice_id ); ?></td></tr>
-				<?php /* <tr><th>username</th><td><?php echo get_field( 'username', $invoice_id ); ?></td></tr> */ ?>
-				<?php /* <tr><th>password</th><td><?php echo get_field( 'password', $invoice_id ); ?></td></tr> */ ?>
 				<tr><th>address</th><td><?php echo get_field( 'address', $invoice_id ); ?></td></tr>
 				<tr><th>address_2</th><td><?php echo get_field( 'address_2', $invoice_id ); ?></td></tr>
 				<tr><th>city</th><td><?php echo get_field( 'city', $invoice_id ); ?></td></tr>
@@ -89,6 +88,7 @@ if ( $owner_id != $user_id ) {
 		</div>
 		<?php
 	}
+	*/
 	?>
 
 </article>
