@@ -19,7 +19,7 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		'first_name'        => '1.3',
 		'last_name'         => '1.6',
 		
-		'email'             => 2,
+		'email'             => 2, // if logged in
 		'phone_number'      => 4,
 		
 		'username'          => 19, // if logged out
