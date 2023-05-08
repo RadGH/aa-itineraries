@@ -33,31 +33,6 @@ End: Fix select2 on top of datepickers
 */
 
 /*
-Start: Fix welcome panel (FEEL FREE TO REMOVE THIS IF FIXED ELSEWHERE)
-*/
-.welcome-panel .welcome-panel-column-container {
-	background: none;
-}
-
-@media (min-width: 1180px) {
-	.welcome-panel .welcome-panel-column-container {
-		justify-content: space-between;
-		gap: 80px;
-	}
-
-	.welcome-panel-column {
-		max-width: none !important;
-	}
-
-	.welcome-panel .sig {
-		grid-column: 1 / 3;
-	}
-}
-/*
-End: Fix welcome panel
-*/
-
-/*
 Start: Admin notices
 */
 .ah-admin-notice {
