@@ -112,6 +112,7 @@ window.AH_Admin = new (function() {
 		jQuery(document.body).on( 'click', '.ah-insert-button', function() {
 			jQuery(this).removeClass('button-primary');
 			jQuery(this).addClass('button-secondary');
+			jQuery(this).html( jQuery(this).html().replace(/Create (Village|Hotel)/, '$1 Created') );
 		});
 	};
 

@@ -140,6 +140,10 @@ Start: Hotel Info page
 	border-radius: 3px;
 }
 
+.ah-admin-table:last-child {
+	margin-bottom: 0;
+}
+
 .ah-admin-table-fixed {
 	table-layout: fixed;
 	width: 100%;
