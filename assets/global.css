@@ -87,3 +87,73 @@ Start: Login Form - Blue Box Theme
 /*
 End: Login Form - Blue Box Theme
 */
+
+
+/*
+START: Accordions [ah_accordion]
+See shortcodes/ah_accordion.php and global.js for details
+*/
+.ah-accordion {
+	margin: 10px 0 0;
+	border: 1px solid #dfdfdf;
+}
+
+.ah-accordion + .ah-accordion {
+	margin-top: 0;
+	border-top: none;
+}
+
+.ah-accordion .ah-handle {
+	position: relative;
+}
+
+.ah-accordion .ah-handle a,
+.ah-accordion .ah-handle button {
+	display: block;
+	padding: 10px 12px;
+	color: inherit;
+	text-decoration: none;
+}
+
+.ah-accordion .ah-handle a:hover,
+.ah-accordion .ah-handle button:hover {
+	background: rgba( 0, 0, 0, 0.02 );
+}
+
+.ah-accordion .ah-handle .ah-arrow {
+	position: relative;
+	margin-right: 8px;
+
+	display: inline-block;
+	width: 6px;
+	height: 6px;
+	border-top: 2px solid #787c82;
+	border-left: 2px solid #787c82;
+
+	top: -3px;
+	transform: rotate(225deg);
+	transition: all 0.1s linear;
+}
+
+.ah-accordion.ah-collapsed .ah-handle .ah-arrow {
+	top: -1px;
+	transform: rotate(135deg);
+}
+
+.ah-accordion .ah-content {
+	padding: 10px 12px;
+	border-top: 1px solid #dfdfdf;
+	background: rgba( 0, 0, 0, 0.04 );
+}
+
+.ah-accordion.ah-collapsed .ah-content {
+	display: none;
+}
+
+.wp-admin .ah-accordion .ah-handle a,
+.wp-admin .ah-accordion .ah-handle button {
+	font-weight: 500;
+}
+/*
+END: Accordions [ah_accordion]
+*/

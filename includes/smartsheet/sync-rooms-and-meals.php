@@ -189,7 +189,7 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 			'permalink' => $sheet['permalink'], // "https://app.smartsheet.com/sheets/325jvc9vPfWQmRJPvFgvJWfVMjRw3H3GrPjW8651"
 		);
 		
-		update_option( 'ah_meals_and_rooms_sheet', $sheet_data );
+		update_option( 'ah_meals_and_rooms_sheet', $sheet_data, false );
 		
 		// Get rows from the sheet
 		$rows = AH_Smartsheet_API()->get_rows_from_sheet( $sheet_id );
@@ -249,13 +249,16 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 		
 		// Remove duplicates and empty values
 		if ( $room_list ) {
-			update_option( 'ah_room_list', $room_list );
+			update_option( 'ah_room_list', $room_list, false );
 		}
 		
 		// Remove duplicates and empty values
 		if ( $meal_list ) {
-			update_option( 'ah_meal_list', $meal_list );
+			update_option( 'ah_meal_list', $meal_list, false );
 		}
+		
+		// Save the last sync date
+		update_option( 'ah_rooms_and_meals_last_sync', current_time('Y-m-d H:i:s'), false );
 		
 		return array( 'room_list' => $room_list, 'meal_list' => $meal_list );
 	}

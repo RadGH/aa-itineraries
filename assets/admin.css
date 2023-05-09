@@ -132,13 +132,17 @@ End: Custom admin postbox with scrolling sidebar
 Start: Hotel Info page
 */
 .ah-admin-table {
-	table-layout: fixed;
-	width: 100%;
 	margin: 10px 0 20px;
 	padding: 10px;
 
+	background: #ffffff;
 	border: 1px solid #dfdfdf;
 	border-radius: 3px;
+}
+
+.ah-admin-table-fixed {
+	table-layout: fixed;
+	width: 100%;
 }
 
 .ah-admin-table th {
@@ -150,6 +154,8 @@ Start: Hotel Info page
 .ah-admin-table td {
 	vertical-align: top;
 	text-align: left;
+	padding-left: 5px;
+	padding-right: 5px;
 }
 
 .ah-admin-table tbody tr td:not(:hover) span.cell {
@@ -164,9 +170,15 @@ Start: Hotel Info page
 	background: rgba(255,255,0,0.15);
 }
 
-.ah-admin-table .col-village_name,
-.ah-admin-table .col-hotel_name {
+.ah-admin-table .col-smartsheet_name,
+.ah-admin-table .col-smartsheet_id {
 	width: 150px;
+}
+@media ( min-width: 800px ) {
+	.ah-admin-table .col-smartsheet_name,
+	.ah-admin-table .col-smartsheet_id {
+		width: 240px;
+	}
 }
 /*
 End: Hotel Info page

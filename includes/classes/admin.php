@@ -265,7 +265,7 @@ class Class_AH_Admin {
 				$data = json_decode($data, true);
 				$hotel_count = $data['hotels'] ?? 0;
 				$village_count = $data['villages'] ?? 0;
-				$this->add_notice( 'success', 'Sync complete. Found '. $hotel_count .' hotels and ' . $village_count . ' villages.', null, null, true );
+				$this->add_notice( 'success', 'Sync complete. Found '. $village_count . ' villages and '. $hotel_count .' hotels.', null, null, true );
 				break;
 				
 			case 'sync_hotels_failed':
@@ -285,6 +285,14 @@ class Class_AH_Admin {
 			
 			case 'sync_rooms_failed':
 				$this->add_notice( 'success', 'Failed to sync room and meal information from the spreadsheet.', null, null, true );
+				break;
+			
+			case 'smartsheet_village_inserted':
+				$this->add_notice( 'success', 'This village has been automatically created and paired with Smartsheet.', null, null, true );
+				break;
+			
+			case 'smartsheet_hotel_inserted':
+				$this->add_notice( 'success', 'This hotel has been automatically created and paired with Smartsheet.', null, null, true );
 				break;
 				
 			default:

@@ -417,3 +417,29 @@ function ah_find_in_array( $array, $key, $value ) {
 	
 	return null;
 }
+
+/**
+ * Sorts a list of associative arrays by a key within each array.
+ *
+ * @param array[] $list
+ * @param string $key
+ * @param bool $asc
+ *
+ * @return array
+ */
+function ah_sort_by_key( $list, $key, $asc = true ) {
+	
+	// Sort the list using a custom function, passing $key and $asc as additional arguments
+	usort($list, function( $a, $b ) use ( $key, $asc ) {
+		
+		// Check if A before B and returns: 1, 0, or -1
+		$order = strcmp( strtolower($a[$key]), strtolower($b[$key]) );
+		
+		// If descending order, flip the positive/negative value
+		if ( ! $asc ) $order *= -1;
+		
+		return $order;
+	});
+	
+	return $list;
+}

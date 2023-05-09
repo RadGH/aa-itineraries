@@ -21,12 +21,12 @@ class Class_AH_Smartsheet_Sync {
 		global $wpdb;
 		
 		$sql = <<<MySQL
-SELECT DISTINCT p.ID as 'post_id', m.meta_value as 'smartsheet_name'
+SELECT DISTINCT p.ID as 'post_id', m.meta_value as 'smartsheet_id'
 
 FROM {$wpdb->posts} p
 
 LEFT JOIN {$wpdb->postmeta} m
-ON p.ID = m.post_id AND m.meta_key = 'smartsheet_name'
+ON p.ID = m.post_id AND m.meta_key = 'smartsheet_id'
 
 WHERE
     p.post_type = %s
@@ -43,7 +43,7 @@ MySQL;
 		$post_list = array();
 		
 		if ( $rows ) foreach( $rows as $row ) {
-			$post_list[ $row['post_id'] ] = $row['smartsheet_name'] ?: '';
+			$post_list[ $row['post_id'] ] = $row['smartsheet_id'] ?: '';
 		}
 		
 		return $post_list;
@@ -59,7 +59,7 @@ MySQL;
 	 *
 	 * @return int|false
 	 */
-	public function get_post_id_from_name( $smartsheet_name, $post_type, $post_list = null ) {
+	public function get_post_id_from_smartsheet_id( $smartsheet_name, $post_type, $post_list = null ) {
 		// Use post ID from the given list, if provided
 		if ( $post_list !== null ) {
 			$post_id = array_search( $smartsheet_name, $post_list );
@@ -75,7 +75,7 @@ SELECT DISTINCT p.ID
 FROM {$wpdb->posts} p
 
 INNER JOIN {$wpdb->postmeta} m
-ON p.ID = m.post_id AND m.meta_key = 'smartsheet_name'
+ON p.ID = m.post_id AND m.meta_key = 'smartsheet_id'
 
 WHERE
     p.post_type = %s
@@ -104,6 +104,7 @@ MySQL;
 	 *
 	 * @return array
 	 */
+	/*
 	public function get_unassigned_post_list( $post_list, $smartsheet_names ) {
 		$unassigned_posts = array();
 		
@@ -121,6 +122,7 @@ MySQL;
 		
 		return $unassigned_posts;
 	}
+	*/
 	
 	/**
 	 * Check if a cell from a spreadsheet is valid (not empty, not a formula error)

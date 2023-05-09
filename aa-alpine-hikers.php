@@ -34,6 +34,7 @@ function AH_Smartsheet_Webhooks() { return AH_Plugin()->Smartsheet_Webhooks; }
 
 function AH_Smartsheet_Sync() { return AH_Plugin()->Smartsheet_Sync; }
 function AH_Smartsheet_Sync_Hotels_And_Villages() { return AH_Plugin()->Smartsheet_Sync_Hotels_And_Villages; }
+function AH_Smartsheet_Sync_Itineraries() { return AH_Plugin()->Smartsheet_Sync_Itineraries; }
 function AH_Smartsheet_Sync_Rooms_And_Meals() { return AH_Plugin()->Smartsheet_Sync_Rooms_And_Meals; }
 
 function AH_Account_Page() { return AH_Plugin()->Account_Page; }
@@ -70,8 +71,9 @@ class Class_AH_Plugin {
 	public Class_AH_Smartsheet_Invoices        $Smartsheet_Invoices;
 	public Class_AH_Smartsheet_Webhooks        $Smartsheet_Webhooks;
 	
-	public Class_AH_Smartsheet_Sync            $Smartsheet_Sync;
+	public Class_AH_Smartsheet_Sync                      $Smartsheet_Sync;
 	public Class_AH_Smartsheet_Sync_Hotels_And_Villages  $Smartsheet_Sync_Hotels_And_Villages;
+	public Class_AH_Smartsheet_Sync_Itineraries          $Smartsheet_Sync_Itineraries;
 	public Class_AH_Smartsheet_Sync_Rooms_And_Meals      $Smartsheet_Sync_Rooms_And_Meals;
 	
 	public Class_Account_Page_Post_Type        $Account_Page;
@@ -162,6 +164,9 @@ class Class_AH_Plugin {
 		require_once( __DIR__ . '/includes/smartsheet/sync-hotels-and-villages.php' );
 		$this->Smartsheet_Sync_Hotels_And_Villages = new Class_AH_Smartsheet_Sync_Hotels_And_Villages();
 		
+		require_once( __DIR__ . '/includes/smartsheet/sync-itineraries.php' );
+		$this->Smartsheet_Sync_Itineraries = new Class_AH_Smartsheet_Sync_Itineraries();
+		
 		require_once( __DIR__ . '/includes/smartsheet/sync-rooms-and-meals.php' );
 		$this->Smartsheet_Sync_Rooms_And_Meals = new Class_AH_Smartsheet_Sync_Rooms_And_Meals();
 		
@@ -200,6 +205,7 @@ class Class_AH_Plugin {
 		
 		// ----------------------------------------
 		// 8. Shortcodes
+		require_once( AH_PATH . '/includes/shortcodes/ah_accordion.php' );
 		require_once( AH_PATH . '/includes/shortcodes/ah_documents.php' );
 		require_once( AH_PATH . '/includes/shortcodes/ah_invoice_merge_tags_preview.php' );
 		require_once( AH_PATH . '/includes/shortcodes/ah_invoices.php' );
