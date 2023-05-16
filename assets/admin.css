@@ -187,3 +187,31 @@ Start: Hotel Info page
 /*
 End: Hotel Info page
 */
+
+/*
+Start: Content review columns (Villages/Hotels)
+*/
+table.wp-list-table .column-ah_review {
+	width: 100px;
+}
+
+.ah-review-valid {
+	color: #cccccc;
+}
+
+.ah-review-valid:hover,
+.ah-review-valid:focus {
+	color: #676767;
+}
+
+.ah-review-invalid {
+	color: #d06161;
+}
+.ah-review-invalid:hover,
+.ah-review-invalid:focus {
+	color: #ff3434;
+}
+
+/*
+End: Content review columns (Villages/Hotels)
+*/

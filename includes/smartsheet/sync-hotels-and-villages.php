@@ -116,6 +116,9 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 	 * @return array {
 	 *      @type string $name
 	 *      @type string $id
+	 *
+	 *      Hotels only:
+	 *      @type string $village_id
 	 * }
 	 */
 	public function get_stored_hotel_list() {
@@ -245,7 +248,11 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 		if ( ! $rows ) return false;
 		
 		// 1. Get a list of hotels
-		$hotel_list = $this->get_values_from_rows( $rows, $column_ids['hotel_name'], $column_ids['hotel_id'] );
+		$hotel_list = $this->get_values_from_rows( $rows, array(
+			'name'       => $column_ids['hotel_name'],
+			'id'         => $column_ids['hotel_id'],
+			'village_id' => $column_ids['village_id'],
+		) );
 		
 		// Save the hotel list
 		if ( $hotel_list ) {
@@ -253,7 +260,10 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 		}
 	
 		// 2. Get a list of villages
-		$village_list = $this->get_values_from_rows( $rows, $column_ids['village_name'], $column_ids['village_id'] );
+		$village_list = $this->get_values_from_rows( $rows, array(
+			'name'       => $column_ids['village_name'],
+			'id'         => $column_ids['village_id'],
+		));
 		
 		// Save the hotel list
 		if ( $village_list ) {
@@ -271,30 +281,32 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 	 * Used for both villages and hotels.
 	 *
 	 * @param array[] $rows         Rows from: AH_Smartsheet_API()->get_rows_from_sheet( $sheet_id )
-	 * @param string $name_column   Column ID for the item name
-	 * @param string $id_column     Column ID for the item ID
+	 * @param array $columns        Array of column IDs where keys are the name to be returned.
+	 *                              Note: 'id' and 'name' columns are required.
 	 *
-	 * @return array[]
+	 * @return array
 	 */
-	public function get_values_from_rows( $rows, $name_column, $id_column ) {
+	public function get_values_from_rows( $rows, $columns ) {
 		$items = array();
 		
 		// Loop through each row
 		if ( $rows ) foreach( $rows as $row ) {
 			
-			// Get item name and id from their respective cells
-			$name_cell = ah_find_in_array( $row['cells'], 'columnId', $name_column );
-			$id_cell = ah_find_in_array( $row['cells'], 'columnId', $id_column );
+			$item = array();
 			
-			$item_name = $name_cell['value'] ?? false;
-			$item_id = $id_cell['value'] ?? false;
+			// Get each specific column's value from this row
+			foreach( $columns as $key => $column_id ) {
+				$cell = ah_find_in_array( $row['cells'], 'columnId', $column_id );
+				$item[ $key ] = $cell['value'] ?? false;
+			}
 			
-			// If the name and ID are valid, add the item
-			if ( AH_Smartsheet_Sync()->is_cell_valid( $item_name ) && AH_Smartsheet_Sync()->is_cell_valid( $item_id ) ) {
-				$items[ $item_id ] = array(
-					'name' => $item_name,
-					'id' => $item_id,
-				);
+			// Check that name and id are valid
+			if (
+				AH_Smartsheet_Sync()->is_cell_valid( $item['name'] )
+				&&
+				AH_Smartsheet_Sync()->is_cell_valid( $item['id'] )
+			) {
+				$items[ $item['id'] ] = $item;
 			}
 		}
 		
@@ -425,13 +437,17 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 		
 		$args = array(
 			'ah_create_item' => $type,
-			'ah_post_title' => $smartsheet_name,
+			'ah_smartsheet_name' => $smartsheet_name,
 			'ah_smartsheet_id' => $smartsheet_id,
 		);
 		
 		$url = add_query_arg($args, $base_url);
 		
 		return $url;
+	}
+	
+	
+	public function get_hotel_row_from_smartsheet_list( $smartsheet_id ) {
 	}
 	
 	/**
@@ -443,14 +459,17 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 		if ( ! isset($_GET['ah_create_item']) ) return;
 		
 		$type = stripslashes($_GET['ah_create_item']);
-		$post_title = stripslashes($_GET['ah_post_title']);
+		$smartsheet_name = stripslashes($_GET['ah_smartsheet_name']);
 		$smartsheet_id = stripslashes($_GET['ah_smartsheet_id']);
+		
+		// Smartsheet ID is used as the post title because some villages/hotels may have repeat names in different locations.
+		$post_title = $smartsheet_id;
 		
 		if ( $type == 'village' ) {
 			$type_name = 'Village';
 			$post_type = AH_Village()->get_post_type();
 			$existing_post_id = $this->get_village_by_smartsheet_id($smartsheet_id);
-		}else if ( isset($_GET['ah_create_hotel']) ) {
+		}else if ( $type == 'hotel' ) {
 			$type_name = 'Hotel';
 			$post_type = AH_Hotel()->get_post_type();
 			$existing_post_id = $this->get_hotel_by_smartsheet_id($smartsheet_id);
@@ -478,6 +497,19 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 			'post_status' => 'publish',
 		);
 		
+		// Hotels also correspond to a village
+		if ( $type == 'hotel' ) {
+			$hotel = $this->get_hotel_by_smartsheet_id( $smartsheet_id );
+			pre_dump($hotel);
+
+		}
+		
+		pre_dump(compact(
+			'type', 'smartsheet_name', 'smartsheet_id',
+			'type_name', 'post_type', 'existing_post_id'
+		));
+		pre_dump(compact($args));
+		exit;
 		$post_id = wp_insert_post( $args );
 		
 		if ( ! $post_id || is_wp_error( $post_id ) ) {
@@ -490,6 +522,13 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 		
 		// Set the last sync date for this post
 		update_post_meta( $post_id, 'smartsheet_last_sync', current_time('Y-m-d H:i:s') );
+		
+		// Set the village/post name (custom field)
+		if ( $type == 'village' ) {
+			update_post_meta( $post_id, 'village_name', $smartsheet_name );
+		}else{
+			update_post_meta( $post_id, 'hotel_name', $smartsheet_name );
+		}
 		
 		// Redirect to the edit post screen
 		$url = get_edit_post_link( $post_id, 'raw' );

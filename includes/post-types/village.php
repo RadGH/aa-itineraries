@@ -82,4 +82,49 @@ class Class_Village_Post_Type extends Class_Abstract_Post_Type {
 		return $args;
 	}
 	
+	/**
+	 * Add a column that shows any information that is missing
+	 *
+	 * @param $columns
+	 *
+	 * @return array
+	 */
+	public function customize_columns( $columns ) {
+		return array_merge(
+			array_slice( $columns, 0, 2),
+			array('ah_review' => 'Content Review'),
+			array_slice( $columns, 2, null),
+		);
+	}
+	
+	/**
+	 * Display custom columns html
+	 *
+	 * @param string $column
+	 * @param int $post_id
+	 *
+	 * @return void
+	 */
+	public function display_columns( $column, $post_id ) {
+		switch( $column ) {
+			case 'ah_review':
+				$fields = array(
+					'Village Name' => get_post_meta( $post_id, 'village_name', true ),
+					'Image' => get_post_meta( $post_id, 'image', true ),
+					'Introduction' => get_post_meta( $post_id, 'village_intro', true ),
+					'In and Around' => get_post_meta( $post_id, 'around_the_village', true ),
+				);
+				
+				foreach( $fields as $name => $value ) {
+					if ( $value ) {
+						echo '<a href="#" title="&quot;'. esc_attr($name) .'&quot; is valid" class="ah-tooltip ah-review-valid"><span class="dashicons dashicons-yes"></span></a>';
+					}else{
+						echo '<a href="#" title="&quot;'. esc_attr($name) .'&quot; has no value" class="ah-tooltip ah-review-invalid"><span class="dashicons dashicons-no"></span></a>';
+					}
+				}
+				
+				break;
+		}
+	}
+	
 }

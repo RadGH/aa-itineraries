@@ -13,7 +13,7 @@ window.AH_Global = new (function() {
 		o.initialize_module( 'AH_Public' );
 
 		o.register_ah_toggle();
-
+		o.register_ah_tooltip();
 		o.register_ah_accordion();
 
 	};
@@ -40,6 +40,15 @@ window.AH_Global = new (function() {
 				$target.css( 'display', $target.css('display') === 'block' ? 'none' : 'block' );
 			}
 
+			return false;
+		});
+	};
+
+	// Clicking on a tooltip will show an alert window with the "title" attribute.
+	// <a href="#" class="ah-tooltip" title="Try this out!">Click here</a>
+	o.register_ah_tooltip = function() {
+		jQuery(document.body).on('click', '.ah-tooltip[title]', function(e) {
+			alert( jQuery(this).attr('title') );
 			return false;
 		});
 	};
