@@ -105,11 +105,6 @@ Start: Account Menus
 		margin-top: -1px;
 	}
 
-	body.scrolled-past-account-sidebar .account-sidebar {
-		margin-left: -32px;
-		margin-right: -32px;
-	}
-
 	body.scrolled-past-account-sidebar .ah-account-menu-nav {
 		padding: 20px 32px;
 	}
@@ -140,6 +135,21 @@ Start: Account Menus
 		top: 0;
 	}
 }
+
+/* Adjust to margins of the page */
+@media ( max-width: 980px ) {
+	body.scrolled-past-account-sidebar .account-sidebar {
+		margin-left: -20px;
+		margin-right: -20px;
+	}
+}
+@media ( max-width: 980px ) and ( min-width: 767px ) {
+	body.scrolled-past-account-sidebar .account-sidebar {
+		margin-left: -32px;
+		margin-right: -32px;
+	}
+}
+
 /*
 End: Account Menus
 */
@@ -273,7 +283,7 @@ nav.ah-account-menu-nav ul.sub-menu li {
 }
 
 nav.ah-account-menu-nav ul.sub-menu li > a::before {
-	content: '•';
+	content: '\2022';
 	margin-right: 5px;
 }
 

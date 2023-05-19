@@ -14,7 +14,7 @@ margin-right: 30px or 50px;
 	even-footer-name: none;
 	odd-footer-name: none;
 	margin: 12mm 16mm 23mm;
-	sheet-size: 815px 1055px;
+	/*sheet-size: 815px 1055px;*/
 }
 
 @page default_page {

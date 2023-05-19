@@ -239,18 +239,21 @@ function ah_display_image( $image_id, $max_w = 1055, $max_h = 815 ) {
 /**
  * Gets a width and height that will fix within the maximum width/height parameters.
  *
- * @param $original_w
- * @param $original_h
- * @param $max_w
- * @param $max_h
+ * @param int $original_w
+ * @param int $original_h
+ * @param int $max_w
+ * @param int $max_h
+ * @param bool $as_float    Default (false) returns rounded integers. If true, returns with decimals, as a float.
  *
- * @return array|float[]|int[]
+ * @return false|int[]|float[]
  */
-function ah_fit_image_size( $original_w, $original_h, $max_w = 0, $max_h = 0 ) {
+function ah_fit_image_size( $original_w, $original_h, $max_w = 0, $max_h = 0, $as_float = false ) {
 	
-	$w = $original_w;
-	$h = $original_h;
+	$w = (int) $original_w;
+	$h = (int) $original_h;
 	
+	if ( $w <= 0 || $h <= 0 ) return false;
+
 	$ratio_h = $w / $h;
 	$ratio_w = $h / $w;
 	
@@ -273,6 +276,9 @@ function ah_fit_image_size( $original_w, $original_h, $max_w = 0, $max_h = 0 ) {
 		$h = $max_h;
 		$w = $h * $ratio_h;
 	}
+	
+	$w = round($w);
+	$h = round($h);
 	
 	return array( $w, $h );
 }
@@ -442,4 +448,22 @@ function ah_sort_by_key( $list, $key, $asc = true ) {
 	});
 	
 	return $list;
+}
+
+/**
+ * Check if an array is empty. If it contains arrays, checks that those arrays are empty. Everything must be empty!
+ *
+ * @param array $array
+ *
+ * @return bool
+ */
+function is_array_recursively_empty( $array ) {
+	if ( empty($array) ) return true; // 0, false, array()
+	if ( ! is_array($array) ) return false; // non-empty value
+	
+	foreach( $array as $item ) {
+		if ( ! is_array_recursively_empty( $item ) ) return false; // check each item, abort if any contain a value
+	}
+	
+	return true; // array is empty
 }

@@ -216,6 +216,15 @@ class Class_AH_PDF {
 			// Page settings
 			'orientation' => 'P',
 			
+			
+			// DPI's
+			// standard: 72
+			// mpdf defualt: 96 (25% more)
+			// print: 300
+			// 1628 / 1222
+			'dpi' => 96,
+			'img_dpi' => 96, // default 96
+			
 			'format' => 'LETTER',
 			// 'format' => [$w = 210, $w * (11/8.5)],
 			// 815px x 1055px

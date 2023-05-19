@@ -504,12 +504,15 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 
 		}
 		
+		/*
 		pre_dump(compact(
 			'type', 'smartsheet_name', 'smartsheet_id',
 			'type_name', 'post_type', 'existing_post_id'
 		));
 		pre_dump(compact($args));
 		exit;
+		*/
+		
 		$post_id = wp_insert_post( $args );
 		
 		if ( ! $post_id || is_wp_error( $post_id ) ) {

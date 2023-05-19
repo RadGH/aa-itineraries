@@ -19,7 +19,15 @@ $link_items = get_field( 'link_links', $post_id );
 // Remove empty links
 if ( $link_items ) foreach( $link_items as $k => $l ) if ( empty($l['url']) ) unset($link_items[$k]);
 
-$topographic_map_image = wp_get_attachment_image_src( $topographic_map, 'full' );
+// Topographic map image from WP media library
+$t = $topographic_map ? wp_get_attachment_image_src( $topographic_map, 'full' ) : false;
+$topo_image_src = $t[0] ?? false;
+$topo_image_w = $t[1] ?? false;
+$topo_image_h = $t[2] ?? false;
+
+$size = ah_fit_image_size($topo_image_w, $topo_image_h, 815, 1055);
+$topo_scaled_w = $size[0];
+$topo_scaled_h = $size[1];
 
 if ( $additional_content ) $content .= "\n\n" . $additional_content;
 ?>
@@ -56,32 +64,54 @@ if ( ah_is_pdf() ) {
 	</htmlpagefooter>
     */ ?>
 	
+	<?php if ( $topographic_map ) { ?>
 	<style>
 		#page-hike-topo-<?php echo esc_attr($slug); ?> {
 			page: hike_topo_<?php echo $post_id; ?>;
 		}
 
 		@page hike_topo_<?php echo $post_id; ?> {
-			/*even-footer-name: footer_hike_topo_*/<?php //echo $post_id; ?>/*;*/
-			/*odd-footer-name: footer_hike_topo_*/<?php //echo $post_id; ?>/*;*/
-			
 			even-footer-name: none;
 			odd-footer-name: none;
+
+			margin: 0;
 			
-			background-image: url(<?php echo $topographic_map_image[0]; ?>);
+			background: url(<?php echo esc_html($topo_image_src); ?>) top left no-repeat;
 
 			<?php
-			// 815px x 1055px
-			$size = ah_fit_image_size($topographic_map_image[1], $topographic_map_image[1], 815, 1055);
-            ?>
-			sheet-size: <?php echo $size[0] . 'px ' . $size[1] . 'px'; ?>;
+			// 815px x 1055px (ratio 0.7725118 or 1.294478)
+			$ratio = $topo_image_w / $topo_image_h; // landscape 5 / 2 = 2.5; portrait 2 / 5 = 0.4
+			$is_landscape = $ratio >= 1;
+			
+			// Check if landscape
+			// resize 4 = scale to width (landscape), 5 = scale to height (portrait), 6 = scale both to fit
+			if ( $is_landscape ) {
+				?>
+				size: landscape;
+				background-image-resize: 4;
+				<?php
+			}else{
+				?>
+				size: portrait;
+				background-image-resize: 5;
+				<?php
+			}
+			?>
+			
+			
 		}
 	</style>
+	<?php } ?>
+	
 	<?php
 }
 ?>
 <section id="hike-<?php echo esc_attr($slug); ?>" class="pdf-section hike hike-<?php echo esc_attr($slug); ?> hike-id-<?php echo $post_id; ?>">
 	
+	<?php
+	$show_hike_page = ( $summary || $link_items || $elevation_diagram || $content );
+	if ( $show_hike_page ) {
+	?>
 	<div class="pdf-page page-hike" id="page-hike-main-<?php echo esc_attr($slug); ?>">
 		
 		<?php if ( $first_bookmark ) { ?>
@@ -140,6 +170,7 @@ if ( ah_is_pdf() ) {
 		<?php } ?>
 	
 	</div>
+	<?php } ?>
 	
 	<?php
 	if ( $topographic_map ) {
@@ -148,7 +179,7 @@ if ( ah_is_pdf() ) {
 			
 			<?php if ( ! ah_is_pdf() || ah_is_pdf_preview() ) { ?>
 				<div class="full-page-image">
-					<?php ah_display_image( $topographic_map, 815, 1055 ); ?>
+					<?php ah_display_image( $topographic_map /*, 815, 1055 */ ); ?>
 				</div>
 			<?php } ?>
 		

@@ -73,6 +73,12 @@
 		border: none;
 	}
 
+	table.schedule-table tr {
+		display: block;
+		margin: 0 -20px;
+		padding: 0 5px;
+	}
+
 	table.schedule-table .column-1 { padding-top: 15px; }
 	table.schedule-table .column-3 { padding-bottom: 15px; }
 

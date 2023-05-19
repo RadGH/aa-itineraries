@@ -17,7 +17,8 @@ $schedule = get_field( 'schedule', get_the_ID() );
 
 $departure_information = get_field( 'departure_information', get_the_ID() );
 
-$phone_numbers = get_field( 'phone_numbers', get_the_ID() );
+$all_phone_numbers = (array) get_field( 'phone_numbers', get_the_ID() ); // title, phone_number, content
+$has_phone_numbers = ! is_array_recursively_empty( $all_phone_numbers );
 
 $country_codes = get_field( 'country_codes', get_the_ID() );
 
@@ -152,6 +153,11 @@ if ( ah_is_pdf() ) {
 
 <section id="itinerary" class="pdf-section itinerary itinerary-<?php echo esc_attr($slug); ?> itinerary-id-<?php the_ID(); ?>">
 	
+	<?php
+	$show_intro_page = ( $introduction_message || $contact_information );
+	
+	if ( $show_intro_page ) {
+	?>
 	<div class="pdf-page" id="intro">
 		
 		<?php ah_display_bookmark( 'Introduction', 0 ); ?>
@@ -183,7 +189,16 @@ if ( ah_is_pdf() ) {
 		<?php } ?>
 	
 	</div>
+	<?php } ?>
 	
+	<?php
+	$show_schedule_page = ( $schedule || $departure_information );
+	
+	// If the intro page was not displayed, force the schedule to display
+	if ( ! $show_intro_page ) $show_schedule_page = true;
+	
+	if ( $show_schedule_page ) {
+	?>
 	<div class="pdf-page" id="schedule">
 		
 		<?php ah_display_bookmark( 'Schedule', 0 ); ?>
@@ -196,36 +211,41 @@ if ( ah_is_pdf() ) {
 			<?php if ( $date_range ) echo '<h2 class="pdf-subtitle date-range">', $date_range, '</h2>'; ?>
 		</div>
 		
-		<div class="section-sechedule">
+		<?php if ( $schedule || $departure_information ) { ?>
+		<div class="section-schedule">
 			
 			<?php
-			if ( $schedule || $departure_information ) {
-				
-				echo '<table class="schedule-table columns-3"><tbody>';
-				
-				if ( $schedule ) foreach( $schedule as $i ) {
-					echo '<tr>';
-						echo '<td class="column column-1">', nl2br($i['column_1']), '</td>';
-						echo '<td class="column column-2">', nl2br($i['column_2']), '</td>';
-						echo '<td class="column column-3">', nl2br($i['column_3']), '</td>';
-					echo '</tr>';
-				}
-				
-				if ( $departure_information ) {
-					echo '<tr>';
-					echo '<td class="column column-1">Departure Information:</td>';
-					echo '<td class="column column-2-3" colspan="2">', nl2br($departure_information), '</td>';
-					echo '</tr>';
-				}
-				
-				echo '</tbody></table>';
-				
+			echo '<table class="schedule-table columns-3"><tbody>';
+			
+			if ( $schedule ) foreach( $schedule as $i ) {
+				echo '<tr class="schedule">';
+					echo '<td class="column column-1">', nl2br($i['column_1']), '</td>';
+					echo '<td class="column column-2">', nl2br($i['column_2']), '</td>';
+					echo '<td class="column column-3">', nl2br($i['column_3']), '</td>';
+				echo '</tr>';
 			}
+			
+			if ( $departure_information ) {
+				echo '<tr class="department-information">';
+				echo '<td class="column column-1">Departure Information:</td>';
+				echo '<td class="column column-2-3" colspan="2">', nl2br($departure_information), '</td>';
+				echo '</tr>';
+			}
+			
+			echo '</tbody></table>';
 			?>
 		</div>
+		<?php } ?>
 		
 	</div>
+	<?php
+	}
+	?>
 	
+	<?php
+	$show_directory_page = ( $has_phone_numbers || $country_codes );
+	if ( $show_directory_page ) {
+	?>
 	<div class="pdf-page" id="directory">
 		
 		<?php ah_display_bookmark( 'Directory', 0 ); ?>
@@ -237,9 +257,9 @@ if ( ah_is_pdf() ) {
 		<div class="section-directory">
 			
 			<?php
-			if ( $phone_numbers ) {
+			if ( $all_phone_numbers ) {
 				echo '<table class="directory-table columns-2"><tbody>';
-				foreach( $phone_numbers as $i ) {
+				foreach( $all_phone_numbers as $i ) {
 					
 					if ( $i['title'] || $i['phone_number'] ) {
 						echo '<tr>';
@@ -272,7 +292,14 @@ if ( ah_is_pdf() ) {
 		</div>
 		
 	</div>
+	<?php
+	}
+	?>
 	
+	<?php
+	$show_tour_overview = $tour_overview != '';
+	if ( $show_tour_overview ) {
+	?>
 	<div class="pdf-page" id="tour-overview">
 		
 		<?php ah_display_bookmark( 'Tour Overview', 0 ); ?>
@@ -281,17 +308,16 @@ if ( ah_is_pdf() ) {
 			<?php echo '<h1 class="pdf-title">Tour Overview</h1>'; ?>
 		</div>
 		
-		<div class="section-sechedule">
-			
-			<?php if ( $tour_overview ) { ?>
-				<div class="section-content itinerary-tour-overview">
-					<?php ah_display_content_columns( $tour_overview ); ?>
-				</div>
-			<?php } ?>
-			
-		</div>
+		<?php if ( $tour_overview ) { ?>
+			<div class="section-content itinerary-tour-overview">
+				<?php ah_display_content_columns( $tour_overview ); ?>
+			</div>
+		<?php } ?>
 		
 	</div>
+	<?php
+	}
+	?>
 
 </section>
 

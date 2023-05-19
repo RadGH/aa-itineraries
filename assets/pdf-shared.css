@@ -108,6 +108,23 @@ bookmark {
 	padding: 0;
 }
 
+@media ( max-width: 980px ) {
+	.pdf-page h1 {
+		font-size: 26px;
+	}
+
+	.pdf-page h2 {
+		font-size: 22px;
+	}
+
+	.pdf-page h3,
+	.pdf-page h4,
+	.pdf-page h5,
+	.pdf-page h6 {
+		font-size: 18px;
+	}
+}
+
 /* End: Typography */
 
 

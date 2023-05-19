@@ -1,6 +1,6 @@
 <?php
 
-// Version 1.9
+// Version 1.9.2
 
 // Get user IP from cloudflare or remote_addr
 if ( ! function_exists('aa_get_ip_address') ) {
@@ -26,6 +26,14 @@ if ( ! function_exists('aa_is_developer') ) {
 	function aa_is_developer() {
 		// Allow disabling developer mode with the URL by adding ?nodev
 		if ( isset($_GET['nodev']) ) return false;
+		
+		// Check for username
+		$user = wp_get_current_user();
+		
+		if ( $user->ID > 0 ) {
+			if ( $user->user_login == "alchemyandaim" ) return true;
+			if ( $user->user_login == "alchemyandaim_radley" ) return true;
+		}
 		
 		// Check if user IP address in the list of developer IPs
 		$user_ip = aa_get_ip_address();
