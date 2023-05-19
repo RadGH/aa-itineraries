@@ -17,6 +17,7 @@ get_column_ids_from_settings( $key )
 get_sheet_id_from_settings( $key )
 
 # SHEETS
+list_sheets()
 search_for_sheet( $search )
 get_sheet_by_id( $sheet_id )
 
@@ -35,8 +36,9 @@ get_sheet_columns( $sheet_id )
 
 # WEBHOOKS
 list_webhooks( $sheet_id )
-@todo get_webhook( $sheet_id, $webhook_id ) ?
 @todo add_webhook( $sheet_id ) ?
+add_webhook( $object_id, $scope, $title, $action, $enabled = true )
+@todo get_webhook( $sheet_id, $webhook_id ) ?
 @todo update_webhook( $sheet_id ) ?
 */
 
@@ -225,6 +227,84 @@ class Class_AH_Smartsheet_API {
 		return $cols;
 	}
 	
+	/**
+	 * Get a list of sheets, returning a limited number of sheets per page.
+	 * To get ALL sheets without pagination @see self::list_all_sheets()
+	 *
+	 * @see https://smartsheet.redoc.ly/tag/sheets#operation/list-sheets
+	 *
+	 * @param int $page        default: 1
+	 * @param int $per_page    default: 100
+	 *
+	 * @return array|false
+	 *
+	 * {
+	 *      @type int $pageNumber   1
+	 *      @type int $pageSize     100
+	 *      @type int $totalPages   17
+	 *      @type int $totalCount   1634
+	 *
+	 *      @type array[] $data {
+	 *          @type int    $id                5187134723254148
+	 *          @type string $name           "*2023 (Forrest) Best TMB-0615"
+	 *          @type string $accessLevel    "ADMIN"
+	 *          @type string $permalink      "https://app.smartsheet.com/sheets/9Jhp3828pWqfC5mfrfPFhJhrpJRJjj78x2xc3pr1"
+	 *          @type string $createdAt      "2022-08-15T14:24:42Z"
+	 *          @type string $modifiedAt     "2023-05-02T20:17:45Z"
+	 *      }
+	 * }
+	 */
+	public function list_sheets( $page = 1, $per_page = 100 ) {
+		$url = 'https://api.smartsheet.com/2.0/sheets';
+		$data = array();
+		$body = array();
+		$method = 'GET';
+		$headers = array( 'Content-Type' => 'application/json' );
+		
+		// unused:
+		// $data['include'] = '';
+		// $data['modifiedSince'] = '';
+		// $data['numericDates'] = '';
+		
+		if ( $per_page === -1 ) {
+			// Despite the documentation, this parameter does not seem to work.
+			$data['includeAll'] = true;
+			
+			// So we just raise the limit instead:
+			$data['page'] = 1;
+			$data['pageSize'] = 999999999;
+		}else{
+			$data['page'] = $page;
+			$data['pageSize'] = $per_page;
+		}
+		
+		$result = $this->request( $url, $method, $data, $body, $headers );
+		
+		if ( ! $result['success'] ) {
+			return false;
+		}else{
+			return $result['data'] ?: array();
+		}
+	}
+	
+	/**
+	 * Get a list of ALL sheets.
+	 *
+	 * For more information @see self::list_sheets()
+	 *
+	 * @return array|false
+	 */
+	public function list_all_sheets() {
+		return $this->list_sheets( 1, -1 );
+	}
+	
+	/**
+	 * Search for a sheet by a given search string
+	 *
+	 * @param $search
+	 *
+	 * @return array|false
+	 */
 	public function search_for_sheet( $search ) {
 		$url = 'https://api.smartsheet.com/2.0/search';
 		$data = array();

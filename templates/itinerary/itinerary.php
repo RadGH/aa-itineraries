@@ -18,7 +18,7 @@ $schedule = get_field( 'schedule', get_the_ID() );
 $departure_information = get_field( 'departure_information', get_the_ID() );
 
 $all_phone_numbers = (array) get_field( 'phone_numbers', get_the_ID() ); // title, phone_number, content
-$has_phone_numbers = ! is_array_recursively_empty( $all_phone_numbers );
+$has_phone_numbers = ! ah_is_array_recursively_empty( $all_phone_numbers );
 
 $country_codes = get_field( 'country_codes', get_the_ID() );
 

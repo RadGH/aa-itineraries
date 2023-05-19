@@ -31,11 +31,13 @@ function AH_Theme() { return AH_Plugin()->Theme; }
 function AH_Smartsheet_API() { return AH_Plugin()->Smartsheet_API; }
 function AH_Smartsheet_Invoices() { return AH_Plugin()->Smartsheet_Invoices; }
 function AH_Smartsheet_Webhooks() { return AH_Plugin()->Smartsheet_Webhooks; }
+function AH_Smartsheet_Sheet_Select() { return AH_Plugin()->Smartsheet_Sheet_Select; }
 
 function AH_Smartsheet_Sync() { return AH_Plugin()->Smartsheet_Sync; }
 function AH_Smartsheet_Sync_Hotels_And_Villages() { return AH_Plugin()->Smartsheet_Sync_Hotels_And_Villages; }
 function AH_Smartsheet_Sync_Itineraries() { return AH_Plugin()->Smartsheet_Sync_Itineraries; }
 function AH_Smartsheet_Sync_Rooms_And_Meals() { return AH_Plugin()->Smartsheet_Sync_Rooms_And_Meals; }
+function AH_Smartsheet_Sync_Sheets() { return AH_Plugin()->Smartsheet_Sync_Sheets; }
 
 function AH_Account_Page() { return AH_Plugin()->Account_Page; }
 function AH_Document() { return AH_Plugin()->Document; }
@@ -70,11 +72,13 @@ class Class_AH_Plugin {
 	public Class_AH_Smartsheet_API             $Smartsheet_API;
 	public Class_AH_Smartsheet_Invoices        $Smartsheet_Invoices;
 	public Class_AH_Smartsheet_Webhooks        $Smartsheet_Webhooks;
+	public Class_AH_Smartsheet_Sheet_Select    $Smartsheet_Sheet_Select;
 	
 	public Class_AH_Smartsheet_Sync                      $Smartsheet_Sync;
 	public Class_AH_Smartsheet_Sync_Hotels_And_Villages  $Smartsheet_Sync_Hotels_And_Villages;
 	public Class_AH_Smartsheet_Sync_Itineraries          $Smartsheet_Sync_Itineraries;
 	public Class_AH_Smartsheet_Sync_Rooms_And_Meals      $Smartsheet_Sync_Rooms_And_Meals;
+	public Class_AH_Smartsheet_Sync_Sheets               $Smartsheet_Sync_Sheets;
 	
 	public Class_Account_Page_Post_Type        $Account_Page;
 	public Class_Document_Post_Type            $Document;
@@ -154,6 +158,9 @@ class Class_AH_Plugin {
 		require_once( __DIR__ . '/includes/smartsheet/webhooks.php' );
 		$this->Smartsheet_Webhooks = new Class_AH_Smartsheet_Webhooks();
 		
+		require_once( __DIR__ . '/includes/smartsheet/sheet-select.php' );
+		$this->Smartsheet_Sheet_Select = new Class_AH_Smartsheet_Sheet_Select();
+		
 		require_once( __DIR__ . '/includes/smartsheet/invoices.php' );
 		$this->Smartsheet_Invoices = new Class_AH_Smartsheet_Invoices();
 		
@@ -169,6 +176,9 @@ class Class_AH_Plugin {
 		
 		require_once( __DIR__ . '/includes/smartsheet/sync-rooms-and-meals.php' );
 		$this->Smartsheet_Sync_Rooms_And_Meals = new Class_AH_Smartsheet_Sync_Rooms_And_Meals();
+		
+		require_once( __DIR__ . '/includes/smartsheet/sync-sheets.php' );
+		$this->Smartsheet_Sync_Sheets = new Class_AH_Smartsheet_Sync_Sheets();
 		
 		// ----------------------------------------
 		// 6. Custom post types controllers

@@ -22,6 +22,9 @@ window.AH_Admin = new (function() {
 		// When clicking to create a post (village, hotel, itinerary), change the button appearance
 		o.create_post_buttons();
 
+		// Enable select2 with ajax results when using the "Search Sheets" dropdown, see sheet-select.php
+		o.setup_sheet_search_fields();
+
 	};
 
 	/**
@@ -113,6 +116,49 @@ window.AH_Admin = new (function() {
 			jQuery(this).removeClass('button-primary');
 			jQuery(this).addClass('button-secondary');
 			jQuery(this).html( jQuery(this).html().replace(/Create (Village|Hotel)/, '$1 Created') );
+		});
+	};
+
+	/**
+	 * Enable select2 with ajax results when using the "Search Sheets" dropdown, see sheet-select.php
+	 */
+	o.setup_sheet_search_fields = function() {
+		let $select_elements = jQuery('.ah-sheet-select');
+		if ( $select_elements.length < 1 ) return;
+
+		let select2_args = {
+			ajax: {
+				url: AH_API.get_setting('admin', 'ajaxurl'),
+				dataType: 'json',
+				method: 'POST',
+
+				// Add ajax action, search term, page number
+				// ?search=[term]&page=[page]&action=ah_search_sheets
+				data: function (params) {
+					return {
+						search: params.term || '',
+						page: params.page || 1,
+						action: 'ah_search_sheets',
+					};
+				},
+
+				// Rate limit to prevent spamming the server
+				delay: 250,
+			}
+		};
+
+		// Enable each select2
+		$select_elements.each(function() {
+			let $select = jQuery(this);
+
+			// Add a placeholder: placeholder="Choose an option"
+			select2_args.placeholder = $select.attr('placeholder');
+
+			// Allow clearing the selection (default = true)
+			// Disabled with: data-allow-clear="0"
+			select2_args.allowClear = ($select.attr('data-allow-clear') !== '0');
+
+			$select.select2( select2_args );
 		});
 	};
 

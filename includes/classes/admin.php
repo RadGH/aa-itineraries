@@ -294,6 +294,16 @@ class Class_AH_Admin {
 			case 'smartsheet_hotel_inserted':
 				$this->add_notice( 'success', 'This hotel has been automatically created and paired with Smartsheet.', null, null, true );
 				break;
+			
+			case 'sync_sheets_failed':
+				$this->add_notice( 'success', 'Failed to sync list of sheets from Smartsheet.', null, null, true );
+				break;
+			
+			case 'sync_sheets_success':
+				$data = json_decode($data, true);
+				$sheet_count = $data['sheets'] ?? 0;
+				$this->add_notice( 'success', 'Sync complete. Found ' . $sheet_count . ' sheets.', null, null, true );
+				break;
 				
 			default:
 				$this->add_notice( 'error', 'Unsupported notice type: "'. esc_html($notice) .'"', null, null, true );

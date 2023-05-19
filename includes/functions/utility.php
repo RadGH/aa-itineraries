@@ -39,6 +39,28 @@ function ah_adjust_date( $offset, $format, $current_time = null ) {
 }
 
 /**
+ * Displays a relative date (eg: 3 days ago) in HTML. Hover to view the actual date.
+ *
+ * @param string $date     Formatted date string, must be compatible with strtotime()
+ * @param string $format   The date format to use when hovering over the relative date
+ *
+ * @return string|false
+ */
+function ah_get_relative_date_html( $date, $format = 'F j, Y g:i a' ) {
+	$ts = strtotime((string) $date);
+	if ( ! $ts ) return false;
+	
+	$date_formatted = date( $format, $ts );
+	$date_relative = human_time_diff($ts) . ' ago';
+	
+	return sprintf(
+		'<abbr title="%s" class="ah-relative-date ah-tooltip">%s</abbr>',
+		esc_attr($date_formatted),
+		esc_html($date_relative)
+	);
+}
+
+/**
  * Format a number for use as currency: 0.35 -> $0.35
  * Optionally remove zero cents: 5.00 -> $5
  *
@@ -457,13 +479,61 @@ function ah_sort_by_key( $list, $key, $asc = true ) {
  *
  * @return bool
  */
-function is_array_recursively_empty( $array ) {
+function ah_is_array_recursively_empty( $array ) {
 	if ( empty($array) ) return true; // 0, false, array()
 	if ( ! is_array($array) ) return false; // non-empty value
 	
 	foreach( $array as $item ) {
-		if ( ! is_array_recursively_empty( $item ) ) return false; // check each item, abort if any contain a value
+		if ( ! ah_is_array_recursively_empty( $item ) ) return false; // check each item, abort if any contain a value
 	}
 	
 	return true; // array is empty
+}
+
+/**
+ * Search an array of items for a string for a search term.
+ * Only searches 1 level deep (arrays and objects are ignored).
+ * Only searches in keys with a strings or number as the value.
+ * Does not sort by relevance.
+ *
+ * Returns an array of items that contain the search string in any of the keys that were searched.
+ *
+ * @param array[]       $item_list      Array of items to search
+ * @param string        $search_term    String to search for
+ * @param null|array    $keys_to_search (optional) Which keys to search in. Can be a single key or array of keys.
+ *
+ * @return array[]
+ */
+function ah_search_array_items( $item_list, $search_term, $keys_to_search = null ) {
+	if ( $keys_to_search !== null ) $keys_to_search = (array) $keys_to_search;
+	
+	$search_term = strtolower($search_term);
+	
+	$results = array();
+	
+	// Search through every item
+	foreach( $item_list as $item ) {
+		// Search through each key
+		foreach( $item as $key => $value ) {
+			// Should search this key?
+			if ( $keys_to_search !== null && ! in_array( $key, (array) $keys_to_search, true ) ) {
+				continue;
+			}
+			
+			// Only search numbers and string
+			if ( ! is_string($value) && ! is_numeric($value) ) {
+				continue;
+			}
+			
+			// Check if search term is in this key
+			if ( str_contains( strtolower($value), $search_term ) ) {
+				$results[] = $item;
+				
+				// Stop searching through this item's keys
+				break;
+			}
+		}
+	}
+	
+	return $results;
 }

@@ -500,8 +500,10 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 		// Hotels also correspond to a village
 		if ( $type == 'hotel' ) {
 			$hotel = $this->get_hotel_by_smartsheet_id( $smartsheet_id );
+			// @todo: finish creating hotel from button
+			echo 'TODO: Finish creating hotels from link';
 			pre_dump($hotel);
-
+			exit;
 		}
 		
 		/*

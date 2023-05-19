@@ -134,6 +134,9 @@ class RS_API {
 		
 		// Add body args
 		if ( $body_args ) {
+			// @todo: this appears to throw an error
+			//        is it caused by json_encode?
+			//        is it only when this header? "content-type: application/json"
 			$args['body'] = json_encode($body_args);
 		}
 		

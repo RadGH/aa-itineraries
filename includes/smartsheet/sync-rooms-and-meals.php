@@ -247,12 +247,11 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 			}
 		}
 		
-		// Remove duplicates and empty values
+		// Save the values if successful
 		if ( $room_list ) {
 			update_option( 'ah_room_list', $room_list, false );
 		}
 		
-		// Remove duplicates and empty values
 		if ( $meal_list ) {
 			update_option( 'ah_meal_list', $meal_list, false );
 		}

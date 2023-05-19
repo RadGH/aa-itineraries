@@ -6,13 +6,7 @@ $base_url = add_query_arg(array('page' => $_GET['page']), admin_url('admin.php')
 $sync_url = add_query_arg(array('ah_sync_hotels_and_villages' => 1), $base_url);
 
 // Get the last sync time
-$sync_time = get_option( 'ah_hotels_and_villages_last_sync', false );
-
-if ( $sync_time ) {
-	$sync_time = date('F j, Y g:i a', strtotime($sync_time));
-}else{
-	$sync_time = '<em>(never)</em>';
-}
+$sync_date = get_option( 'ah_hotels_and_villages_last_sync', false );
 
 // Get sheet settings
 $sheet_id = AH_Smartsheet_Sync_Hotels_And_Villages()->get_sheet_id();
@@ -167,7 +161,7 @@ if ( ! function_exists('ah_list_village_and_hotel_items') ) {
 								<p>
 									<a href="<?php echo esc_attr($sync_url); ?>" class="button button-secondary">Run Sync</a>
 								</p>
-								<p style="opacity:0.5;">Last sync: <?php echo $sync_time; ?></p>
+								<p style="opacity:0.5;">Last sync: <?php echo ah_get_relative_date_html( $sync_date ) ?: '(never)'; ?></p>
 							</div>
 						</div>
 					
@@ -367,6 +361,7 @@ if ( ! function_exists('ah_list_village_and_hotel_items') ) {
 							
 							</div>
 							
+							<!-- Submit button -->
 							<div class="ah-admin-field ah-submit">
 								<input type="submit" name="publish" value="Save Changes" class="button button-secondary button-large" id="publish">
 							</div>

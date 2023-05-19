@@ -20,6 +20,16 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		
 		add_filter( 'single_template', array( $this, 'replace_page_template' ) );
 		
+		
+		// Display a <select> to pick a sheet for an itinerary
+		add_action( 'add_meta_boxes', array( $this, 'register_smartsheet_meta_box' ), 5 );
+		
+		// Save the <select> containing smartsheet ID for the itinerary, when the post is saved
+		add_action( 'save_post', array( $this, 'save_smartsheet_id' ) );
+		
+		// Sync an itinerary after post updated
+		add_action( 'save_post', array( $this, 'sync_itinerary_with_sheet' ), 100 );
+		
 	}
 	
 	/**
@@ -456,6 +466,67 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		);
 		
 		$list[] = &$new_item;
+	}
+	
+	// Show meta box
+	public function register_smartsheet_meta_box() {
+		add_meta_box(
+			'ah_itinerary_smartsheet_meta_box',
+			'Smartsheet Sync',
+			array( $this, 'display_smartsheet_meta_box' ),
+			'ah_itinerary',
+			'side'
+		);
+	}
+	
+	// Display meta box html
+	public function display_smartsheet_meta_box() {
+		$post_id = get_the_ID();
+		$sheet_id = (string) get_post_meta( $post_id, 'smartsheet_sheet_id', true );
+		
+		$label = '';
+		
+		if ( $sheet_id ) {
+			// Load current value
+			$sheets = AH_Smartsheet_Sync_Sheets()->get_stored_sheet_list();
+			$sheet = ah_find_in_array($sheets, 'id', $sheet_id);
+			if ( $sheet ) {
+				$label = $sheet['name'];
+			}
+		}
+		
+		echo '<p><label for="smartsheet_sheet_id">Itinerary Spreadsheet:</label></p>';
+		
+		echo AH_Smartsheet_Sheet_Select()->get_select_html(array(
+			'name' => 'smartsheet_sheet_id',
+			'id' => 'smartsheet_sheet_id',
+			'value' => $sheet_id,
+			'label' => $label,
+		));
+		
+		echo '<p><input type="submit" name="ah_save_and_sync_itinerary" value="Save and Run Sync" class="button button-secondary"></p>';
+	}
+	
+	// Save meta box fields
+	public function save_smartsheet_id( $post_id ) {
+		if ( ! isset($_POST['ah_save_and_sync_itinerary']) ) return;
+		if ( get_post_type($post_id) != $this->get_post_type() ) return;
+		
+		$sheet_id = stripslashes($_POST['smartsheet_sheet_id']);
+		update_post_meta( $post_id, 'smartsheet_sheet_id', $sheet_id );
+	}
+	
+	// Sync an itinerary after post updated
+	public function sync_itinerary_with_sheet( $post_id ) {
+		if ( ! isset($_POST['ah_save_and_sync_itinerary']) ) return;
+		if ( get_post_type($post_id) != $this->get_post_type() ) return;
+		
+		$sheet_id = get_post_meta( $post_id, 'smartsheet_sheet_id', true );
+		
+		// @todo
+		echo '<h2>TODO: Sync itinerary with smartsheet</h2>';
+		echo '<p>Sheet ID: ' . $sheet_id . '</p>';
+		exit;
 	}
 	
 }

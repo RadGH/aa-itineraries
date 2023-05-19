@@ -6,13 +6,7 @@ $base_url = admin_url('admin.php?page=ah-smartsheet-rooms-and-meals');
 $sync_url = add_query_arg(array('ah_sync_rooms_and_meals' => 1), $base_url);
 
 // Get the last sync time
-$sync_time = 0; // @TODO get_option( 'ah_hotels_and_villages_last_sync', false );
-
-if ( $sync_time ) {
-	$sync_time = date('F j, Y g:i a', strtotime($sync_time));
-}else{
-	$sync_time = '<em>(never)</em>';
-}
+$sync_date = get_option( 'ah_rooms_and_meals_last_sync', false );
 
 // Get sheet settings
 $sheet_id = AH_Smartsheet_Sync_Rooms_And_Meals()->get_sheet_id();
@@ -42,6 +36,7 @@ $meal_list = AH_Smartsheet_Sync_Rooms_And_Meals()->get_stored_meal_list();
 					
 					<div class="ah-postbox-sticky">
 					
+						<!--
 						<div id="submitdiv" class="postbox">
 							<div class="postbox-header">
 								<h2>Actions</h2>
@@ -57,6 +52,7 @@ $meal_list = AH_Smartsheet_Sync_Rooms_And_Meals()->get_stored_meal_list();
 								</div>
 							</div>
 						</div>
+						-->
 						
 						<div class="postbox">
 							<div class="postbox-header">
@@ -66,7 +62,7 @@ $meal_list = AH_Smartsheet_Sync_Rooms_And_Meals()->get_stored_meal_list();
 							<div class="inside">
 								<p>Updates the room list with current information from the Rooms and Meals master spreadsheet.</p>
 								<p><a href="<?php echo esc_attr($sync_url); ?>" class="button button-secondary">Run Sync</a></p>
-								<p style="opacity:0.5;">Last sync: <?php echo $sync_time; ?></p>
+								<p style="opacity:0.5;">Last sync: <?php echo ah_get_relative_date_html( $sync_date ) ?: '(never)'; ?></p>
 							</div>
 						</div>
 						
@@ -237,6 +233,11 @@ $meal_list = AH_Smartsheet_Sync_Rooms_And_Meals()->get_stored_meal_list();
 									?>
 								</div>
 							
+							</div>
+							
+							<!-- Submit button -->
+							<div class="ah-admin-field ah-submit">
+								<input type="submit" name="publish" value="Save Changes" class="button button-secondary button-large" id="publish">
 							</div>
 						
 						</div>

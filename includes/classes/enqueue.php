@@ -37,6 +37,9 @@ class Class_AH_Enqueue {
 		$this->register( 'ah-public', 'public.css' );
 		$this->register( 'ah-public', 'public.js', array( 'jquery', 'ah-global', 'ah-api' ) );
 		
+		$this->register( 'select2', 'select2/css/select2.min.css' );
+		$this->register( 'select2', 'select2/js/select2.js', array( 'jquery' ) );
+		
 	}
 	
 	/**
@@ -60,6 +63,11 @@ class Class_AH_Enqueue {
 	 * @return void
 	 */
 	public function enqueue_admin_scripts() {
+		// currently not needed, enqueued by sheet-select.php when a field is displayed
+		// if select2 is used elsewhere consider enabling this
+		// wp_enqueue_script( 'select2' );
+		// wp_enqueue_style( 'select2' );
+		
 		wp_enqueue_script( 'ah-api' );
 		
 		wp_enqueue_style( 'ah-global' );
