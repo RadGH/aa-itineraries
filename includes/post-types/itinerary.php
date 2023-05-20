@@ -495,7 +495,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 			}
 		}
 		
-		echo '<p><label for="smartsheet_sheet_id">Itinerary Spreadsheet:</label></p>';
+		echo '<p><label for="smartsheet_sheet_id"><strong>Itinerary Spreadsheet:</strong></label></p>';
 		
 		echo AH_Smartsheet_Sheet_Select()->get_select_html(array(
 			'name' => 'smartsheet_sheet_id',
@@ -523,10 +523,9 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		
 		$sheet_id = get_post_meta( $post_id, 'smartsheet_sheet_id', true );
 		
-		// @todo
-		echo '<h2>TODO: Sync itinerary with smartsheet</h2>';
-		echo '<p>Sheet ID: ' . $sheet_id . '</p>';
-		exit;
+		if ( $sheet_id ) {
+			AH_Smartsheet_Sync_Itineraries()->sync_itinerary_with_sheet( $post_id, $sheet_id );
+		}
 	}
 	
 }

@@ -54,11 +54,14 @@ class Class_AH_Smartsheet_Sheet_Select {
 	public function ajax_search_sheets() {
 		
 		// Configurable
-		$results_per_page = 25;
+		$results_per_page = 20;
 		
 		// Data from select2
 		$search_term = isset($_REQUEST['search']) ? stripslashes($_REQUEST['search']) : '';
 		$page = isset($_REQUEST['page']) ? stripslashes($_REQUEST['page']) : '';
+		
+		// Index to start results at
+		$start_at = ($page - 1) * $results_per_page;
 		
 		// Get all sheets
 		$sheets = AH_Smartsheet_Sync_Sheets()->get_stored_sheet_list();
@@ -76,7 +79,11 @@ class Class_AH_Smartsheet_Sheet_Select {
 		);
 		
 		// Add each sheet that matched, limited to $results_per_page
-		if ( $sheets ) foreach( $sheets as $sheet ) {
+		if ( $sheets ) foreach( $sheets as $i => $sheet ) {
+			
+			// If starting at page 2+, skip previous sheets
+			if ( $i < $start_at ) continue;
+			
 			$output['results'][] = array(
 				'id' => $sheet['id'],
 				'text' => $sheet['name'],
@@ -139,80 +146,6 @@ class Class_AH_Smartsheet_Sheet_Select {
 		$html .= '</select>';
 		
 		return $html;
-	}
-	
-	// https://alpinehikerdev.wpengine.com/?ah_test_sheet_select
-	public function test_sheet_select() {
-		?>
-<!doctype html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width">
-	<title>Document</title>
-	
-	<script
-		src="https://code.jquery.com/jquery-3.7.0.min.js"
-		integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g="
-		crossorigin="anonymous"></script>
-	
-	<link rel="stylesheet" href="<?php echo AH_URL; ?>/assets/select2/css/select2.min.css">
-	<script src="<?php echo AH_URL; ?>/assets/select2/js/select2.js"></script>
-	
-	<script src="<?php echo AH_URL; ?>/assets/api.js"></script>
-	<link rel="stylesheet" href="<?php echo AH_URL; ?>/assets/global.css">
-	<script src="<?php echo AH_URL; ?>/assets/global.js"></script>
-</head>
-<body>
-
-<?php
-echo $this->get_select_html(array(
-	'id' => 'ah-sheet-select-2',
-));
-?>
-
-<select id="ah-sheet-select">
-	<option value="">&ndash; Select Spreadsheet &ndash;</option>
-</select>
-
-<script>
-	/*
-let $select = jQuery('.ah-sheet-select');
-
-let select2_args = {
-	ajax: {
-		url: <?php echo json_encode(admin_url('admin-ajax.php')); ?>,
-		dataType: 'json',
-		
-		// Use POST, and add ajax action
-		// ?search=[term]&page=[page]&action=ah_search_sheets
-		method: 'POST',
-		data: function (params) {
-			return {
-				search: params.term || '',
-				page: params.page || 1,
-				action: 'ah_search_sheets',
-			};
-		},
-		
-		// Rate limit to prevent spamming the server
-		delay: 250,
-	}
-};
-
-$select.select2( select2_args );
-*/
-</script>
-
-<pre><?php
-	//var_dump(compact( 'sheets' ));
-?></pre>
-
-
-</body>
-</html>
-		<?php
-		exit;
 	}
 	
 }

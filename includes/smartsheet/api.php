@@ -374,22 +374,25 @@ class Class_AH_Smartsheet_API {
 	 *      @type bool $expanded      true
 	 *      @type string $createdAt   "2023-04-03T21:06:24Z"
 	 *      @type string $modifiedAt  "2023-04-03T23:01:30Z"
-	 *      @type array $cells {
+	 *
+	 *      @type array[] $cells {
 	 *
 	 *           @type int $columnId         452610815223684
-	 *           @type string $value         "Gasterntal - CH"
-	 *           @type string $displayValue  "Gasterntal - CH"
+	 *           @type string $value         Optional. "Gasterntal - CH"
+	 *           @type string $displayValue  Optional. "Gasterntal - CH"
+	 *           @type string $formula       Optional. "="" + ROUND(COUNTIF(CHILDREN(), 1) + "%""
 	 *
 	 *      }
 	 *
 	 *      The first row does not contain this, but others do:
-	 *      @type int $siblingId      8046223133501316
+	 *      @type int $siblingId      Optional. 8046223133501316
+	 *
+	 *      Rows can be made children of a previous row, allowing the list to be collapsed:
+	 *      @type int $parentId       Optional. 750124477704068
 	 */
 	public function get_rows_from_sheet( $sheet_id ) {
-		$sheet_data =  $this->get_sheet_by_id( $sheet_id );
-		if ( !isset( $sheet_data['rows'] ) ) return false;
-		
-		return $sheet_data['rows'];
+		$sheet =  $this->get_sheet_by_id( $sheet_id );
+		return $sheet['rows'] ?? false;
 	}
 	
 	/**
@@ -397,7 +400,7 @@ class Class_AH_Smartsheet_API {
 	 *   pageNumber, pageSize, totalPages, totalCount, data[]
 	 *   data items = id, version, index, title, type, primary, validation, width
 	 *
-	 * @param $sheet_id
+	 * @param int      $sheet_id
 	 *
 	 * @return array|false
 	 */
@@ -407,6 +410,13 @@ class Class_AH_Smartsheet_API {
 		$body = array();
 		$method = 'GET';
 		$headers = array( 'Content-Type' => 'application/json' );
+		
+		// Despite the documentation, this parameter does not seem to work.
+		$data['includeAll'] = true;
+		
+		// So we just raise the limit instead:
+		$data['page'] = 1;
+		$data['pageSize'] = 999999999;
 		
 		$result = $this->request( $url, $method, $data, $body, $headers );
 		
