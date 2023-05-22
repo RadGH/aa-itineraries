@@ -391,19 +391,42 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		}
 		
 		// Itinerary
-		$this->_add_toc_item( $toc_list, 'Introduction', '#intro' );
+		$introduction_message = get_field( 'introduction_message', $itinerary_id );
+		$contact_information = get_field( 'contact_information', $itinerary_id );
+		$show_intro_page = ( $introduction_message || $contact_information );
+		if ( $show_intro_page ) {
+			$this->_add_toc_item( $toc_list, 'Introduction', '#intro' );
+		}
 		
-		$this->_add_toc_item( $toc_list, 'Schedule', '#schedule' );
+		// SCHEDULE
+		$schedule = get_field( 'schedule', $itinerary_id );
+		$departure_information = get_field( 'departure_information', $itinerary_id );
+		$show_schedule_page = ( $schedule || $departure_information );
+		if ( ! $show_intro_page ) $show_schedule_page = true;
+		if ( $show_schedule_page ) {
+			$this->_add_toc_item( $toc_list, 'Schedule', '#schedule' );
+		}
 		
-		$this->_add_toc_item( $toc_list, 'Directory', '#directory' );
+		// DIRECTORY
+		$all_phone_numbers = (array) get_field( 'phone_numbers', $itinerary_id ); // title, phone_number, content
+		$has_phone_numbers = ! ah_is_array_recursively_empty( $all_phone_numbers );
+		$country_codes = get_field( 'country_codes', $itinerary_id );
+		$show_directory_page = ( $has_phone_numbers || $country_codes );
+		if ( $show_directory_page ) {
+			$this->_add_toc_item( $toc_list, 'Directory', '#directory' );
+		}
 		
-		$this->_add_toc_item( $toc_list, 'Tour Overview', '#tour-overview' );
-		
+		// TOUR OVERVIEW
+		$tour_overview = get_field( 'tour_overview', $itinerary_id );
+		$show_tour_overview = ($tour_overview != '');
+		if ( $show_tour_overview ) {
+			$this->_add_toc_item( $toc_list, 'Tour Overview', '#tour-overview' );
+		}
 		
 		// Villages
 		$villages = get_field( 'villages', $itinerary_id );
-		
-		if ( $villages ) {
+		$show_villages = ! ah_is_array_recursively_empty($villages);
+		if ( $show_villages ) {
 			$this->_add_toc_item( $toc_list, 'Villages', '#villages', $village_list );
 			
 			foreach( $villages as $s ) {
@@ -417,8 +440,8 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		
 		// Hikes
 		$hikes = get_field( 'hikes', $itinerary_id );
-		
-		if ( $hikes ) {
+		$show_hikes = ! ah_is_array_recursively_empty($hikes);
+		if ( $show_hikes ) {
 			$this->_add_toc_item( $toc_list, 'Hikes', '#hikes', $hike_list );
 			
 			foreach( $hikes as $s ) {

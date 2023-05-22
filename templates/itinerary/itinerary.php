@@ -30,6 +30,13 @@ $hikes = get_field( 'hikes', get_the_ID() );
 
 $attached_documents = get_field( 'attached_documents', get_the_ID() );
 
+// Check which sections will be displayed
+$show_intro_page = ( $introduction_message || $contact_information );
+$show_schedule_page = ( $schedule || $departure_information || ! $show_intro_page );
+$show_directory_page = ( $has_phone_numbers || $country_codes );
+$show_tour_overview = ($tour_overview != '');
+$show_villages = ! ah_is_array_recursively_empty($villages);
+
 if ( ! ah_is_pdf() ) {
 	// Web page view
 	?>
@@ -154,7 +161,6 @@ if ( ah_is_pdf() ) {
 <section id="itinerary" class="pdf-section itinerary itinerary-<?php echo esc_attr($slug); ?> itinerary-id-<?php the_ID(); ?>">
 	
 	<?php
-	$show_intro_page = ( $introduction_message || $contact_information );
 	
 	if ( $show_intro_page ) {
 	?>
@@ -192,11 +198,6 @@ if ( ah_is_pdf() ) {
 	<?php } ?>
 	
 	<?php
-	$show_schedule_page = ( $schedule || $departure_information );
-	
-	// If the intro page was not displayed, force the schedule to display
-	if ( ! $show_intro_page ) $show_schedule_page = true;
-	
 	if ( $show_schedule_page ) {
 	?>
 	<div class="pdf-page" id="schedule">
@@ -243,7 +244,6 @@ if ( ah_is_pdf() ) {
 	?>
 	
 	<?php
-	$show_directory_page = ( $has_phone_numbers || $country_codes );
 	if ( $show_directory_page ) {
 	?>
 	<div class="pdf-page" id="directory">
@@ -297,7 +297,6 @@ if ( ah_is_pdf() ) {
 	?>
 	
 	<?php
-	$show_tour_overview = $tour_overview != '';
 	if ( $show_tour_overview ) {
 	?>
 	<div class="pdf-page" id="tour-overview">
@@ -322,7 +321,7 @@ if ( ah_is_pdf() ) {
 </section>
 
 <?php
-if ( $villages ) {
+if ( $show_villages ) {
 	echo '<div id="villages"></div>';
 	
 	foreach( $villages as $i => $s ) {
@@ -337,7 +336,8 @@ if ( $villages ) {
 ?>
 
 <?php
-if ( $hikes ) {
+$show_hikes = ! ah_is_array_recursively_empty($hikes);
+if ( $show_hikes ) {
 	echo '<div id="hikes"></div>';
 	
 	foreach( $hikes as $i => $s ) {
