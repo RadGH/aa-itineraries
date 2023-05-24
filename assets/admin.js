@@ -19,8 +19,8 @@ window.AH_Admin = new (function() {
 			o.disable_post_title();
 		}
 
-		// When clicking to create a post (village, hotel, itinerary), change the button appearance
-		o.create_post_buttons();
+		// When clicking to create or update a (village, hotel, itinerary), change the button appearance
+		o.create_and_update_buttons();
 
 		// Enable select2 with ajax results when using the "Search Sheets" dropdown, see sheet-select.php
 		o.setup_sheet_search_fields();
@@ -111,11 +111,18 @@ window.AH_Admin = new (function() {
 	/**
 	 * Clicking "Create [item]" buttons makes the button turn gray
 	 */
-	o.create_post_buttons = function() {
-		jQuery(document.body).on( 'click', '.ah-insert-button', function() {
+	o.create_and_update_buttons = function() {
+		// Create button
+		jQuery(document.body).on( 'click', '.ah-create-item-button', function() {
 			jQuery(this).removeClass('button-primary');
 			jQuery(this).addClass('button-secondary');
 			jQuery(this).html( jQuery(this).html().replace(/Create (Village|Hotel)/, '$1 Created') );
+		});
+
+		// Update button just changes appearance
+		jQuery(document.body).on( 'click', '.ah-update-item-button', function() {
+			jQuery(this).removeClass('button-primary');
+			jQuery(this).addClass('button-secondary');
 		});
 	};
 

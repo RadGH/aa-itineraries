@@ -14,7 +14,7 @@ $column_ids = AH_Smartsheet_Sync_Hotels_And_Villages()->get_column_ids();
 $sheet_url = AH_Smartsheet_Sync_Hotels_And_Villages()->get_smartsheet_permalink();
 $columns = AH_Smartsheet_Sync_Hotels_And_Villages()->columns;
 
-// Preload the list of hotel and village post IDs along with their smartsheet name
+// Preload the list of hotel and village post IDs along with their smartsheet id
 $hotel_posts = AH_Smartsheet_Sync_Hotels_And_Villages()->preload_hotel_post_list();
 $village_posts = AH_Smartsheet_Sync_Hotels_And_Villages()->preload_village_post_list();
 
@@ -23,27 +23,39 @@ $hotel_list = AH_Smartsheet_Sync_Hotels_And_Villages()->get_stored_hotel_list();
 $village_list = AH_Smartsheet_Sync_Hotels_And_Villages()->get_stored_village_list();
 
 // Identify which hotels are assigned to a post
-list( $assigned_hotels, $unassigned_hotels ) = AH_Smartsheet_Sync_Hotels_And_Villages()->group_by_smartsheet_assignment( $hotel_list, 'hotel' );
-list( $assigned_villages, $unassigned_villages ) = AH_Smartsheet_Sync_Hotels_And_Villages()->group_by_smartsheet_assignment( $village_list, 'village' );
+//   assigned: Exists in smartsheet and corresponds with wordpress
+//   unassigned: Only exists in smartsheet
+//   missing: Only exists in wordpress
+list( $assigned_hotels, $unassigned_hotels, $missing_hotels ) = AH_Smartsheet_Sync_Hotels_And_Villages()->group_by_smartsheet_assignment( $hotel_list, 'hotel' );
+list( $assigned_villages, $unassigned_villages, $missing_villages ) = AH_Smartsheet_Sync_Hotels_And_Villages()->group_by_smartsheet_assignment( $village_list, 'village' );
+
+$hotel_count = count($assigned_hotels) + count($unassigned_hotels) + count($missing_hotels);
+$village_count = count($assigned_villages) + count($unassigned_villages) + count($missing_villages);
 
 if ( ! function_exists('ah_list_village_and_hotel_items') ) {
 	/**
 	 * Displays a list of village or hotel items with a column of actions.
 	 *
-	 * @param array $list   array of items including "name" and "post_id"
-	 * @param string $type  either "hotel" or "village"
+	 * @param array $list   array of items, each including: "post_id", "smartsheet_name", and "smartsheet_id"
+	 * @param string $type  one of: "hotel" or "village"
+	 * @param string $mode  one of: "assigned" or "unassigned" or "missing"
 	 *
 	 * @return void
 	 */
-	function ah_list_village_and_hotel_items( $list, $type ) {
+	function ah_list_village_and_hotel_items( $list, $type, $mode ) {
 		if ( empty($list) ) return;
 		?>
 		<table class="ah-admin-table ah-admin-table-fixed">
 			
 			<thead>
 			<tr>
-				<!-- <th class="col-smartsheet_name"><?php echo $type == 'village' ? 'Village Name' : 'Hotel Name'; ?></th>-->
-				<th class="col-smartsheet_id"><?php echo $type == 'village' ? 'Village ID' : 'Hotel ID'; ?></th>
+				<?php if ( $mode == 'missing' ) { ?>
+					<th class="col-wordpress_title"><?php echo 'Post Title'; ?></th>
+					<th class="col-smartsheet_id">Smartsheet ID</th>
+				<?php }else{ ?>
+					<th class="col-smartsheet_id"><?php echo ($type == 'village' ? 'Village ID' : 'Hotel ID'); ?></th>
+				<?php } ?>
+				
 				<th class="col-actions">Actions</th>
 			</tr>
 			</thead>
@@ -54,24 +66,47 @@ if ( ! function_exists('ah_list_village_and_hotel_items') ) {
 				$post_id = $item['post_id'];
 				$smartsheet_name = $item['smartsheet_name'];
 				$smartsheet_id = $item['smartsheet_id'];
+				
+				if ( $mode == 'missing' ) {
+					$smartsheet_id = get_field( 'smartsheet_id', $post_id );
+				}
+				
 				?>
 				<tr>
-					<!-- <td class="col-smartsheet_name"><span class="cell"><?php echo esc_html($smartsheet_name ?: '&ndash;'); ?></span></td>-->
-					<td class="col-smartsheet_id"><span class="cell"><?php echo esc_html($smartsheet_id ?: '&ndash;'); ?></span></td>
+					<?php if ( $mode == 'missing' ) { ?>
+						<td class="col-wordpress_title"><span class="cell"><?php echo esc_html(get_the_title($post_id) ?: '&ndash;'); ?></span></td>
+						<td class="col-smartsheet_id"><span class="cell"><?php echo esc_html($smartsheet_id ?: '<em>(empty)</em>'); ?></span></td>
+					<?php }else{ ?>
+						<td class="col-smartsheet_id"><span class="cell"><?php echo esc_html($smartsheet_id ?: '<em>(empty)</em>'); ?></span></td>
+					<?php } ?>
 					
 					<td class="col-actions">
 						<?php
-						if ( $post_id ) {
-							// Button to edit the existing post
-							$edit_url = get_edit_post_link($post_id);
+						
+						// Button to sync the item
+						if ( $post_id && $smartsheet_id ) {
+							$sync_url = AH_Smartsheet_Sync_Hotels_And_Villages()->get_sync_village_or_hotel_link( $type, $post_id, $smartsheet_id );
+							
 							echo sprintf(
-								'<a href="%s" class="button button-small button-link" target="_blank">Edit %s #%d</a>',
+								'<a href="%s" class="button button-primary button-small ah-update-item-button" target="_blank">Sync</a> ',
+								esc_attr( $sync_url )
+							);
+						}
+						
+						// Button to edit the existing item
+						if ( $post_id ) {
+							$edit_url = get_edit_post_link($post_id);
+							
+							echo sprintf(
+								'<a href="%s" class="button button-small button-link" target="_blank">Edit %s #%d</a> ',
 								esc_attr( $edit_url ),
 								esc_html($smartsheet_name),
 								esc_html($post_id)
 							);
-						}else{
-							// Button to create a new village/hotel
+						}
+						
+						// Button to create a new item
+						if ( ! $post_id ) {
 							if ( $type == 'village' ) {
 								$create_text = 'Create Village';
 							}else{
@@ -81,7 +116,7 @@ if ( ! function_exists('ah_list_village_and_hotel_items') ) {
 							$create_url = AH_Smartsheet_Sync_Hotels_And_Villages()->get_edit_village_or_hotel_link( $type, $smartsheet_name, $smartsheet_id );
 							
 							echo sprintf(
-								'<a href="%s" class="button button-primary button-small ah-insert-button" target="_blank">%s</a>',
+								'<a href="%s" class="button button-primary button-small ah-create-item-button" target="_blank">%s</a>',
 								esc_attr( $create_url ),
 								esc_html( $create_text )
 							);
@@ -125,8 +160,8 @@ if ( ! function_exists('ah_list_village_and_hotel_items') ) {
 							<div class="inside">
 								<ul class="ul-disc">
 									<li><a href="#instructions">Instructions</a></li>
-									<li><a href="#villages">Villages (<?php echo count($village_list); ?>)</a></li>
-									<li><a href="#hotels">Hotels (<?php echo count($hotel_list); ?>)</a></li>
+									<li><a href="#villages">Villages (<?php echo $village_count; ?>)</a></li>
+									<li><a href="#hotels">Hotels (<?php echo $hotel_count; ?>)</a></li>
 									<li><a href="#advanced-settings">Advanced Settings</a></li>
 								</ul>
 							</div>
@@ -201,7 +236,7 @@ if ( ! function_exists('ah_list_village_and_hotel_items') ) {
 					<!-- Villages -->
 					<div class="village-postbox postbox">
 						<div class="postbox-header">
-							<h2 id="villages">Villages (<?php echo count($village_list); ?>)</h2>
+							<h2 id="villages">Villages (<?php echo $village_count; ?>)</h2>
 						</div>
 						
 						<div class="inside">
@@ -212,6 +247,21 @@ if ( ! function_exists('ah_list_village_and_hotel_items') ) {
 							
 							<?php }else{ ?>
 								
+								<?php if ( $missing_villages ) { ?>
+									<div class="ah-accordion ah-collapsed" id="missing-villages">
+										<div class="ah-handle">
+											<a href="#missing-villages">Missing villages (<?php echo count($missing_villages); ?>)</a>
+										</div>
+										<div class="ah-content">
+											<?php
+											echo '<p class="description">These villages only exist in WordPress and are not present in Smartsheet. Verify that the Smartsheet ID is correct for these items.</p>';
+											ah_list_village_and_hotel_items( $missing_villages, 'village', 'missing' );
+											?>
+										</div>
+									</div>
+								<?php } ?>
+								
+								<?php if ( $unassigned_villages ) { ?>
 								<div class="ah-accordion ah-collapsed" id="unassigned-villages">
 									<div class="ah-handle">
 										<a href="#unassigned-villages">Unassigned Villages (<?php echo count($unassigned_villages); ?>)</a>
@@ -219,16 +269,13 @@ if ( ! function_exists('ah_list_village_and_hotel_items') ) {
 									<div class="ah-content">
 										
 										<?php
-										if ( $unassigned_villages ) {
-											echo '<p class="description"><strong>Action Required:</strong> These villages exist in Smartsheet but have not been created in WordPress. Use the buttons below to automatically create and begin editing each village.</p>';
-											ah_list_village_and_hotel_items( $unassigned_villages, 'village' );
-										}else{
-											echo '<p class="description">No action needed – All villages have been assigned.</p>';
-										}
+										echo '<p class="description"><strong>Action Required:</strong> These villages exist in Smartsheet but have not been created in WordPress. Use the buttons below to automatically create and begin editing each village.</p>';
+										ah_list_village_and_hotel_items( $unassigned_villages, 'village', 'unassigned' );
 										?>
 										
 									</div>
 								</div>
+								<?php } ?>
 								
 								<div class="ah-accordion ah-collapsed" id="assigned-villages">
 									<div class="ah-handle">
@@ -239,7 +286,7 @@ if ( ! function_exists('ah_list_village_and_hotel_items') ) {
 										<?php
 										if ( $assigned_villages ) {
 											echo '<p class="description">No action needed – These villages exist in both Smartsheet and WordPress.</p>';
-											ah_list_village_and_hotel_items( $assigned_villages, 'village' );
+											ah_list_village_and_hotel_items( $assigned_villages, 'village', 'assigned' );
 										}else{
 											echo '<p class="description">No villages have been assigned yet.</p>';
 										}
@@ -258,7 +305,7 @@ if ( ! function_exists('ah_list_village_and_hotel_items') ) {
 					<!-- Hotels -->
 					<div class="hotel-postbox postbox">
 						<div class="postbox-header">
-							<h2 id="hotels">Hotels (<?php echo count($hotel_list); ?>)</h2>
+							<h2 id="hotels">Hotels (<?php echo $hotel_count; ?>)</h2>
 						</div>
 						
 						<div class="inside">
@@ -269,6 +316,21 @@ if ( ! function_exists('ah_list_village_and_hotel_items') ) {
 							
 							<?php }else{ ?>
 								
+								<?php if ( $missing_hotels ) { ?>
+									<div class="ah-accordion ah-collapsed" id="missing-hotels">
+										<div class="ah-handle">
+											<a href="#missing-hotels">Missing hotels (<?php echo count($missing_hotels); ?>)</a>
+										</div>
+										<div class="ah-content">
+											<?php
+											echo '<p class="description">These hotels only exist in WordPress and are not present in Smartsheet. Verify that the Smartsheet ID is correct for these items.</p>';
+											ah_list_village_and_hotel_items( $missing_hotels, 'hotel', 'missing' );
+											?>
+										</div>
+									</div>
+								<?php } ?>
+								
+								<?php if ( $unassigned_hotels ) { ?>
 								<div class="ah-accordion ah-collapsed" id="unassigned-hotels">
 									<div class="ah-handle">
 										<a href="#unassigned-hotels">Unassigned hotels (<?php echo count($unassigned_hotels); ?>)</a>
@@ -276,16 +338,13 @@ if ( ! function_exists('ah_list_village_and_hotel_items') ) {
 									<div class="ah-content">
 										
 										<?php
-										if ( $unassigned_hotels ) {
-											echo '<p class="description"><strong>Action required:</strong> These hotels exist in Smartsheet but have not been created in WordPress. Use the buttons below to automatically create and begin editing each hotel.</p>';
-											ah_list_village_and_hotel_items( $unassigned_hotels, 'hotel' );
-										}else{
-											echo '<p class="description">No action needed – All hotels have been assigned.</p>';
-										}
+										echo '<p class="description"><strong>Action required:</strong> These hotels exist in Smartsheet but have not been created in WordPress. Use the buttons below to automatically create and begin editing each hotel.</p>';
+										ah_list_village_and_hotel_items( $unassigned_hotels, 'hotel', 'unassigned' );
 										?>
 										
 									</div>
 								</div>
+								<?php } ?>
 								
 								<div class="ah-accordion ah-collapsed" id="assigned-hotels">
 									<div class="ah-handle">
@@ -296,7 +355,7 @@ if ( ! function_exists('ah_list_village_and_hotel_items') ) {
 										<?php
 										if ( $assigned_hotels ) {
 											echo '<p class="description">No action needed – These hotels exist in both Smartsheet and WordPress.</p>';
-											ah_list_village_and_hotel_items( $assigned_hotels, 'hotel' );
+											ah_list_village_and_hotel_items( $assigned_hotels, 'hotel', 'assigned' );
 										}else{
 											echo '<p class="description">No hotels have been assigned yet.</p>';
 										}

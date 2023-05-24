@@ -92,6 +92,8 @@ class Class_Village_Post_Type extends Class_Abstract_Post_Type {
 	public function customize_columns( $columns ) {
 		return array_merge(
 			array_slice( $columns, 0, 2),
+			array('ah_sync' => 'Smartsheet'),
+			array('ah_image' => 'Image'),
 			array('ah_review' => 'Content Review'),
 			array_slice( $columns, 2, null),
 		);
@@ -107,23 +109,41 @@ class Class_Village_Post_Type extends Class_Abstract_Post_Type {
 	 */
 	public function display_columns( $column, $post_id ) {
 		switch( $column ) {
+			
+			case 'ah_sync':
+				$sync_url = AH_Smartsheet_Sync_Hotels_And_Villages()->get_sync_village_or_hotel_link( 'village', $post_id );
+				
+				if ( $sync_url ) {
+					echo sprintf(
+						'<a href="%s" class="button button-small button-secondary">Sync</a>',
+						esc_attr($sync_url)
+					);
+				}else{
+					echo '&ndash;';
+				}
+				
+				break;
+				
+			case 'ah_image':
+				$image_id = get_post_meta( $post_id, 'image', true );
+				if ( $image_id ) {
+					ah_display_image( $image_id, 150, 150 );
+				}else{
+					echo '&ndash;';
+				}
+				break;
+				
 			case 'ah_review':
-				$fields = array(
+				
+				$this->display_content_review_column(array(
 					'Village Name' => get_post_meta( $post_id, 'village_name', true ),
 					'Image' => get_post_meta( $post_id, 'image', true ),
 					'Introduction' => get_post_meta( $post_id, 'village_intro', true ),
 					'In and Around' => get_post_meta( $post_id, 'around_the_village', true ),
-				);
-				
-				foreach( $fields as $name => $value ) {
-					if ( $value ) {
-						echo '<a href="#" title="&quot;'. esc_attr($name) .'&quot; is valid" class="ah-tooltip ah-review-valid"><span class="dashicons dashicons-yes"></span></a>';
-					}else{
-						echo '<a href="#" title="&quot;'. esc_attr($name) .'&quot; has no value" class="ah-tooltip ah-review-invalid"><span class="dashicons dashicons-no"></span></a>';
-					}
-				}
+				));
 				
 				break;
+				
 		}
 	}
 	

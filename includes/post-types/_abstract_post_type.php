@@ -412,4 +412,21 @@ abstract class Class_Abstract_Post_Type {
 		return get_post_type( $post_id ) == $this->get_post_type();
 	}
 	
+	/**
+	 * Displays a check ✅ or X ❌ indicating which pieces of content have been added
+	 *
+	 * @param $fields
+	 *
+	 * @return void
+	 */
+	public function display_content_review_column( $fields ) {
+		foreach( $fields as $name => $value ) {
+			if ( $value ) {
+				echo '<a href="#" title="&quot;'. esc_attr($name) .'&quot; is valid" class="ah-tooltip ah-review-valid"><span class="dashicons dashicons-yes"></span></a>';
+			}else{
+				echo '<a href="#" title="&quot;'. esc_attr($name) .'&quot; has no value" class="ah-tooltip ah-review-invalid"><span class="dashicons dashicons-no"></span></a>';
+			}
+		}
+	}
+	
 }

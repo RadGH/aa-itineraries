@@ -27,8 +27,8 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 	public $rows_hotels;
 	public $rows_restaurants;
 	public $rows_hikes;
-	public $row_arrival;   // single row
-	public $row_departure; // single row
+	// public $row_arrival;   // single row
+	// public $row_departure; // single row
 	
 	/**
 	 * Load and store column data which is used during the sync
@@ -131,9 +131,10 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		$parent_id = $start_row['parentId'] ?? false;
 		$this->rows_hikes = $this->find_rows_by_property( $parent_id, 'parentId' );
 		
+		// UNUSED
 		// Get arrival date and departure date rows
-		$this->row_arrival = $this->find_row_by_column( $task_column_id, 'Arrival:' );
-		$this->row_departure = $this->find_row_by_column( $task_column_id, 'Departure:' );
+		// $this->row_arrival = $this->find_row_by_column( $task_column_id, 'Arrival:' );
+		// $this->row_departure = $this->find_row_by_column( $task_column_id, 'Departure:' );
 	}
 	
 	/**
@@ -251,8 +252,50 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 	 * @return false|mixed
 	 */
 	public function get_cell_value( $cells, $column_id ) {
-		foreach( $cells as $cell ) {
-			if ( $cell['columnId'] == $column_id ) return $cell['value'];
+		// Allow using a row directly
+		if ( isset($cells['cells']) ) $cells = $cells['cells'];
+		
+		if ( $cells ) {
+			foreach( $cells as $cell ) {
+				if ( $cell['columnId'] == $column_id ) return $cell['value'];
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Get the timestamp for a date string. Returns false if the date format is invalid, or if the year is 1970 or earlier.
+	 *
+	 * @param string $date
+	 *
+	 * @return false|int
+	 */
+	public function get_timestamp( $date ) {
+		if ( $date ) {
+			$ts = strtotime($date);
+			if ( date('Y', $ts) > 1970 ) return $ts;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Get the number of days between two dates.
+	 * If the dates are the same, returns 0.
+	 * If either date is invalid, returns false.
+	 *
+	 * @param string $date_1
+	 * @param string $date_2
+	 *
+	 * @return int|false
+	 */
+	public function get_duration_in_days( $date_1, $date_2 ) {
+		$t1 = $date_1 ? strtotime($date_1) : false;
+		$t2 = $date_2 ? strtotime($date_2) : false;
+		
+		if ( $t1 && $t2 ) {
+			return (int) ceil(abs($t2 - $t1) / DAY_IN_SECONDS);
 		}
 		
 		return false;
@@ -274,12 +317,33 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		// API request to get all rows, stored in $this->rows
 		$this->load_rows( $sheet_id );
 		
-		// Retrieve the arrival date
-		$arrival_date = $this->get_arrival_date();
+		// Get structured data from retrieved rows
+		$client = $this->get_client();
+		
+		$hotels = $this->get_hotels();
+		
+		$dates = $this->get_dates( $hotels );
+		
+		// -- Custom fields --
+		// Title:
+		// Subtitle:
+		// Date range: ($dates['arrival_date'] and $dates['departure_date'] formatted as: September 6-16, 2022)
+		// Introduction message:
+		// Contact information:
+		// Schedule: (based on $hotels)
 		
 		// @todo
 		
 		echo '<h2>TODO: Sync itinerary with smartsheet</h2>';
+		
+		echo '<p>Hotels:</p>';
+		pre_dump( $hotels );
+		
+		echo '<p>Dates:</p>';
+		pre_dump($dates);
+		
+		echo '<hr>';
+		
 		echo '<p>Sheet ID: ' . $sheet_id . '</p>';
 		
 		echo '<p>Column B (Task):</p>';
@@ -292,9 +356,6 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		
 		echo '<p>Cell B2 (Task -> Hotel1):</p>';
 		pre_dump($this->rows[1]['cells'][1]);
-		
-		echo '<p>Arrival date:</p>';
-		pre_dump($arrival_date);
 		
 		echo '<p>Rows found:</p>';
 		$row_counts = array(
@@ -314,10 +375,165 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		exit;
 	}
 	
-	public function get_arrival_date() {
-		// Date is stored in the column titled "Arrive"
-		$column_id = $this->column_arrival['id'];
-		return $this->get_cell_value( $this->row_arrival['cells'], $column_id );
+	/**
+	 * Return information about the client from the first row in the Task column.
+	 *
+	 * @return array {
+	 *     @type string $name     Name: (value)
+	 *     @type string $email    Email: (value)
+	 *     @type string $mobile   Mobile: (value) [or] Phone: (value)
+	 * }
+	 */
+	public function get_client() {
+		$row = reset( $this->rows );
+		
+		$data = $this->get_cell_value( $row, $this->column_task['id'] );
+		
+		// Name: Rich & Rachel Buchanan
+		// Email:
+		// Mobile:
+		// Dietary: none
+		// Medical: none
+		// Travelers: 2
+		// Room: 1 Db
+		// Notes:
+		
+		$client = array(
+			'name' => '',
+			'email' => '',
+			'mobile' => '',
+		);
+		
+		if ( preg_match( '/^Name: (.+)$/m', $data, $matches ) ) {
+			$client['name'] = $matches[1];
+		}
+		
+		if ( preg_match( '/^Email: (.+)$/m', $data, $matches ) ) {
+			$client['email'] = $matches[1];
+		}
+		
+		if ( preg_match( '/^(Mobile|Phone): (.+)$/m', $data, $matches ) ) {
+			$client['mobile'] = $matches[2];
+		}
+		
+		return $client;
+	}
+	
+	/**
+	 * Return an array of hotels for this itinerary
+	 *
+	 * @return array[] {
+	 *     ["room"]=> "1 Db"
+	 *     ["meal"]=> "HB"
+	 *     ["location"]=> "Wengen - CH"
+	 *     ["hotel"]=> "Schonegg - Wengen"
+	 *     ["arrival"]=> "2023-08-19"
+	 *     ["departure"]=> "2023-08-20"
+	 *     ["arrival_ts"]=> int(1692403200)
+	 *     ["departure_ts"]=> int(1692489600)
+	 *     ["duration_days"]=> float(1)
+	 * }
+	 */
+	public function get_hotels() {
+		$hotels = array();
+		
+		// Loop through hotel rows to get their information:
+		// rooms: 1Db
+		// meals: HB
+		// arrival: 08/17/2023
+		// departure: 08/23/2023
+		
+		// And calculate the following:
+		// days: (departure - arrival)
+		
+		foreach( $this->rows_hotels as $i => $row ) {
+			$hotel = array(
+				'room'      => $this->get_cell_value( $row, $this->column_room['id'] ),
+				'meal'      => $this->get_cell_value( $row, $this->column_meal['id'] ),
+				'location'  => $this->get_cell_value( $row, $this->column_location['id'] ),
+				'hotel'     => $this->get_cell_value( $row, $this->column_hotel['id'] ),
+				'arrival'   => $this->get_cell_value( $row, $this->column_arrival['id'] ),
+				'departure' => $this->get_cell_value( $row, $this->column_departure['id'] ),
+			);
+			
+			// Hotel and location are required or else the row will be skipped
+			if ( empty($hotel['hotel']) ) continue;
+			if ( empty($hotel['location']) ) continue;
+			
+			// Calculate the dates
+			$hotel['arrival_ts'] = $hotel['arrival'] ? strtotime($hotel['arrival']) : false;
+			$hotel['departure_ts'] = $hotel['departure'] ? strtotime($hotel['departure']) : false;
+			$hotel['duration'] = $this->get_duration_in_days( $hotel['arrival'], $hotel['departure'] );
+			
+			$hotels[] = $hotel;
+		}
+		
+		return $hotels;
+	}
+	
+	/**
+	 * Get the start and end dates as well as the duration in days, from the provided hotels.
+	 *
+	 * @param $hotels
+	 *
+	 * @return array {
+	 *     @type string|false $arrival_date
+	 *     @type string|false $departure_date
+	 *     @type int|false    $duration
+	 * }
+	 */
+	public function get_dates( $hotels ) {
+		$start = $this->get_hotel_date( $hotels, true );
+		$end = $this->get_hotel_date( $hotels, false );
+		$duration = $this->get_duration_in_days( $start, $end );
+		
+		return array(
+			'arrival_date' => $start,
+			'departure_date' => $end,
+			'duration' => $duration,
+		);
+	}
+	
+	/**
+	 * Get the arrival date such as "2023-08-17"
+	 *
+	 * @param array  $hotels
+	 * @param bool   $arrival  True for arrival date (default). False for departure date.
+	 *
+	 * @return string|false    YYYY-MM-DD formatted date, or false if not available
+	 */
+	public function get_hotel_date( $hotels, $arrival ) {
+		if ( $arrival ) {
+			$hotel = reset($hotels); // first item
+		}else{
+			$hotel = end($hotels); // last item
+		}
+		
+		$ts = $hotel[ $arrival ? 'arrival_ts' : 'departure_ts' ] ?? false;
+		
+		return $ts ? date( 'Y-m-d', $ts ) : false;
+		
+		/*
+		$found_ts = 0;
+		
+		if ( $hotels ) foreach( $hotels as $hotel ) {
+			$ts = $hotel[ $arrival ? 'arrival_ts' : 'departure_ts' ];
+			
+			if ( $found_ts <= 0 ) {
+				$found_ts = $ts;
+			}else{
+				if ( $arrival ) {
+					// Arrival uses first day
+					$found_ts = min( $found_ts, $ts );
+				}else{
+					// Departure uses last date
+					$found_ts = max( $found_ts, $ts );
+				}
+			}
+		}
+		
+		return ( $found_ts > 0 ) ? date( 'Y-m-d', $found_ts ) : false;
+		*/
 	}
 	
 }

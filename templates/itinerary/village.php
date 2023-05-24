@@ -73,14 +73,14 @@ if ( ah_is_pdf() ) {
 	
 	<?php if ( $intro ) { ?>
 	<div class="section-content village-intro">
-		<?php ah_display_content_columns( $intro ); ?>
+		<?php echo wpautop( $intro ); ?>
 	</div>
 	<?php } ?>
 	
 	<?php if ( $hotel_description ) { ?>
 	<div class="section-content hotel-description">
 		<?php if ( $hotel_name ) echo '<h3>', $hotel_name, '</h3>'; ?>
-		<?php ah_display_content_columns( $hotel_description ); ?>
+		<?php echo wpautop( $hotel_description ); ?>
 	</div>
 	<?php } ?>
 	
@@ -88,11 +88,11 @@ if ( ah_is_pdf() ) {
 	<div class="section-content around-the-village">
 		<?php echo '<h2>In and Around ', $title, '</h2>'; ?>
 		
-		<?php ah_display_content_columns( $details ); ?>
+		<?php echo wpautop( $details ); ?>
 		
 		<?php
 		if ( $additional_content ) {
-			ah_display_content_columns( $additional_content );
+			echo wpautop( $additional_content );
 		}
 		?>
 		

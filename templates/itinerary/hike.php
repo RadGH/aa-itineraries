@@ -128,7 +128,7 @@ if ( ah_is_pdf() ) {
 		
 		<?php if ( $summary ) { ?>
 			<div class="section-content hike-summary">
-				<?php ah_display_content_columns( $summary ); ?>
+				<?php echo wpautop( $summary ); ?>
 			</div>
 		<?php } ?>
 		
@@ -165,7 +165,7 @@ if ( ah_is_pdf() ) {
 		
 		<?php if ( $content ) { ?>
 			<div class="section-content hike-content">
-				<?php ah_display_content_columns( $content ); ?>
+				<?php echo wpautop( $content ); ?>
 			</div>
 		<?php } ?>
 	

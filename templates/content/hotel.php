@@ -21,7 +21,7 @@ $hotel_description = get_field( 'description', $hotel_id );
 		
 		<?php if ( $hotel_description ) { ?>
 		<div class="section-content hotel-description">
-			<?php ah_display_content_columns( $hotel_description ); ?>
+			<?php echo wpautop( $hotel_description ); ?>
 		</div>
 		<?php } ?>
 	

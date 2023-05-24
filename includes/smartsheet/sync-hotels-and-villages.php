@@ -3,11 +3,18 @@
 class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 	
 	public $columns = array(
-		'hotel_name'      => 'Hotel Name',
-		'hotel_id'        => 'Hotel ID',
 		'village_name'    => 'Village Name',
 		'village_id'      => 'Village ID',
-		// Each hotel item also includes "smartsheet_row_id" which is not displayed
+		
+		'hotel_name'      => 'Hotel Name',
+		'hotel_id'        => 'Hotel ID',
+		
+		// Additional hotel details:
+		'proprietor_name' => 'Proprietor Name',
+		'email'           => 'Email',
+		'phone'           => 'Phone',
+		
+		// Each item also stores the "smartsheet_row_id"
 	);
 	
 	public $hotel_list = null;
@@ -26,6 +33,9 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 		
 		// Create a village or hotel from a link in the settings page
 		add_action( 'admin_init', array( $this, 'create_village_or_hotel_from_link' ) );
+		
+		// Sync a village or hotel from a link in the settings page
+		add_action( 'admin_init', array( $this, 'sync_village_or_hotel_from_link' ) );
 		
 	}
 	
@@ -145,22 +155,27 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 	
 	/**
 	 * Separates hotels which are attached to posts, and those that aren't.
-	 * Returns an array where [0] is assigned items, and [1] is unassigned items.
+	 *
+	 * Returns an array:
+	 *     [0] = items that exist on Smartsheet + WordPress
+	 *     [1] = items missing from WordPress
+	 *     [2] = items missing from Smartsheet
 	 *
 	 * @param array[] $item_list   array of items which each include "id" and "name"
 	 * @param string   $type       either "hotel" or "village"
 	 *
 	 * @return array {
-	 *      [0] and [1] = array {
-	 *           @type string $smartsheet_name
-	 *           @type string $smartsheet_id
-	 *           @type int    $post_id
+	 *      [0] [1] [2] = array {
+	 *           @type string|null $smartsheet_name
+	 *           @type string|null $smartsheet_id
+	 *           @type int|null    $post_id
 	 *      }
 	 * }
 	 */
 	public function group_by_smartsheet_assignment( $item_list, $type ) {
 		$assigned = array();
 		$unassigned = array();
+		$found_ids = array();
 		
 		// Check each hotel by name to see if it is assigned to a post
 		foreach( $item_list as $item ) {
@@ -171,6 +186,10 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 				$post_id = $this->get_hotel_by_smartsheet_id( $smartsheet_id );
 			}else{
 				$post_id = $this->get_village_by_smartsheet_id( $smartsheet_id );
+			}
+			
+			if ( $post_id ) {
+				$found_ids[ $post_id ] = $post_id;
 			}
 			
 			$item = array(
@@ -186,8 +205,37 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 			}
 		}
 		
-		// Return both arrays
-		return array( $assigned, $unassigned );
+		// Identify villages/hotels that only exist in WordPress as "missing" from smartsheet
+		$missing = array();
+		$remaining_ids = $this->get_all_item_ids( $type, $found_ids );
+		
+		if ( $remaining_ids ) foreach( $remaining_ids as $id ) {
+			$missing[] = array(
+				'smartsheet_name' => false,
+				'smartsheet_id' => false,
+				'post_id' => $id,
+			);
+		}
+		
+		// Return all arrays in a format compatible with list()
+		return array( $assigned, $unassigned, $missing );
+	}
+	
+	public function get_all_item_ids( $type, $exclude_ids = array() ) {
+		if ( $type == 'hotel' ) {
+			$post_type = AH_Hotel()->get_post_type();
+		}else{
+			$post_type = AH_Village()->get_post_type();
+		}
+		
+		$args = array(
+			'post_type' => $post_type,
+			'nopaging' => true,
+			'fields' => 'ids',
+			'post__not_in' => $exclude_ids,
+		);
+		
+		return get_posts($args);
 	}
 	
 	/**
@@ -251,7 +299,12 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 		$hotel_list = $this->get_values_from_rows( $rows, array(
 			'name'       => $column_ids['hotel_name'],
 			'id'         => $column_ids['hotel_id'],
-			'village_id' => $column_ids['village_id'],
+			
+			// Additional hotel data:
+			'village_id'      => $column_ids['village_id'],
+			'proprietor_name' => $column_ids['proprietor_name'],
+			'email'           => $column_ids['email'],
+			'phone'           => $column_ids['phone'],
 		) );
 		
 		// Save the hotel list
@@ -446,10 +499,6 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 		return $url;
 	}
 	
-	
-	public function get_hotel_row_from_smartsheet_list( $smartsheet_id ) {
-	}
-	
 	/**
 	 * Create a hotel from a row in the spreadsheet (within the "Sync Villages and Hotels" settings screen)
 	 *
@@ -462,19 +511,14 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 		$smartsheet_name = stripslashes($_GET['ah_smartsheet_name']);
 		$smartsheet_id = stripslashes($_GET['ah_smartsheet_id']);
 		
-		// Smartsheet ID is used as the post title because some villages/hotels may have repeat names in different locations.
-		$post_title = $smartsheet_id;
-		
 		if ( $type == 'village' ) {
 			$type_name = 'Village';
 			$post_type = AH_Village()->get_post_type();
 			$existing_post_id = $this->get_village_by_smartsheet_id($smartsheet_id);
-		}else if ( $type == 'hotel' ) {
+		}else{
 			$type_name = 'Hotel';
 			$post_type = AH_Hotel()->get_post_type();
 			$existing_post_id = $this->get_hotel_by_smartsheet_id($smartsheet_id);
-		}else{
-			return;
 		}
 		
 		// If it already exists, show an error message with link to edit
@@ -483,12 +527,23 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 				'%s already exists: <a href="%s">%s #%d</a>',
 				esc_html($type_name),
 				esc_attr(get_edit_post_link($existing_post_id)),
-				esc_html($post_title),
+				esc_html($smartsheet_id),
 				esc_html($existing_post_id)
 			);
 			wp_die($message);
 			exit;
 		}
+		
+		// Get the Smartsheet data from the list
+		$item_data = $this->get_stored_item( $smartsheet_id, $type );
+		
+		if ( ! $item_data ) {
+			wp_die('Cannot create hotel/village: item data not found with smartsheet id "'. esc_html($smartsheet_id) .'"');
+			exit;
+		}
+		
+		// Smartsheet ID is used as the post title because some villages/hotels may have repeat names in different locations.
+		$post_title = $smartsheet_id;
 		
 		// Create the post
 		$args = array(
@@ -497,14 +552,18 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 			'post_status' => 'publish',
 		);
 		
-		// Hotels also correspond to a village
+		// Hotels correspond to a village
+		/*
 		if ( $type == 'hotel' ) {
+			
 			$hotel = $this->get_hotel_by_smartsheet_id( $smartsheet_id );
-			// @todo: finish creating hotel from button
+			// @todo: finish creating hotels from button
 			echo 'TODO: Finish creating hotels from link';
 			pre_dump($hotel);
 			exit;
+			
 		}
+		*/
 		
 		/*
 		pre_dump(compact(
@@ -518,22 +577,12 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 		$post_id = wp_insert_post( $args );
 		
 		if ( ! $post_id || is_wp_error( $post_id ) ) {
-			wp_die( 'Failed to insert ' . $type_name . ', wp_insert_post returned an error.' );
+			wp_die( 'Failed to insert ' . $type_name . ', wp_insert_post returned an error.', 'Error', $post_id );
 			exit;
 		}
 		
-		// Set the smartsheet id
-		update_post_meta( $post_id, 'smartsheet_id', $smartsheet_id );
-		
-		// Set the last sync date for this post
-		update_post_meta( $post_id, 'smartsheet_last_sync', current_time('Y-m-d H:i:s') );
-		
-		// Set the village/post name (custom field)
-		if ( $type == 'village' ) {
-			update_post_meta( $post_id, 'village_name', $smartsheet_name );
-		}else{
-			update_post_meta( $post_id, 'hotel_name', $smartsheet_name );
-		}
+		// Sync the item with data from Smartsheet
+		$this->sync_item( $type, $post_id, $item_data );
 		
 		// Redirect to the edit post screen
 		$url = get_edit_post_link( $post_id, 'raw' );
@@ -549,4 +598,179 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 		exit;
 	}
 	
+	/**
+	 * Get a link that will automatically create a village or hotel based on smartsheet name/id
+	 *
+	 * @param string $type                  either "village" or "hotel"
+	 * @param string $post_id               ID of the post in WordPress
+	 * @param string|null $smartsheet_id    Optional. The title which should match the "WordPress ID" column in Smartsheet.
+	 *
+	 * @return string
+	 */
+	public function get_sync_village_or_hotel_link( $type, $post_id, $smartsheet_id = null ) {
+		$base_url = isset($_GET['page']) ? add_query_arg(array('page' => $_GET['page'] ?? '')) : $_SERVER['REQUEST_URI'];
+		
+		if ( $smartsheet_id === null ) {
+			$smartsheet_id = get_post_meta( $post_id, 'smartsheet_id', true );
+			if ( ! $smartsheet_id ) return false;
+		}
+		
+		$args = array(
+			'ah_sync_item' => $type,
+			'ah_post_id' => $post_id,
+			'ah_smartsheet_id' => $smartsheet_id,
+		);
+		
+		$url = add_query_arg($args, $base_url);
+		
+		return $url;
+	}
+	
+	/**
+	 * Returns the item with matching smartsheet ID from the stored village or hotel list.
+	 * False if not found.
+	 *
+	 * @param string $smartsheet_id
+	 * @param string $type
+	 *
+	 * @return array|false
+	 */
+	public function get_stored_item( $smartsheet_id, $type ) {
+		if ( $type == 'village' ) {
+			$list = $this->get_stored_village_list();
+		}else{
+			$list = $this->get_stored_hotel_list();
+		}
+		
+		foreach( $list as $item ) {
+			if ( $item['id'] == $smartsheet_id ) {
+				return $item;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Sync a hotel from a row in the spreadsheet (within the "Sync Villages and Hotels" settings screen)
+	 *
+	 * @return void
+	 */
+	public function sync_village_or_hotel_from_link() {
+		if ( ! isset($_GET['ah_sync_item']) ) return;
+		
+		$type = stripslashes($_GET['ah_sync_item']);
+		$post_id = stripslashes($_GET['ah_post_id']);
+		$smartsheet_id = stripslashes($_GET['ah_smartsheet_id']);
+		
+		// Look for the corresponding item to sync with
+		$item_data = $this->get_stored_item( $smartsheet_id, $type );
+		
+		if ( ! $item_data ) {
+			wp_die('Cannot sync hotel/village: item data not found with smartsheet id "'. esc_html($smartsheet_id) .'" and type "'. esc_html($type). '"' );
+			exit;
+		}
+		
+		// Update the item
+		$this->sync_item( $type, $post_id, $item_data );
+		
+		// Redirect when complete
+		$url = get_edit_post_link( $post_id, 'raw' );
+		
+		// Add a message to indicate the post was created successfully
+		if ( $type == 'village' ) {
+			$url = add_query_arg(array('ah_notice' => 'smartsheet_village_sync_complete'), $url);
+		}else{
+			$url = add_query_arg(array('ah_notice' => 'smartsheet_hotel_sync_complete'), $url);
+		}
+		
+		wp_redirect( $url );
+		exit;
+	}
+	
+	/**
+	 * Sync a hotel or village using data stored from a previous Smartsheet sync.
+	 * $data must include an "id" property (smartsheet id) or else returns false without updating the item.
+	 *
+	 * Does not perform any API queries.
+	 *
+	 * @param string $type     "hotel" or "village"
+	 * @param int    $post_id  post ID of a hotel or village
+	 * @param array  $data     {
+	 *     @type string $name               "Hotel Schonegg"
+	 *     @type string $id                 "Hotel Schonegg | Wengen"
+	 *
+	 *     (Hotels Only)
+	 *     @type string $village_id         "Wengen - CH"
+	 *     @type string $proprietor_name    "Jennifer"
+	 *     @type string $email              "mail@hotel-schoenegg.ch"
+	 *     @type string $phone              "41 33 855 3422"
+	 * }
+	 *
+	 * @return bool
+	 */
+	public function sync_item( $type, $post_id, $data ) {
+		$smartsheet_id = $data['id'];
+		$smartsheet_name = $data['name'];
+		if ( ! $smartsheet_id ) return false;
+		
+		// Smartsheet id
+		update_post_meta( $post_id, 'smartsheet_id', $smartsheet_id );
+		
+		// Last sync date
+		update_post_meta( $post_id, 'smartsheet_last_sync', current_time('Y-m-d H:i:s') );
+		
+		// Village fields
+		if ( $type == 'village' ) {
+			update_post_meta( $post_id, 'village_name', $smartsheet_name );
+		}
+		
+		// Hotel fields
+		if ( $type == 'hotel' ) {
+			update_post_meta( $post_id, 'hotel_name', $smartsheet_name );
+			
+			$village_smartsheet_id = $data['village_id'] ?? '';
+			update_post_meta( $post_id, 'village_smartsheet_id', $village_smartsheet_id );
+			
+			$village_post_id = $this->get_village_by_smartsheet_id( $village_smartsheet_id );
+			if ( $village_post_id ) {
+				update_post_meta( $post_id, 'village', $village_post_id );
+			}
+			
+			update_post_meta( $post_id, 'proprietor_name', $data['proprietor_name'] ?? '' );
+			update_post_meta( $post_id, 'email', $data['email'] ?? '' );
+			update_post_meta( $post_id, 'phone', $data['phone'] ?? '' );
+		}
+		
+		return true;
+	}
+	
 }
+
+/*
+type
+string(5) "hotel"
+post_id
+string(4) "6510"
+smartsheet_id
+string(23) "Hotel Schonegg | Wengen"
+type_name
+string(5) "Hotel"
+post_type
+string(8) "ah_hotel"
+found_item
+array(6) {
+  ["name"]=>
+  string(14) "Hotel Schonegg"
+  ["id"]=>
+  string(23) "Hotel Schonegg | Wengen"
+  ["village_id"]=>
+  string(11) "Wengen - CH"
+  ["proprietor_name"]=>
+  string(8) "Jennifer"
+  ["email"]=>
+  string(23) "mail@hotel-schoenegg.ch"
+  ["phone"]=>
+  string(14) "41 33 855 3422"
+}
+
+ */

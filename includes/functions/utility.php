@@ -41,17 +41,26 @@ function ah_adjust_date( $offset, $format, $current_time = null ) {
 /**
  * Displays a relative date (eg: 3 days ago) in HTML. Hover to view the actual date.
  *
- * @param string $date     Formatted date string, must be compatible with strtotime()
- * @param string $format   The date format to use when hovering over the relative date
+ * @param string      $date     Formatted date string, must be compatible with strtotime()
+ * @param string|null $date_2   Optional. Another date string used as the end of the date range
+ * @param string      $format   The date format to use when hovering over the relative date
  *
  * @return string|false
  */
-function ah_get_relative_date_html( $date, $format = 'F j, Y g:i a' ) {
+function ah_get_relative_date_html( $date, $date_2 = null, $format = 'F j, Y g:i a' ) {
+	// From $date
 	$ts = strtotime((string) $date);
 	if ( ! $ts ) return false;
 	
+	// To $date_2
+	if ( $date_2 === null ) {
+		$ts_2 = current_time('timestamp');
+	}else{
+		$ts_2 = strtotime( (string) $date_2 );
+	}
+	
 	$date_formatted = date( $format, $ts );
-	$date_relative = human_time_diff($ts) . ' ago';
+	$date_relative = human_time_diff( $ts, $ts_2 ) . ' ago';
 	
 	return sprintf(
 		'<abbr title="%s" class="ah-relative-date ah-tooltip">%s</abbr>',
@@ -228,17 +237,14 @@ function ah_get_asset_url( $filename ) {
 }
 
 /**
- * Display an HTML string with 2 columns.
+ * Displays an <img> tag at full resolution, scaled to fit the given width and height
  *
- * @param $html
+ * @param $image_id
+ * @param $max_w
+ * @param $max_h
  *
  * @return void
  */
-function ah_display_content_columns( $html ) {
-	echo wpautop($html);
-}
-
-
 function ah_display_image( $image_id, $max_w = 1055, $max_h = 815 ) {
 	
 	$img = wp_get_attachment_image_src( $image_id, 'full' );

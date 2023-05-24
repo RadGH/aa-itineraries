@@ -54,7 +54,7 @@ if ( ah_is_pdf() ) {
 	<htmlpagefooter name="itinerary_intro_footer" style="display:none">
 		<table class="footer-table footer-table-itinerary-intro" width="100%"><tr>
 				<td width="50%"></td>
-				<td width="50%" align="right"><?php ah_display_content_columns( $contact_information ); ?></td>
+				<td width="50%" align="right"><?php echo wpautop( $contact_information ); ?></td>
 			</tr></table>
 	</htmlpagefooter>
 	
@@ -183,14 +183,14 @@ if ( ah_is_pdf() ) {
 		
 		<?php if ( $introduction_message ) { ?>
 			<div class="section-content itinerary-summary">
-				<?php ah_display_content_columns( $introduction_message ); ?>
+				<?php echo wpautop( $introduction_message ); ?>
 			</div>
 		<?php } ?>
 		
 		<?php // On PDF, this moved to footer. See above htmlpagefooter
 		if ( (! ah_is_pdf() || ah_is_pdf_preview()) && $contact_information ) { ?>
 			<div class="section-content itinerary-contact">
-				<?php ah_display_content_columns( $contact_information ); ?>
+				<?php echo wpautop( $contact_information ); ?>
 			</div>
 		<?php } ?>
 	
@@ -309,7 +309,7 @@ if ( ah_is_pdf() ) {
 		
 		<?php if ( $tour_overview ) { ?>
 			<div class="section-content itinerary-tour-overview">
-				<?php ah_display_content_columns( $tour_overview ); ?>
+				<?php echo wpautop( $tour_overview ); ?>
 			</div>
 		<?php } ?>
 		

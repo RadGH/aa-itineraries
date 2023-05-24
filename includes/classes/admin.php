@@ -295,6 +295,14 @@ class Class_AH_Admin {
 				$this->add_notice( 'success', 'This hotel has been automatically created and paired with Smartsheet.', null, null, true );
 				break;
 			
+			case 'smartsheet_village_sync_complete':
+				$this->add_notice( 'success', 'The village information has been updated to match Smartsheet.', null, null, true );
+				break;
+			
+			case 'smartsheet_hotel_sync_complete':
+				$this->add_notice( 'success', 'The hotel information has been updated to match Smartsheet.', null, null, true );
+				break;
+			
 			case 'sync_sheets_failed':
 				$this->add_notice( 'success', 'Failed to sync list of sheets from Smartsheet.', null, null, true );
 				break;

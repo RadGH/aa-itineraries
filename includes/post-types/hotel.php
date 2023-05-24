@@ -96,6 +96,7 @@ class Class_Hotel_Post_Type extends Class_Abstract_Post_Type {
 	public function customize_columns( $columns ) {
 		return array_merge(
 			array_slice( $columns, 0, 2),
+			array('ah_sync' => 'Smartsheet'),
 			array('ah_review' => 'Content Review'),
 			array_slice( $columns, 2, null),
 		);
@@ -111,22 +112,32 @@ class Class_Hotel_Post_Type extends Class_Abstract_Post_Type {
 	 */
 	public function display_columns( $column, $post_id ) {
 		switch( $column ) {
-			case 'ah_review':
-				$fields = array(
-					'Hotel Name' => get_post_meta( $post_id, 'hotel_name', true ),
-					'Village' => get_post_meta( $post_id, 'village', true ),
-					'Description' => get_post_meta( $post_id, 'description', true ),
-				);
+			
+			case 'ah_sync':
+				$sync_url = AH_Smartsheet_Sync_Hotels_And_Villages()->get_sync_village_or_hotel_link( 'hotel', $post_id );
 				
-				foreach( $fields as $name => $value ) {
-					if ( $value ) {
-						echo '<a href="#" title="&quot;'. esc_attr($name) .'&quot; is valid" class="ah-tooltip ah-review-valid"><span class="dashicons dashicons-yes"></span></a>';
-					}else{
-						echo '<a href="#" title="&quot;'. esc_attr($name) .'&quot; has no value" class="ah-tooltip ah-review-invalid"><span class="dashicons dashicons-no"></span></a>';
-					}
+				if ( $sync_url ) {
+					echo sprintf(
+						'<a href="%s" class="button button-small button-secondary">Sync</a>',
+						esc_attr($sync_url)
+					);
+				}else{
+					echo '&ndash;';
 				}
 				
 				break;
+				
+			case 'ah_review':
+				
+				$this->display_content_review_column(array(
+					'Village' => get_post_meta( $post_id, 'village', true ),
+					'Hotel Name' => get_post_meta( $post_id, 'hotel_name', true ),
+					'Phone' => get_post_meta( $post_id, 'phone', true ),
+					'Description' => get_post_meta( $post_id, 'description', true ),
+				));
+				
+				break;
+				
 		}
 	}
 	

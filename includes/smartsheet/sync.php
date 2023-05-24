@@ -50,19 +50,19 @@ MySQL;
 	}
 	
 	/**
-	 * Get the post ID by the smartsheet name. The smartsheet name on the website must exactly match the one in the spreadsheet.
+	 * Get the post ID by the smartsheet ID. The smartsheet ID on the website must exactly match the one in the spreadsheet.
 	 * If $post_list is provided (from get_post_list), that list will be checked instead.
 	 *
-	 * @param $smartsheet_name
+	 * @param $smartsheet_id
 	 * @param $post_type
 	 * @param $post_list
 	 *
 	 * @return int|false
 	 */
-	public function get_post_id_from_smartsheet_id( $smartsheet_name, $post_type, $post_list = null ) {
+	public function get_post_id_from_smartsheet_id( $smartsheet_id, $post_type, $post_list = null ) {
 		// Use post ID from the given list, if provided
 		if ( $post_list !== null ) {
-			$post_id = array_search( $smartsheet_name, $post_list );
+			$post_id = array_search( $smartsheet_id, $post_list );
 			return $post_id ?: false;
 		}
 		
@@ -87,7 +87,7 @@ WHERE
 LIMIT 1;
 MySQL;
 		
-		$sql = $wpdb->prepare( $sql, $post_type, $smartsheet_name );
+		$sql = $wpdb->prepare( $sql, $post_type, $smartsheet_id );
 		
 		$post_id = (int) $wpdb->get_var( $sql );
 		

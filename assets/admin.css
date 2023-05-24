@@ -175,12 +175,14 @@ Start: Hotel Info page
 }
 
 .ah-admin-table .col-smartsheet_name,
-.ah-admin-table .col-smartsheet_id {
+.ah-admin-table .col-smartsheet_id,
+.ah-admin-table .col-wordpress_title {
 	width: 150px;
 }
 @media ( min-width: 800px ) {
 	.ah-admin-table .col-smartsheet_name,
-	.ah-admin-table .col-smartsheet_id {
+	.ah-admin-table .col-smartsheet_id,
+	.ah-admin-table .col-wordpress_title {
 		width: 240px;
 	}
 }
@@ -189,12 +191,18 @@ End: Hotel Info page
 */
 
 /*
+Start: Post List Columns
+*/
+table.wp-list-table .column-ah_review { width: 100px; }
+table.wp-list-table .column-ah_image { width: 150px; }
+table.wp-list-table .column-ah_sync { width: 100px; }
+/*
+End: Post List Columns
+*/
+
+/*
 Start: Content review columns (Villages/Hotels)
 */
-table.wp-list-table .column-ah_review {
-	width: 100px;
-}
-
 .ah-review-valid {
 	color: #cccccc;
 }
