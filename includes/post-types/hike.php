@@ -70,7 +70,7 @@ class Class_Hike_Post_Type extends Class_Abstract_Post_Type {
 		
 		$args['publicly_queryable'] = true;
 		$args['rewrite'] = array(
-			'slug' => 'hikes',
+			'slug' => 'hike',
 			'with_front' => false,
 		);
 		

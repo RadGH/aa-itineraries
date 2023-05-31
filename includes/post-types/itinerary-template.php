@@ -65,7 +65,7 @@ class Class_Itinerary_Template_Post_Type extends Class_Abstract_Post_Type {
 		
 		$args['publicly_queryable'] = true;
 		$args['rewrite'] = array(
-			'slug' => 'itinerary-templates',
+			'slug' => 'itinerary-template',
 			'with_front' => false,
 		);
 		

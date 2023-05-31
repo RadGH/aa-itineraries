@@ -22,7 +22,7 @@ class Class_AH_Rewrites {
 		
 		// Documents with ability to download
 		add_rewrite_rule(
-			'(documents)/([^/]+)?(:/([0-9]+))?/download/?$',
+			'(document)/([^/]+)?(:/([0-9]+))?/download/?$',
 			'index.php?post_type=ah_document&ah_document=$matches[2]&page=&slug=$matches[1]&ah_action=download_document',
 			'top'
 		);
@@ -37,22 +37,22 @@ class Class_AH_Rewrites {
 		// Allow hikes, villages, itineraries, and itinerary templates; to "download" a pdf or "preview" a pdf
 		// see theme.php -> load_template()
 		add_rewrite_rule(
-			'hikes/([^/]+)/(download|preview)/?$',
+			'hike/([^/]+)/(download|preview)/?$',
 			'index.php?post_type=ah_hike&ah_hike=$matches[1]&ah_action=$matches[2]',
 			'top'
 		);
 		add_rewrite_rule(
-			'villages/([^/]+)/(download|preview)/?$',
+			'village/([^/]+)/(download|preview)/?$',
 			'index.php?post_type=ah_village&ah_village=$matches[1]&ah_action=$matches[2]',
 			'top'
 		);
 		add_rewrite_rule(
-			'itineraries/([^/]+)/(download|preview)/?$',
+			'itinerary/([^/]+)/(download|preview)/?$',
 			'index.php?post_type=ah_itinerary&ah_itinerary=$matches[1]&ah_action=$matches[2]',
 			'top'
 		);
 		add_rewrite_rule(
-			'itinerary-templates/([^/]+)/(download|preview)/?$',
+			'itinerary-template/([^/]+)/(download|preview)/?$',
 			'index.php?post_type=ah_itinerary_tpl&ah_itinerary=$matches[1]&ah_action=$matches[2]',
 			'top'
 		);

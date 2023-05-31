@@ -243,7 +243,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		
 		$args['publicly_queryable'] = true;
 		$args['rewrite'] = array(
-			'slug' => 'itineraries',
+			'slug' => 'itinerary',
 			'with_front' => false,
 		);
 		

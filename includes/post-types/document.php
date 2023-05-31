@@ -110,7 +110,7 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 		
 		$args['publicly_queryable'] = true;
 		$args['rewrite'] = array(
-			'slug' => 'documents',
+			'slug' => 'document',
 			'with_front' => false,
 		);
 		

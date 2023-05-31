@@ -72,7 +72,10 @@ class Class_Account_Page_Post_Type extends Class_Abstract_Post_Type {
 		$args['menu_position'] = 20;
 		
 		$args['publicly_queryable'] = true;
-		$args['rewrite'] = array( 'slug' => 'account' );
+		$args['rewrite'] = array(
+			'slug' => 'account',
+			'with_front' => false,
+		);
 		
 		$args['hierarchical'] = true;
 		$args['supports'] = array( 'title', 'author', 'revisions', 'page-attributes' );

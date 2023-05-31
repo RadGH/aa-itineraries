@@ -74,7 +74,7 @@ class Class_Hotel_Post_Type extends Class_Abstract_Post_Type {
 		
 		$args['publicly_queryable'] = true;
 		$args['rewrite'] = array(
-			'slug' => 'hotels',
+			'slug' => 'hotel',
 			'with_front' => false,
 		);
 		
