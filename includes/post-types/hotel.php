@@ -97,6 +97,7 @@ class Class_Hotel_Post_Type extends Class_Abstract_Post_Type {
 		return array_merge(
 			array_slice( $columns, 0, 2),
 			array('ah_sync' => 'Smartsheet'),
+			array('ah_village_map' => 'Village Map'),
 			array('ah_review' => 'Content Review'),
 			array_slice( $columns, 2, null),
 		);
@@ -125,6 +126,15 @@ class Class_Hotel_Post_Type extends Class_Abstract_Post_Type {
 					echo '&ndash;';
 				}
 				
+				break;
+				
+			case 'ah_village_map':
+				$image_id = get_post_meta( $post_id, 'village_map', true );
+				if ( $image_id ) {
+					ah_display_image( $image_id, 150, 150 );
+				}else{
+					echo '&ndash;';
+				}
 				break;
 				
 			case 'ah_review':

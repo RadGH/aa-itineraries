@@ -200,6 +200,10 @@ table.schedule-table {
 	margin: 0;
 }
 
+table.schedule-table a {
+	text-decoration: none;
+}
+
 table.schedule-table .column {
 	vertical-align: top;
 	padding-bottom: 10px;

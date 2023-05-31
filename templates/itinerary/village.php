@@ -10,17 +10,21 @@ if ( !isset($first_bookmark) ) $first_bookmark = false;
 
 $slug = get_post_field( 'post_name', $village_id );
 
-$title = get_the_title( $village_id );
-$image_id = get_field( 'image', $village_id, false );
+$title = get_field( 'village_name', $village_id ) ?: get_the_title( $village_id );
 $intro = get_field( 'village_intro', $village_id );
 $details = get_field( 'around_the_village', $village_id );
+
+// Image ID now belongs to the village
+// $village_map_id = get_field( 'image', $village_id, false );
 
 if ( AH_Hotel()->is_valid( $hotel_id ) ) {
 	$hotel_name = get_field( 'hotel_name', $hotel_id );
 	$hotel_description = get_field( 'description', $hotel_id );
+	$village_map_id = get_field( 'village_map', $hotel_id, false );
 }else{
 	$hotel_name = false;
 	$hotel_description = false;
+	$village_map_id = false;
 }
 ?>
 
@@ -65,11 +69,11 @@ if ( ah_is_pdf() ) {
 	</div>
 	<?php } ?>
 	
-	<?php if ( $image_id ) { ?>
-	<div class="section-image village-image">
-		<?php ah_display_image( $image_id, 815, 360 ); ?>
+	<?php if ( $village_map_id ) { ?>
+	<div class="section-image village-map">
+		<?php ah_display_image( $village_map_id, 815, 360 ); ?>
 	</div>
-	<?php } ?>
+	<?php }	?>
 	
 	<?php if ( $intro ) { ?>
 	<div class="section-content village-intro">

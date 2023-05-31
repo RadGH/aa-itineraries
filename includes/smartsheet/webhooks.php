@@ -193,12 +193,15 @@ class Class_AH_Smartsheet_Webhooks  {
 			
 			// Respond with the challenge code using a custom header and also as the message body
 			ob_clean();
-			header( 'HTTP/1.1 200 OK', true, 200 );
-			header( 'Smartsheet-Hook-Challenge: ' . $challenge );
-			echo $challenge;
-			// echo json_encode( array('smartSheetHookResponse' => $challenge) );
+			// header( 'HTTP/1.1 200 OK', true, 200 );
+			http_response_code( 200 );
+			header( 'Smartsheet-Hook-Response: ' . $challenge );
+			// echo $challenge;
+			echo json_encode( array('smartsheetHookResponse' => $challenge) );
 			exit;
 		}else{
+			http_response_code( 400 );
+			
 			echo '<p><strong>Error: The header "Smartsheet-Hook-Challenge" was not defined.</strong></p>';
 			echo '<p>To add custom headers in Chrome (for testing):</p>';
 			echo '<br><img style="max-width: 1000px;" src="https://s3.us-west-2.amazonaws.com/elasticbeanstalk-us-west-2-868470985522/ShareX/2023/05/chrome_2023-05-19_14-16-38.png">';

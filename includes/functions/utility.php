@@ -543,3 +543,81 @@ function ah_search_array_items( $item_list, $search_term, $keys_to_search = null
 	
 	return $results;
 }
+
+/**
+ * Test if a string appears to be a phone number by checking if it contains 8 to 18 numeric digits.
+ * If the string contains 50% non-numbers it fails the test.
+ * This is a very rough test.
+ *
+ * @param string $phone
+ *
+ * @return bool
+ */
+function ah_is_phone_number( $phone ) {
+	$number = preg_replace('/[^0-9]/', '', $phone);
+	
+	$length = strlen($number);
+	if ( $length < 8 ) return false;
+	if ( $length > 18 ) return false;
+	
+	// fail if 50% non numbers
+	$max_length = strlen($phone);
+	$number_ratio = $length / $max_length;
+	if ( $number_ratio <= 0.5 ) return false;
+	
+	return true;
+}
+
+/**
+ * Create an HTML link using a phone number.
+ * Supports international numbers by preserving common symbols.
+ * Supports an optional extension displayed after the link.
+ *
+ * @param string $phone
+ *
+ * @return string
+ */
+function ah_get_phone_number_link( $phone ) {
+	// Check for an extension, split it from the phone number
+	if ( preg_match('/([0-9])[^0-9]*(extension|ext|x).*?([0-9\-|\/]+)\b/i', $phone, $matches) ) {
+		// Get extension to put after the link
+		$extension = ' ext. ' . $matches[3];
+		
+		// Remove the extension from the phone number
+		$pos = strpos( $phone, $matches[0] );
+		$phone = substr( $phone, 0, $pos + 1 );
+	}else{
+		// No extension
+		$extension = '';
+	}
+	
+	// Get the digits
+	$number = strtoupper(preg_replace('/[^0-9]/i', '', $phone)); // "(123) 456-7890 ext. 123" => "1234567890"
+	
+	// Special formatting for USA
+	if ( preg_match('/^(\+1|1)?([2-9]\d{2})([\d]{3})([\d]{4})$/i', $number, $matches) ) {
+		//   555.123.1234 ->
+		// (555) 456-7890 ->
+		// = 1 (555) GET-LOST
+		$link = sprintf('tel:+1%d%d%d', $matches[2], $matches[3], $matches[4]);
+		$display = sprintf('1 (%d) %d-%d', $matches[2], $matches[3], $matches[4]);
+	} else {
+		// Other countries:
+		// Only allow numbers and these symbols
+		$link = 'tel:+' . $number;
+		$display = preg_replace('/[^0-9\(\)\-\. ]/', '', $phone );
+	}
+	
+	// Do not use links in PDF
+	if ( ah_is_pdf() ) {
+		return $display . $extension;
+	}
+	
+	// Get an HTML link
+	return sprintf(
+		'<a href="%s" itemprop="telephone">%s</a>%s',
+		esc_attr($link),
+		esc_html($display),
+		esc_html($extension)
+	);
+}

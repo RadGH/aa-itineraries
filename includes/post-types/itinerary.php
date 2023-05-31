@@ -431,7 +431,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 			
 			foreach( $villages as $s ) {
 				$village_id = (int) $s['village'];
-				$title = get_the_title( $village_id );
+				$title = get_field( 'village_name', $village_id ) ?: get_the_title( $village_id );
 				$link = '#village-' . esc_attr(get_post_field( 'post_name', $village_id ));
 				$this->_add_toc_item( $village_list['children'], $title, $link );
 			}

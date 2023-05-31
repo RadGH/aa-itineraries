@@ -336,6 +336,9 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		
 		echo '<h2>TODO: Sync itinerary with smartsheet</h2>';
 		
+		echo '<p>Client:</p>';
+		pre_dump($client);
+		
 		echo '<p>Hotels:</p>';
 		pre_dump( $hotels );
 		

@@ -219,10 +219,16 @@ if ( ah_is_pdf() ) {
 			echo '<table class="schedule-table columns-3"><tbody>';
 			
 			if ( $schedule ) foreach( $schedule as $i ) {
+				$col_3 = $i['column_3'];
+				
+				if ( $col_3 && ah_is_phone_number( $col_3 ) ) {
+					$col_3 = ah_get_phone_number_link( $col_3 );
+				}
+				
 				echo '<tr class="schedule">';
 					echo '<td class="column column-1">', nl2br($i['column_1']), '</td>';
 					echo '<td class="column column-2">', nl2br($i['column_2']), '</td>';
-					echo '<td class="column column-3">', nl2br($i['column_3']), '</td>';
+					echo '<td class="column column-3">', nl2br($col_3), '</td>';
 				echo '</tr>';
 			}
 			
@@ -261,12 +267,14 @@ if ( ah_is_pdf() ) {
 				echo '<table class="directory-table columns-2"><tbody>';
 				foreach( $all_phone_numbers as $i ) {
 					
-					if ( $i['title'] || $i['phone_number'] ) {
+					$phone_number_display = ah_get_phone_number_link( $i['phone_number'] );
+					
+					if ( $i['title'] || $phone_number_display ) {
 						echo '<tr>';
 						
-						if ( $i['phone_number'] ) {
+						if ( $phone_number_display ) {
 							echo '<td class="column column-1 title">', esc_html($i['title']), '</td>';
-							echo '<td class="column column-2 phone-number">', esc_html($i['phone_number']), '</td>';
+							echo '<td class="column column-2 phone-number">', $phone_number_display, '</td>';
 						}else{
 							echo '<td class="column column-1-2 title" colspan="2">', esc_html($i['title']), '</td>';
 						}
