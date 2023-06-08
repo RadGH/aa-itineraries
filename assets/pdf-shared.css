@@ -265,6 +265,18 @@ table.directory-table .column-2 {
 }
 /* End: Itinerary Phone Numbers */
 
+/* Start: Hike List */
+.itinerary-hike-summary h3 a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.itinerary-hike-summary h3,
+.itinerary-hike-summary ul.hike-list {
+	margin: 0 0 15px;
+}
+/* End: Hike List */
+
 /* Start: Hikes */
 ul.hike-link-list {
 	margin: 10px 0;

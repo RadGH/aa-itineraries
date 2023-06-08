@@ -37,6 +37,9 @@ $show_directory_page = ( $has_phone_numbers || $country_codes );
 $show_tour_overview = ($tour_overview != '');
 $show_villages = ! ah_is_array_recursively_empty($villages);
 
+$hike_summary = ah_get_hike_summary( get_the_ID() );
+$show_hike_summary = ($hike_summary != '' );
+
 if ( ! ah_is_pdf() ) {
 	// Web page view
 	?>
@@ -132,6 +135,26 @@ if ( ah_is_pdf() ) {
 		@page itinerary_tour_overview {
 			odd-footer-name: itinerary_tour_overview_footer;
 			even-footer-name: itinerary_tour_overview_footer;
+		}
+	</style>
+	
+	
+	<!-- Hike Summary -->
+	<htmlpagefooter name="itinerary_hike_summary_footer" style="display:none">
+		<table class="footer-table" width="100%"><tr>
+			<td width="50%">Hike Summary</td>
+			<td width="50%" align="right">{PAGENO}</td>
+		</tr></table>
+	</htmlpagefooter>
+	
+	<style>
+		#hike-summary {
+			page: itinerary_hike_summary;
+		}
+		
+		@page itinerary_hike_summary {
+			odd-footer-name: itinerary_hike_summary_footer;
+			even-footer-name: itinerary_hike_summary_footer;
 		}
 	</style>
 	
@@ -318,6 +341,28 @@ if ( ah_is_pdf() ) {
 		<?php if ( $tour_overview ) { ?>
 			<div class="section-content itinerary-tour-overview">
 				<?php echo wpautop( $tour_overview ); ?>
+			</div>
+		<?php } ?>
+		
+	</div>
+	<?php
+	}
+	?>
+	
+	<?php
+	if ( $show_hike_summary ) {
+	?>
+	<div class="pdf-page" id="hike-summary">
+		
+		<?php ah_display_bookmark( 'Hike Summary', 0 ); ?>
+		
+		<div class="section-heading itinerary-heading">
+			<?php echo '<h1 class="pdf-title">Hike Summary</h1>'; ?>
+		</div>
+		
+		<?php if ( $hike_summary ) { ?>
+			<div class="section-content itinerary-hike-summary">
+				<?php echo $hike_summary; ?>
 			</div>
 		<?php } ?>
 		

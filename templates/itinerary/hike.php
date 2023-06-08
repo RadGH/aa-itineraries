@@ -8,7 +8,7 @@ if ( !isset($first_bookmark) ) $first_bookmark = false;
 
 $slug = get_post_field( 'post_name', $post_id );
 
-$title = get_the_title( $post_id );
+$title = get_field( 'hike_name', $post_id ) ?: get_the_title( $post_id );
 $summary = get_field( 'summary', $post_id );
 $elevation_diagram = get_field( 'elevation_diagram', $post_id, false );
 $topographic_map = get_field( 'topographic_map', $post_id, false );

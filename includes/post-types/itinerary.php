@@ -423,6 +423,13 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 			$this->_add_toc_item( $toc_list, 'Tour Overview', '#tour-overview' );
 		}
 		
+		// HIKE SUMMARY
+		$hike_summary = ah_get_hike_summary( get_the_ID() );
+		$show_hike_summary = ($hike_summary != '' );
+		if ( $show_hike_summary ) {
+			$this->_add_toc_item( $toc_list, 'Hike Summary', '#hike-summary' );
+		}
+		
 		// Villages
 		$villages = get_field( 'villages', $itinerary_id );
 		$show_villages = ! ah_is_array_recursively_empty($villages);

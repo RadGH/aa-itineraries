@@ -219,3 +219,45 @@ function ah_is_pdf() {
 function ah_is_pdf_preview() {
 	return AH_PDF()->use_preview;
 }
+
+/**
+ * Gets the hike summary for an itinerary
+ *
+ * @param $itinerary_id
+ *
+ * @return string|false
+ */
+function ah_get_hike_summary( $itinerary_id ) {
+	$hikes = get_field( 'hikes', get_the_ID() );
+	if ( ah_is_array_recursively_empty($hikes) ) return false;
+	
+	ob_start();
+	
+	foreach( $hikes as $i => $s ) {
+		$hike_id = (int) $s['hike'];
+		$title = get_field( 'hike_name', $hike_id ) ?: get_the_title( $hike_id );
+		$links = get_field( 'link_links', $hike_id );
+		$slug = get_post_field( 'post_name', $hike_id );
+		
+		?>
+		<h3><a href="#hike-<?php echo esc_attr($slug); ?>"><?php echo $title; ?></a></h3>
+		
+		<?php
+		if ( ! ah_is_array_recursively_empty( $links ) ) {
+			foreach( $links as $l ) {
+				$label = $l['label'];
+				$url = $l['url'];
+				?>
+				<ul class="hike-list">
+					<li><?php echo esc_html($label); ?>:<br><a href="<?php echo esc_attr($url); ?>"><?php echo esc_html($url); ?></a></li>
+				</ul>
+				<?php
+			}
+		}
+		?>
+		
+		<?php
+	}
+	
+	return ob_get_clean();
+}

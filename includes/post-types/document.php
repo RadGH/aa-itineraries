@@ -199,31 +199,13 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 	public function user_has_access( $post_id = null, $user_id = null ) {
 		if ( ! $this->is_valid( $post_id ) ) return false;
 		
-		// Must be logged in, even if permission is set to "All Users"
+		// Must be logged in
 		if ( $user_id === null ) $user_id = get_current_user_id();
 		if ( ! $user_id ) return false;
 		
-		$permission = get_field( 'permission', $post_id );
-		
-		switch( $permission ) {
-			
-			case 'all':
-				// Allow for all users (note: must still be signed in)
-				return true;
-				
-			case 'single':
-				// Allow for a single user
-				$document_user_id = (int) get_field( 'user_id', $post_id );
-				if ( $document_user_id == $user_id ) return true;
-				break;
-				
-			case 'multiple':
-				// Allow for multiple users
-				$document_user_ids = (array) get_field( 'user_ids', $post_id );
-				if ( in_array( $user_id, $document_user_ids, true ) ) return true;
-				break;
-				
-		}
+		// Allow multiple users
+		$document_user_ids = (array) get_field( 'user_ids', $post_id );
+		if ( in_array( $user_id, $document_user_ids, true ) ) return true;
 		
 		// Allow administrators to access all documents
 		if ( user_can( $user_id, 'administrator' ) ) return true;
@@ -305,7 +287,7 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 	}
 	
 	/**
-	 * When saving a post, save each user_id as a separate meta key for permission = multiple
+	 * When saving a post, save each user_id as a separate meta key
 	 *
 	 * @param $post_id
 	 *
@@ -462,64 +444,22 @@ MySQL;
 	/**
 	 * Get a WP_Query containing all of the user's documents
 	 *
-	 * @param $user_id
+	 * @param int $user_id
+	 * @param null|array $custom_args
 	 *
 	 * @return false|WP_Query
 	 */
-	public function get_user_documents( $user_id = null, $custom_args = array() ) {
+	public function get_user_documents( $user_id = null, $custom_args = null ) {
 		if ( $user_id === null ) $user_id = get_current_user_id();
 		if ( ! $user_id ) return false;
 		
-		$post_ids = array();
+		// $post_ids = array();
 		
-		// Query 1/4: Get documents assigned to all users
+		// Get documents assigned to multiple users
 		$args = array(
 			'post_type' => $this->get_post_type(),
 			'nopaging' => true,
-			'fields' => 'ids',
 			'meta_query' => array(
-				array(
-					'key' => 'permission',
-					'value' => 'all',
-				),
-			),
-		);
-		
-		$q = new WP_Query( $args );
-		
-		if ( $q->have_posts() ) $post_ids = array_merge( $post_ids, $q->posts );
-		
-		// Query 2/4: Get documents assigned to a single user
-		$args = array(
-			'post_type' => $this->get_post_type(),
-			'nopaging' => true,
-			'fields' => 'ids',
-			'meta_query' => array(
-				array(
-					'key' => 'permission',
-					'value' => 'single',
-				),
-				array(
-					'key' => 'user_id',
-					'value' => $user_id,
-				),
-			),
-		);
-		
-		$q = new WP_Query( $args );
-		
-		if ( $q->have_posts() ) $post_ids = array_merge( $post_ids, $q->posts );
-		
-		// Query 3/4: Get documents assigned to multiple users
-		$args = array(
-			'post_type' => $this->get_post_type(),
-			'nopaging' => true,
-			'fields' => 'ids',
-			'meta_query' => array(
-				array(
-					'key' => 'permission',
-					'value' => 'multiple',
-				),
 				array(
 					'key' => 'ah_multiple_user_id',
 					'value' => $user_id,
@@ -527,11 +467,16 @@ MySQL;
 			),
 		);
 		
+		if ( $custom_args !== null ) $args = array_merge( $args, $custom_args );
+		
 		$q = new WP_Query( $args );
 		
+		return $q;
+		
+		/*
 		if ( $q->have_posts() ) $post_ids = array_merge( $post_ids, $q->posts );
 		
-		// Query 4/4: Combine all those posts into one new query
+		// Combine IDs into a new query
 		$args = array(
 			'post_type' => $this->get_post_type(),
 			'nopaging' => true,
@@ -541,6 +486,7 @@ MySQL;
 		if ( $custom_args ) $args = array_merge( $args, $custom_args );
 		
 		return new WP_Query($args);
+		*/
 	}
 	
 	/**
