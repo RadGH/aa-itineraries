@@ -89,9 +89,9 @@ class Class_Itinerary_Template_Post_Type extends Class_Abstract_Post_Type {
 		
 		if ( $enabled ) {
 			// Convert to regular itinerary
-			add_action( 'acf/save_post', array( $this, 'save_post_convert_to_itinerary' ), 50 );
+			// add_action( 'acf/save_post', array( $this, 'save_post_convert_to_itinerary' ), 50 );
 		}else{
-			remove_action( 'acf/save_post', array( $this, 'save_post_convert_to_itinerary' ), 50 );
+			// remove_action( 'acf/save_post', array( $this, 'save_post_convert_to_itinerary' ), 50 );
 		}
 	}
 	
@@ -102,6 +102,7 @@ class Class_Itinerary_Template_Post_Type extends Class_Abstract_Post_Type {
 	 *
 	 * @return void
 	 */
+	/*
 	public function save_post_convert_to_itinerary( $post_id ) {
 		if ( ! $this->is_valid( $post_id ) ) return;
 		
@@ -122,5 +123,6 @@ class Class_Itinerary_Template_Post_Type extends Class_Abstract_Post_Type {
 			AH_Admin()->add_notice( 'success', 'This itinerary template has been converted to a regular itinerary.', null, 'itinerary-convert', true );
 		}
 	}
+	*/
 	
 }

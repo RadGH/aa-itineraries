@@ -114,30 +114,30 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		$templates = new WP_Query($args);
 		
 		?>
-		<div class="notice notice-info">
-			<p>You are creating a new itinerary. Would you like to load information from a template? This will overwrite ALL information in this itinerary.</p>
+		<div class="notice notice-info is-dismissible">
+			<p>Would you like to load information from an itinerary template?</p>
 			
 			<form action="post-new.php?post_type=<?php echo $this->get_post_type(); ?>" method="POST">
 				
 				<input type="hidden" name="ah_action" value="load_itinerary_template" >
 				<input type="hidden" name="itinerary_id" value="<?php echo get_the_ID(); ?>" >
 				
-				<p><label for="ah_template_id"></label></p>
-				
-				<select name="template_id" id="ah_template_id">
-					<option value="">&ndash; Select Template &ndash;</option>
-					<?php
-					if ( $templates->have_posts() ) foreach( $templates->posts as $post ) {
-						echo sprintf(
-							'<option value="%s">%s</option>',
-							esc_attr($post->ID),
-							esc_html($post->post_title)
-						);
-					}
-					?>
-				</select>
-				
-				<p class="submit"><input type="submit" class="button button-secondary" value="Load Template"></p>
+				<p>
+					<select name="template_id" id="ah_template_id">
+						<option value="">&ndash; Select Template &ndash;</option>
+						<?php
+						if ( $templates->have_posts() ) foreach( $templates->posts as $post ) {
+							echo sprintf(
+								'<option value="%s">%s</option>',
+								esc_attr($post->ID),
+								esc_html($post->post_title)
+							);
+						}
+						?>
+					</select>
+					
+					<input type="submit" class="button button-secondary" value="Load Template">
+				</p>
 				
 			</form>
 		</div>
@@ -325,10 +325,11 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 			add_action( 'acf/save_post', array( $this, 'save_post_split_user_meta_keys' ), 40 );
 			
 			// Convert to itinerary template
-			add_action( 'acf/save_post', array( $this, 'save_post_convert_to_template' ), 50 );
+			// add_action( 'acf/save_post', array( $this, 'save_post_convert_to_template' ), 50 );
 		}else{
 			remove_action( 'acf/save_post', array( $this, 'save_post_split_user_meta_keys' ), 40 );
-			remove_action( 'acf/save_post', array( $this, 'save_post_convert_to_template' ), 50 );
+			
+			// remove_action( 'acf/save_post', array( $this, 'save_post_convert_to_template' ), 50 );
 		}
 	}
 	
@@ -339,6 +340,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 	 *
 	 * @return void
 	 */
+	/*
 	public function save_post_convert_to_template( $post_id ) {
 		if ( ! $this->is_valid( $post_id ) ) return;
 		
@@ -359,6 +361,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 			AH_Admin()->add_notice( 'success', 'This itinerary has been converted to a template.', null, 'itinerary-convert', true );
 		}
 	}
+	*/
 	
 	/**
 	 * When saving the post, set the "User" field as the post author.
