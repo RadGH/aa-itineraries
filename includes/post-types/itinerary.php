@@ -30,6 +30,10 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		// Sync an itinerary after post updated
 		add_action( 'save_post', array( $this, 'sync_itinerary_with_sheet' ), 100 );
 		
+		// Filter hotel dropdown by village on itinerary edit screen
+		// Applies to the Hotel dropdown in the Villages field group when editing an itinerary
+		add_filter('acf/fields/post_object/query', array( $this, 'filter_hotel_dropdown_by_village_id' ), 10, 3);
+		
 	}
 	
 	/**
@@ -556,6 +560,32 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		if ( $sheet_id ) {
 			AH_Smartsheet_Sync_Itineraries()->sync_itinerary_with_sheet( $post_id, $sheet_id );
 		}
+	}
+	
+	// Filter hotel dropdown by village on itinerary edit screen
+	function filter_hotel_dropdown_by_village_id( $args, $field, $post_id ) {
+		// hotel: field_6438875876dfa
+		// village: field_641a98e77d31a
+		
+		// Check that we are loading results for the HOTEL dropdown
+		if ( $field['key'] !== 'field_6438875876dfa' ) return $args;
+		
+		// Get the village ID that was selected in a different field
+		// This is passed by admin.js -> link_hotel_and_village_dropdowns()
+		$village_id = isset($_POST['village_id']) ? stripslashes($_POST['village_id']) : false;
+		
+		// Modify the query args to include 'village_id' meta query
+		if ( $village_id ) {
+			$args['meta_query'] = array(
+				array(
+					'key' => 'village',
+					'value' => $village_id,
+					'compare' => '='
+				)
+			);
+		}
+		
+		return $args;
 	}
 	
 }

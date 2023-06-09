@@ -25,6 +25,11 @@ window.AH_Admin = new (function() {
 		// Enable select2 with ajax results when using the "Search Sheets" dropdown, see sheet-select.php
 		o.setup_sheet_search_fields();
 
+		// The hotel dropdown used in the Villages repeater should only show hotels assigned to the selected village
+		if ( is_post_edit_screen && post_type === 'ah_itinerary' ) {
+			o.link_hotel_and_village_dropdowns();
+		}
+
 	};
 
 	/**
@@ -202,5 +207,38 @@ window.AH_Admin = new (function() {
 
 		return url;
 	}
+
+	/*
+	The hotel dropdown used in the Villages repeater should only show hotels assigned to the selected village
+	 */
+	o.link_hotel_and_village_dropdowns = function() {
+		if ( typeof acf === 'undefined' ) return; // acf not running on this page
+
+		let village_field_key = 'field_641a98e77d31a';
+		let hotel_field_key = 'field_6438875876dfa';
+
+		// Make the Hotel dropdown filter by the Village dropdown when editing an itinerary, in the Villages field group.
+		acf.add_filter('select2_ajax_data', function( data, args, $hotel_select, field, instance ) {
+			let field_key = data.field_key || false;
+
+			// Must be a hotel dropdown
+			if ( field_key !== hotel_field_key ) {
+				return data;
+			}
+
+			// Find the corresponding Village dropdown, or <select>
+			// The hotel and village have the same ID, except for their field_name which is at the end.
+			let village_id = $hotel_select[0].getAttribute('id').replace( hotel_field_key, village_field_key );
+			let $village_select = document.querySelector( '#' + village_id );
+			if ( ! $village_select ) {
+				return data;
+			}
+
+			// Add the village ID
+			data['village_id'] = $village_select.value;
+
+			return data;
+		});
+	};
 
 })();
