@@ -477,6 +477,38 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 	}
 	
 	/**
+	 * Get the hotel based on smartsheet hotel name, and assigned village
+	 *
+	 * @param string $hotel_smartsheet_id
+	 * @param int $village_id
+	 *
+	 * @return false|int
+	 */
+	public function get_hotel_by_smartsheet_name_and_village( $hotel_smartsheet_id, $village_id ) {
+		if ( ! $hotel_smartsheet_id ) return false;
+		if ( ! $village_id ) return false;
+		
+		$args = array(
+			'post_type' => 'ah_hotel',
+			'meta_query' => array(
+				array(
+					'key' => 'smartsheet_id',
+					'value' => $hotel_smartsheet_id
+				),
+				array(
+					'key' => 'village',
+					'value' => (int) $village_id
+				),
+			),
+			'fields' => 'ids',
+		);
+		
+		$q = new WP_Query($args);
+		
+		return $q->found_posts ? $q->posts[0] : false;
+	}
+	
+	/**
 	 * Get a link that will automatically create a village or hotel based on smartsheet name/id
 	 *
 	 * @param string $type             either "village" or "hotel"
@@ -715,6 +747,7 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 		
 		// Smartsheet id
 		update_post_meta( $post_id, 'smartsheet_id', $smartsheet_id );
+		update_post_meta( $post_id, 'smartsheet_name', $smartsheet_name );
 		
 		// Last sync date
 		update_post_meta( $post_id, 'smartsheet_last_sync', current_time('Y-m-d H:i:s') );

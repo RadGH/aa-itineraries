@@ -18,6 +18,7 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 	public $column_arrival;
 	public $column_location;
 	public $column_hotel;
+	public $column_luggage;
 	public $column_departure;
 	public $column_hike_list;
 	public $column_outdoor_active;
@@ -82,7 +83,9 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		// Departure column is similar to Arrival column. Not used for restaurants.
 		$this->column_departure = $columns[11];
 		
-		// $columns[12] = Luggage (checkboxes)
+		// Luggage checkboxes
+		$this->column_luggage = $columns[12];
+		
 		// $columns[13] = Assigned To
 		
 		// Hike list is the name of a hike
@@ -324,6 +327,12 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		
 		$dates = $this->get_dates( $hotels );
 		
+		$hikes = $this->get_hikes();
+		
+		$fields_before = new Class_Sync_Itinerary_Fields( $post_id );
+		
+		$fields_after = new Class_Sync_Itinerary_Fields( $client, $hotels, $dates, $hikes );
+		
 		// -- Custom fields --
 		// Title:
 		// Subtitle:
@@ -345,10 +354,24 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		echo '<p>Dates:</p>';
 		pre_dump($dates);
 		
+		echo '<p>Hikes:</p>';
+		pre_dump($hikes);
+		
+		echo '<p>Before / After:</p>';
+		echo '<table><tbody><tr><td style="vertical-align: top;">';
+		pre_dump($fields_before->get_values());
+		echo '</td><td style="vertical-align: top;">';
+		pre_dump($fields_after->get_values());
+		echo '</td></tr></tbody></table>';
+		
+		echo '<p>Dates:</p>';
+		pre_dump($dates);
+		
 		echo '<hr>';
 		
 		echo '<p>Sheet ID: ' . $sheet_id . '</p>';
 		
+		/*
 		echo '<p>Column B (Task):</p>';
 		pre_dump($this->column_task);
 		
@@ -359,22 +382,24 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		
 		echo '<p>Cell B2 (Task -> Hotel1):</p>';
 		pre_dump($this->rows[1]['cells'][1]);
+		*/
 		
 		echo '<p>Rows found:</p>';
 		$row_counts = array(
 			'hotels' => count( $this->rows_hotels ),
 			'restaurants' => count( $this->rows_restaurants ),
 			'hikes' => count( $this->rows_hikes ),
-			'arrival' => empty( $this->row_arrival ) ? 0 : 1, // single row
-			'departure' => empty( $this->row_departure ) ? 0 : 1, // single row
+			'arrival_date' => empty( $this->row_arrival ) ? 0 : 1, // single row
+			'departure_date' => empty( $this->row_departure ) ? 0 : 1, // single row
 		);
 		pre_dump($row_counts);
-		
+		/*
 		echo '<p>All columns:</p>';
 		pre_dump($this->columns);
 		
 		echo '<p>All rows:</p>';
 		pre_dump($this->rows);
+		*/
 		exit;
 	}
 	
@@ -434,7 +459,7 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 	 *     ["departure"]=> "2023-08-20"
 	 *     ["arrival_ts"]=> int(1692403200)
 	 *     ["departure_ts"]=> int(1692489600)
-	 *     ["duration_days"]=> float(1)
+	 *     ["duration"]=> float(1)
 	 * }
 	 */
 	public function get_hotels() {
@@ -451,22 +476,32 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		
 		foreach( $this->rows_hotels as $i => $row ) {
 			$hotel = array(
-				'room'      => $this->get_cell_value( $row, $this->column_room['id'] ),
-				'meal'      => $this->get_cell_value( $row, $this->column_meal['id'] ),
-				'location'  => $this->get_cell_value( $row, $this->column_location['id'] ),
-				'hotel'     => $this->get_cell_value( $row, $this->column_hotel['id'] ),
-				'arrival'   => $this->get_cell_value( $row, $this->column_arrival['id'] ),
-				'departure' => $this->get_cell_value( $row, $this->column_departure['id'] ),
+				'room'           => $this->get_cell_value( $row, $this->column_room['id'] ),
+				'meal'           => $this->get_cell_value( $row, $this->column_meal['id'] ),
+				'village_name'   => $this->get_cell_value( $row, $this->column_location['id'] ),
+				'hotel_name'     => $this->get_cell_value( $row, $this->column_hotel['id'] ),
+				'arrival_date'   => $this->get_cell_value( $row, $this->column_arrival['id'] ),
+				'departure_date' => $this->get_cell_value( $row, $this->column_departure['id'] ),
+				'luggage'        => $this->get_cell_value( $row, $this->column_luggage['id'] ),
+				'hotel_id'       => null,
+				'village_id'     => null,
 			);
 			
 			// Hotel and location are required or else the row will be skipped
-			if ( empty($hotel['hotel']) ) continue;
-			if ( empty($hotel['location']) ) continue;
+			if ( empty($hotel['hotel_name']) ) continue;
+			if ( empty($hotel['village_name']) ) continue;
+			
+			// Look up the village and hotel
+			// ['hotel_name'] = Schwarzwaldalp - Schwarzwaldalp
+			// ['village_name'] = Schwarzwaldalp - CH
+			// Note that the location is the Village Smartsheet ID, but the hotel is just the name.
+			$hotel['village_id'] = AH_Smartsheet_Sync_Hotels_And_Villages()->get_village_by_smartsheet_id( $hotel['village_name'] );
+			$hotel['hotel_id'] = AH_Smartsheet_Sync_Hotels_And_Villages()->get_hotel_by_smartsheet_name_and_village( $hotel['hotel_name'], $hotel['village_id'] );
 			
 			// Calculate the dates
-			$hotel['arrival_ts'] = $hotel['arrival'] ? strtotime($hotel['arrival']) : false;
-			$hotel['departure_ts'] = $hotel['departure'] ? strtotime($hotel['departure']) : false;
-			$hotel['duration'] = $this->get_duration_in_days( $hotel['arrival'], $hotel['departure'] );
+			$hotel['arrival_ts'] = $hotel['arrival_date'] ? strtotime($hotel['arrival_date']) : false;
+			$hotel['departure_ts'] = $hotel['departure_date'] ? strtotime($hotel['departure_date']) : false;
+			$hotel['duration'] = ah_get_duration_in_days( $hotel['arrival_date'], $hotel['departure_date'] );
 			
 			$hotels[] = $hotel;
 		}
@@ -488,7 +523,7 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 	public function get_dates( $hotels ) {
 		$start = $this->get_hotel_date( $hotels, true );
 		$end = $this->get_hotel_date( $hotels, false );
-		$duration = $this->get_duration_in_days( $start, $end );
+		$duration = ah_get_duration_in_days( $start, $end );
 		
 		return array(
 			'arrival_date' => $start,
@@ -537,6 +572,36 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		
 		return ( $found_ts > 0 ) ? date( 'Y-m-d', $found_ts ) : false;
 		*/
+	}
+	
+	/**
+	 * Returns a list of hikes
+	 *
+	 * @return array {
+	 *     @type string $name     Schwarzwaldalp to Grindelwald
+	 *     @type string $url      https://www.outdooractive.com/en/r/64809261
+	 * }
+	 */
+	public function get_hikes() {
+		$hikes = array();
+		
+		foreach( $this->rows_hikes as $i => $row ) {
+			$hike_name = $this->get_cell_value( $row, $this->column_hike_list['id'] );
+			$url = $this->get_cell_value( $row, $this->column_outdoor_active['id'] );
+			
+			// @todo: get hike post ID
+			
+			if ( ! $hike_name && ! $url ) {
+				continue;
+			}
+			
+			$hikes[] = array(
+				'hike_name' => $hike_name,
+				'url' => $url,
+			);
+		}
+		
+		return $hikes;
 	}
 	
 }

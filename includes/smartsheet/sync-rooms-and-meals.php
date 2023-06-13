@@ -299,4 +299,49 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 		exit;
 	}
 	
+	/**
+	 * Get a meal by meal code. Optionally a specific field for that meal (meal_code, meal_name_short, meal_name_full)
+	 *
+	 * @param $meal_code
+	 * @param $field_name
+	 *
+	 * @return string|array
+	 */
+	public function get_meal( $meal_code, $field_name = null ) {
+		$list = $this->get_stored_meal_list();
+		// meal_code
+		// meal_name_short
+		// meal_name_full
+		
+		$meal = $list[$meal_code] ?? null;
+		
+		if ( $field_name && $meal ) {
+			return $meal[$field_name] ?? null;
+		}else{
+			return $meal;
+		}
+	}
+	
+	/**
+	 * Get a room by room code. Optionally a specific field for that room (room_code, room_name)
+	 *
+	 * @param $room_code
+	 * @param $field_name
+	 *
+	 * @return string|array
+	 */
+	public function get_room( $room_code, $field_name = null ) {
+		$list = $this->get_stored_room_list();
+		// room_code
+		// room_name
+		
+		$room = $list[$room_code] ?? null;
+		
+		if ( $field_name && $room ) {
+			return $room[$field_name] ?? null;
+		}else{
+			return $room;
+		}
+	}
+	
 }

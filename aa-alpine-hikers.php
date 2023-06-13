@@ -129,6 +129,8 @@ class Class_AH_Plugin {
 		// 3. Include instance classes which can be instantiated multiple times
 		require_once( AH_PATH . '/includes/instances/api.php' );
 		
+		require_once( __DIR__ . '/includes/instances/sync-itinerary-fields.php' );
+		
 		
 		// ----------------------------------------
 		// 4. Include controller classes which must be instantiated once

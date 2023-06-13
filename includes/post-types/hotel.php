@@ -151,4 +151,11 @@ class Class_Hotel_Post_Type extends Class_Abstract_Post_Type {
 		}
 	}
 	
+	public function get_hotel_name( $post_id ) {
+		if ( ! $post_id ) return null;
+		$name = get_field( 'hotel_name', $post_id );
+		if ( ! $name ) $name = get_the_title( $post_id );
+		return $name;
+	}
+	
 }

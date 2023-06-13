@@ -82,4 +82,11 @@ class Class_Hike_Post_Type extends Class_Abstract_Post_Type {
 		return $args;
 	}
 	
+	public function get_hike_name( $post_id ) {
+		if ( ! $post_id ) return null;
+		$name = get_field( 'hike_name', $post_id );
+		if ( ! $name ) $name = get_the_title( $post_id );
+		return $name;
+	}
+	
 }

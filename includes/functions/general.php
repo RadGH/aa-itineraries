@@ -261,3 +261,83 @@ function ah_get_hike_summary( $itinerary_id ) {
 	
 	return ob_get_clean();
 }
+
+/**
+ * Get the number of days between two dates.
+ * If the dates are the same, returns 0.
+ * If either date is invalid, returns false.
+ *
+ * @param string $date_1
+ * @param string $date_2
+ *
+ * @return int|false
+ */
+function ah_get_duration_in_days( $date_1, $date_2 ) {
+	$t1 = $date_1 ? strtotime($date_1) : false;
+	$t2 = $date_2 ? strtotime($date_2) : false;
+	
+	if ( $t1 && $t2 ) {
+		return (int) ceil(abs($t2 - $t1) / DAY_IN_SECONDS);
+	}
+	
+	return false;
+}
+
+
+/**
+ * Gets a date range formatted for display
+ * 2023-08-17 -> 2023-08-23 = August 17-23, 2023
+ *
+ * @param $date_1
+ * @param $date_2
+ * @param $year_optional
+ *
+ * @return false|string
+ */
+function ah_get_date_range( $date_1, $date_2, $year_optional = false ) {
+	if ( ! $date_1 ) {
+		return false;
+	}
+	
+	$start_ts = strtotime($date_1);
+	$end_ts = strtotime($date_2);
+	
+	$start_y = date('Y', $start_ts);
+	$start_m = date('n', $start_ts); // no leading zero
+	$start_d = date('j', $start_ts); // no leading zero
+	$start_m_name = date('F', $start_ts); // "June", full month name
+	
+	if ( ! $end_ts ) {
+		// Just one day for some reason
+		// December 20, 2023
+		return $start_m_name . ' ' . $start_d . ', ' . $start_y;
+	}
+	
+	$end_y = date('Y', $end_ts);
+	$end_m = date('n', $end_ts); // no leading zero
+	$end_d = date('j', $end_ts); // no leading zero
+	$end_m_name = date('F', $end_ts); // "June", full month name
+	
+	// If year and month match, should the day be combined into one?
+	$same_day_range = ($start_d != $end_d ? $start_d . '-' . $end_d : $start_d);
+	
+	if ( $start_y !== $end_y || $start_m !== $end_m ) {
+		
+		// If year or month is different, show the entire date range
+		// December 20 - January 3, 2023
+		return $start_m_name . ' ' . $start_d . ' - ' . $end_m_name . ' ' . $end_d . ', ' . $end_y;
+		
+	}else if ( $year_optional ) {
+		
+		// Show only relevant date range, without the year
+		// December 20-24
+		return $start_m_name . ' ' . $same_day_range;
+		
+	}else{
+		
+		// Show only relevant date range
+		// December 20-24, 2023
+		return $start_m_name . ' ' . $same_day_range . ', ' . $end_y;
+		
+	}
+}

@@ -541,7 +541,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 			'label' => $label,
 		));
 		
-		echo '<p><input type="submit" name="ah_save_and_sync_itinerary" value="Save and Run Sync" class="button button-secondary"></p>';
+		echo '<p><input type="submit" name="ah_save_and_sync_itinerary" value="Sync from Smartsheet" class="button button-secondary"></p>';
 	}
 	
 	// Save meta box fields
