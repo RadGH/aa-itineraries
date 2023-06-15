@@ -125,7 +125,13 @@ class Class_Village_Post_Type extends Class_Abstract_Post_Type {
 				
 			case 'ah_review':
 				
+				$has_smartsheet = (
+					get_post_meta( $post_id, 'smartsheet_id', true )
+					&& get_post_meta( $post_id, 'smartsheet_name', true )
+				);
+				
 				$this->display_content_review_column(array(
+					'Smartsheet Settings' => $has_smartsheet,
 					'Village Name' => get_post_meta( $post_id, 'village_name', true ),
 					'Introduction' => get_post_meta( $post_id, 'village_intro', true ),
 					'In and Around' => get_post_meta( $post_id, 'around_the_village', true ),

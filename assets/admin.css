@@ -193,7 +193,7 @@ End: Hotel Info page
 /*
 Start: Post List Columns
 */
-table.wp-list-table .column-ah_review { width: 100px; }
+table.wp-list-table .column-ah_review { width: 150px; }
 table.wp-list-table .column-ah_image { width: 150px; }
 table.wp-list-table .column-ah_sync { width: 100px; }
 /*

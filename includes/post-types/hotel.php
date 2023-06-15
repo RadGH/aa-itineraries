@@ -139,9 +139,17 @@ class Class_Hotel_Post_Type extends Class_Abstract_Post_Type {
 				
 			case 'ah_review':
 				
+				$has_smartsheet = (
+					get_post_meta( $post_id, 'smartsheet_id', true )
+					&& get_post_meta( $post_id, 'smartsheet_name', true )
+					&& get_post_meta( $post_id, 'village_smartsheet_id', true )
+				);
+				
 				$this->display_content_review_column(array(
-					'Village' => get_post_meta( $post_id, 'village', true ),
+					'Smartsheet Settings' => $has_smartsheet,
 					'Hotel Name' => get_post_meta( $post_id, 'hotel_name', true ),
+					'Village' => get_post_meta( $post_id, 'village', true ),
+					'Village Map' => get_post_meta( $post_id, 'village_map', true ),
 					'Phone' => get_post_meta( $post_id, 'phone', true ),
 					'Description' => get_post_meta( $post_id, 'description', true ),
 				));

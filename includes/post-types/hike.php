@@ -82,6 +82,49 @@ class Class_Hike_Post_Type extends Class_Abstract_Post_Type {
 		return $args;
 	}
 	
+	/**
+	 * Add a column that shows any information that is missing
+	 *
+	 * @param $columns
+	 *
+	 * @return array
+	 */
+	public function customize_columns( $columns ) {
+		return array_merge(
+			array_slice( $columns, 0, 2),
+			array('ah_review' => 'Content Review'),
+			array_slice( $columns, 2, null),
+		);
+	}
+	
+	/**
+	 * Display custom columns html
+	 *
+	 * @param string $column
+	 * @param int $post_id
+	 *
+	 * @return void
+	 */
+	public function display_columns( $column, $post_id ) {
+		switch( $column ) {
+			
+			case 'ah_review':
+				
+				$this->display_content_review_column(array(
+					'Smartsheet ID' => get_post_meta( $post_id, 'smartsheet_id', true ),
+					'Hike Name' => get_post_meta( $post_id, 'hike_name', true ),
+					'Summary' => get_post_meta( $post_id, 'summary', true ),
+					'Content' => get_post_meta( $post_id, 'content', true ),
+					'Elevation Diagram' => get_post_meta( $post_id, 'elevation_diagram', true ),
+					'Topographic Map' => get_post_meta( $post_id, 'topographic_map', true ),
+					'Links' => get_post_meta( $post_id, 'link_links_0_url', true ),
+				));
+				
+				break;
+			
+		}
+	}
+	
 	public function get_hike_name( $post_id ) {
 		if ( ! $post_id ) return null;
 		$name = get_field( 'hike_name', $post_id );
