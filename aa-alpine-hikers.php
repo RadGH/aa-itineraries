@@ -34,6 +34,7 @@ function AH_Smartsheet_Webhooks() { return AH_Plugin()->Smartsheet_Webhooks; }
 function AH_Smartsheet_Sheet_Select() { return AH_Plugin()->Smartsheet_Sheet_Select; }
 
 function AH_Smartsheet_Sync() { return AH_Plugin()->Smartsheet_Sync; }
+function AH_Smartsheet_Sync_Hikes() { return AH_Plugin()->Smartsheet_Sync_Hikes; }
 function AH_Smartsheet_Sync_Hotels_And_Villages() { return AH_Plugin()->Smartsheet_Sync_Hotels_And_Villages; }
 function AH_Smartsheet_Sync_Itineraries() { return AH_Plugin()->Smartsheet_Sync_Itineraries; }
 function AH_Smartsheet_Sync_Rooms_And_Meals() { return AH_Plugin()->Smartsheet_Sync_Rooms_And_Meals; }
@@ -75,6 +76,7 @@ class Class_AH_Plugin {
 	public Class_AH_Smartsheet_Sheet_Select    $Smartsheet_Sheet_Select;
 	
 	public Class_AH_Smartsheet_Sync                      $Smartsheet_Sync;
+	public Class_AH_Smartsheet_Sync_Hikes                $Smartsheet_Sync_Hikes;
 	public Class_AH_Smartsheet_Sync_Hotels_And_Villages  $Smartsheet_Sync_Hotels_And_Villages;
 	public Class_AH_Smartsheet_Sync_Itineraries          $Smartsheet_Sync_Itineraries;
 	public Class_AH_Smartsheet_Sync_Rooms_And_Meals      $Smartsheet_Sync_Rooms_And_Meals;
@@ -172,6 +174,9 @@ class Class_AH_Plugin {
 		
 		require_once( __DIR__ . '/includes/smartsheet/sync-hotels-and-villages.php' );
 		$this->Smartsheet_Sync_Hotels_And_Villages = new Class_AH_Smartsheet_Sync_Hotels_And_Villages();
+		
+		require_once( __DIR__ . '/includes/smartsheet/sync-hikes.php' );
+		$this->Smartsheet_Sync_Hikes = new Class_AH_Smartsheet_Sync_Hikes();
 		
 		require_once( __DIR__ . '/includes/smartsheet/sync-itineraries.php' );
 		$this->Smartsheet_Sync_Itineraries = new Class_AH_Smartsheet_Sync_Itineraries();

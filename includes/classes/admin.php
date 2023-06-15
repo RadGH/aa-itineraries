@@ -257,8 +257,9 @@ class Class_AH_Admin {
 		
 		switch($notice) {
 			
+			// Villages and Hotels
 			case 'hotel_list_updated':
-				$this->add_notice( 'success', 'Village and Hotel settings have been updated. Consider running the sync to update the list from the spreadsheet.', null, null, true );
+				$this->add_notice( 'success', 'Village and Hotel settings have been updated. Remember to run the sync next!', null, null, true );
 				break;
 				
 			case 'sync_hotels_success':
@@ -270,21 +271,6 @@ class Class_AH_Admin {
 				
 			case 'sync_hotels_failed':
 				$this->add_notice( 'success', 'Failed to sync hotel and village information from the spreadsheet.', null, null, true );
-				break;
-			
-			case 'room_list_updated':
-				$this->add_notice( 'success', 'Rooms and Meals settings have been updated. Consider running the sync to update the list from the spreadsheet.', null, null, true );
-				break;
-			
-			case 'sync_rooms_success':
-				$data = json_decode($data, true);
-				$rooms_count = $data['rooms'] ?? 0;
-				$meals_count = $data['meals'] ?? 0;
-				$this->add_notice( 'success', 'Sync complete. Found ' . $rooms_count . ' room types and '. $meals_count .' meal types.', null, null, true );
-				break;
-			
-			case 'sync_rooms_failed':
-				$this->add_notice( 'success', 'Failed to sync room and meal information from the spreadsheet.', null, null, true );
 				break;
 			
 			case 'smartsheet_village_inserted':
@@ -303,6 +289,46 @@ class Class_AH_Admin {
 				$this->add_notice( 'success', 'The hotel information has been updated to match Smartsheet.', null, null, true );
 				break;
 			
+			// Hikes
+			case 'hike_list_updated':
+				$this->add_notice( 'success', 'Hike settings have been updated. Remember to run the sync next!', null, null, true );
+				break;
+				
+			case 'sync_hikes_success':
+				$data = json_decode($data, true);
+				$hotel_count = $data['hikes'] ?? 0;
+				$this->add_notice( 'success', 'Sync complete. Found '. $hotel_count . ' hikes.', null, null, true );
+				break;
+				
+			case 'sync_hikes_failed':
+				$this->add_notice( 'success', 'Failed to sync hikes from the spreadsheet.', null, null, true );
+				break;
+			
+			case 'smartsheet_hike_inserted':
+				$this->add_notice( 'success', 'This hike has been automatically created and paired with Smartsheet.', null, null, true );
+				break;
+				
+			case 'smartsheet_hike_sync_complete':
+				$this->add_notice( 'success', 'The hike information has been updated to match Smartsheet.', null, null, true );
+				break;
+			
+			// Rooms
+			case 'room_list_updated':
+				$this->add_notice( 'success', 'Rooms and Meals settings have been updated. Remember to run the sync next!', null, null, true );
+				break;
+			
+			case 'sync_rooms_success':
+				$data = json_decode($data, true);
+				$rooms_count = $data['rooms'] ?? 0;
+				$meals_count = $data['meals'] ?? 0;
+				$this->add_notice( 'success', 'Sync complete. Found ' . $rooms_count . ' room types and '. $meals_count .' meal types.', null, null, true );
+				break;
+			
+			case 'sync_rooms_failed':
+				$this->add_notice( 'success', 'Failed to sync room and meal information from the spreadsheet.', null, null, true );
+				break;
+			
+			// Sync, generic
 			case 'sync_sheets_failed':
 				$this->add_notice( 'success', 'Failed to sync list of sheets from Smartsheet.', null, null, true );
 				break;
