@@ -341,3 +341,83 @@ function ah_get_date_range( $date_1, $date_2, $year_optional = false ) {
 		
 	}
 }
+
+/**
+ * Creates a "View Spreadsheet" button to use on the admin interface
+ *
+ * @param string $url
+ * @param string $text
+ * @param bool $is_button  default: true
+ *
+ * @return string|false
+ */
+function ah_create_html_link( $url, $text = 'View Spreadsheet', $is_button = true ) {
+	if ( ! $url ) return false;
+	
+	$is_external = ah_is_link_external( $url );
+	
+	$classes = '';
+	$target_attr = '';
+	
+	if ( $is_button ) {
+		$classes = 'ah-link button button-secondary';
+	}else{
+		$classes = 'ah-link';
+	}
+	
+	if ( $is_external ) {
+		$text .= ' <span class="dashicons dashicons-external ah-dashicon-inline"></span>';
+		$target_attr .= ' target="_blank" ';
+	}
+	
+	return '<a href="'. esc_attr($url)  .'" '. $target_attr .' class="'. $classes .'">'. $text .'</a>';
+}
+
+/**
+ * Formats the "Smartsheet Actions" field that is used in the ACF field group for Hikes, Hotels, and Villages
+ *
+ * @param int $post_id
+ * @param array $field
+ * @param string $sheet_url
+ * @param string $sync_page_url
+ * @param string $sync_item_url
+ *
+ * @return array
+ */
+function ah_prepare_smartsheet_actions_field( $post_id, $field, $sheet_url, $sync_page_url, $sync_item_url ) {
+	if ( acf_is_screen('acf-field-group') ) return $field; // never modify the field group edit screen
+	
+	$post_type = get_post_type($post_id);
+	$post_type_name = acf_get_post_type_label($post_type);
+	$sync_item_text = 'Sync this ' . $post_type_name;
+	
+	$last_sync = get_post_meta( $post_id, 'smartsheet_last_sync', true );
+	
+	if ( $sheet_url ) {
+		if ( $field['message'] ) $field['message'] .= "\n\n";
+		
+		$button = ah_create_html_link( $sheet_url, 'View Spreadsheet', false );
+		$field['message'] .= $button;
+	}
+	
+	if ( $sync_page_url ) {
+		if ( $field['message'] ) $field['message'] .= "\n\n";
+		
+		$button = ah_create_html_link( $sync_page_url, 'View Sync Page', false );
+		$field['message'] .= $button;
+	}
+	
+	if ( $sync_item_url ) {
+		if ( $field['message'] ) $field['message'] .= "\n\n";
+		
+		$button = ah_create_html_link( $sync_item_url, $sync_item_text, false );
+		$field['message'] .= $button;
+	}
+	
+	if ( $field['message'] ) $field['message'] .= "\n\n";
+	$field['message'] .= '<span class="ah-last-sync">Last sync: ' . (ah_get_relative_date_html( $last_sync ) ?: '(never)') . '</span>';
+	
+	$field['label'] = false;
+	
+	return $field;
+}

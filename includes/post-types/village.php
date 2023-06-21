@@ -14,6 +14,10 @@ class Class_Village_Post_Type extends Class_Abstract_Post_Type {
 		
 		add_filter( 'single_template', array( $this, 'replace_page_template' ) );
 		
+		// Adds links to the Smartsheet meta box to view the spreadsheet or run the sync
+		// The field key is for "Smartsheet Actions" in the group "Smartsheet Settings - Village"
+		add_filter( 'acf/load_field/key=field_648bb42df03cc', array( $this, 'acf_add_smartsheet_actions' ) );
+		
 	}
 	
 	/**
@@ -147,6 +151,53 @@ class Class_Village_Post_Type extends Class_Abstract_Post_Type {
 		$name = get_field( 'village_name', $post_id );
 		if ( ! $name ) $name = get_the_title( $post_id );
 		return $name;
+	}
+	
+	/*
+	 * URLs used on the Smartsheet Actions field group
+	 */
+	public function get_sync_admin_page_url() {
+		return admin_url('admin.php?page=ah-smartsheet-villages-and-hotels');
+	}
+	
+	public function get_smartsheet_sheet_url() {
+		return AH_Smartsheet_Sync_Hotels_And_Villages()->get_smartsheet_permalink();
+	}
+	
+	public function get_sync_item_url() {
+		return AH_Smartsheet_Sync_Hotels_And_Villages()->get_sync_village_or_hotel_link( 'village', get_the_ID() );
+	}
+	// END urls
+	
+	public function get_from_smartsheet( $smartsheet_name, $region ) {
+		$args = array(
+			'post_type' => $this->get_post_type(),
+			'fields' => 'ids',
+			'posts_per_page' => 1,
+			'meta_query' => array(
+				'relation' => 'OR',
+				array(
+					'smartsheet_id' => $smartsheet_name
+				),
+				array(
+					'relation' => 'AND',
+					array(
+						'smartsheet_name' => $smartsheet_name
+					),
+					array(
+						'smartsheet_region' => $region
+					),
+				),
+			),
+		);
+		
+		$q = new WP_Query($args);
+		
+		if ( $q->have_posts() ) {
+			return (int) $q->posts[0];
+		}
+		
+		return false;
 	}
 	
 }

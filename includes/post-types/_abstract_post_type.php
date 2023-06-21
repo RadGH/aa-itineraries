@@ -422,11 +422,51 @@ abstract class Class_Abstract_Post_Type {
 	public function display_content_review_column( $fields ) {
 		foreach( $fields as $name => $value ) {
 			if ( $value ) {
-				echo '<a href="#" title="&quot;'. esc_attr($name) .'&quot; is valid" class="ah-tooltip ah-review-valid"><span class="dashicons dashicons-yes"></span></a>';
+				echo '<a href="#" title="'. esc_attr($name) .'" class="ah-tooltip ah-review-valid"><span class="dashicons dashicons-yes"></span></a>';
 			}else{
-				echo '<a href="#" title="&quot;'. esc_attr($name) .'&quot; has no value" class="ah-tooltip ah-review-invalid"><span class="dashicons dashicons-no"></span></a>';
+				echo '<a href="#" title="'. esc_attr($name) .' (Incomplete)" class="ah-tooltip ah-review-invalid"><span class="dashicons dashicons-no"></span></a>';
 			}
 		}
+	}
+	
+	/**
+	 * URLs used on the Smartsheet Actions field group
+	 * (used by itinerary, hike, hotel, and villages)
+	 *
+	 * @return false
+	 */
+	public function get_sync_admin_page_url() {
+		return false;
+	}
+	
+	public function get_smartsheet_sheet_url() {
+		return false;
+	}
+	
+	public function get_sync_item_url() {
+		return false;
+	}
+	
+	/**
+	 * Adds links to the the Smartsheet Actions field on certain post types.
+	 * You must hook this function to the filter "acf/load_field"
+	 * (used by itinerary, hike, hotel, and villages)
+	 *
+	 * @param $field
+	 *
+	 * @return array|mixed
+	 */
+	public function acf_add_smartsheet_actions( $field ) {
+		if ( ! acf_is_screen( $this->get_post_type() ) ) return $field;
+		
+		$post_id = get_the_ID();
+		if ( ! $post_id ) return $field;
+		
+		$sheet_url = $this->get_smartsheet_sheet_url();
+		$sync_url = $this->get_sync_admin_page_url();
+		$sync_item_url = $this->get_sync_item_url();
+		
+		return ah_prepare_smartsheet_actions_field( $post_id, $field, $sheet_url, $sync_url, $sync_item_url );
 	}
 	
 }

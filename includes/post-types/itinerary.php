@@ -27,8 +27,9 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		// Save the <select> containing smartsheet ID for the itinerary, when the post is saved
 		add_action( 'save_post', array( $this, 'save_smartsheet_id' ) );
 		
+		// MOVED TO SYNC URL METHOD
 		// Sync an itinerary after post updated
-		add_action( 'save_post', array( $this, 'sync_itinerary_with_sheet' ), 100 );
+		// add_action( 'save_post', array( $this, 'sync_itinerary_with_sheet' ), 100 );
 		
 		// Filter hotel dropdown by village on itinerary edit screen
 		// Applies to the Hotel dropdown in the Villages field group when editing an itinerary
@@ -520,6 +521,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 	public function display_smartsheet_meta_box() {
 		$post_id = get_the_ID();
 		$sheet_id = (string) get_post_meta( $post_id, 'smartsheet_sheet_id', true );
+		$sheet_url = (string) get_post_meta( $post_id, 'smartsheet_sheet_url', true );
 		
 		$label = '';
 		
@@ -541,20 +543,48 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 			'label' => $label,
 		));
 		
-		echo '<p><input type="submit" name="ah_save_and_sync_itinerary" value="Sync from Smartsheet" class="button button-secondary"></p>';
+		
+		if ( $sheet_url ) {
+			echo '<p>';
+			$sync_url = AH_Smartsheet_Sync()->get_sync_item_url( $post_id );
+			echo '<a href="'. esc_attr($sync_url) .'" class="button button-secondary" target="_blank">Run Sync</a> ';
+			
+			echo ah_create_html_link( $sheet_url, 'View Spreadsheet' );
+			echo '</p>';
+			
+			$last_sync = get_post_meta( $post_id, 'smartsheet_last_sync', true );
+			echo '<p><span class="ah-last-sync">Last sync: ' . (ah_get_relative_date_html( $last_sync ) ?: '(never)') . '</span></p>';
+		}
+		
 	}
 	
 	// Save meta box fields
 	public function save_smartsheet_id( $post_id ) {
-		if ( ! isset($_POST['ah_save_and_sync_itinerary']) ) return;
 		if ( get_post_type($post_id) != $this->get_post_type() ) return;
 		
-		$sheet_id = stripslashes($_POST['smartsheet_sheet_id']);
-		update_post_meta( $post_id, 'smartsheet_sheet_id', $sheet_id );
+		// Save the sheet ID even if it is blank, as long as it was sent in the POST request.
+		$sheet_id = isset($_POST['smartsheet_sheet_id']) ? stripslashes($_POST['smartsheet_sheet_id']) : null;
+		
+		if ( $sheet_id !== null ) {
+			update_post_meta( $post_id, 'smartsheet_sheet_id', $sheet_id );
+			
+			// Also save the sheet name and URL after looking it up
+			$sheet = $sheet_id ? AH_Smartsheet_Sync_Sheets()->get_sheet_data( $sheet_id ) : false;
+			
+			if ( $sheet ) {
+				update_post_meta( $post_id, 'smartsheet_sheet_name', $sheet['sheet_name'] );
+				update_post_meta( $post_id, 'smartsheet_sheet_url', $sheet['permalink'] );
+			}
+		}
+		
 	}
 	
+	// MOVED TO SYNC URL
 	// Sync an itinerary after post updated
+	/*
 	public function sync_itinerary_with_sheet( $post_id ) {
+		// Check if "Run Sync" button was clicked
+		// @todo: move this
 		if ( ! isset($_POST['ah_save_and_sync_itinerary']) ) return;
 		if ( get_post_type($post_id) != $this->get_post_type() ) return;
 		
@@ -564,6 +594,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 			AH_Smartsheet_Sync_Itineraries()->sync_itinerary_with_sheet( $post_id, $sheet_id );
 		}
 	}
+	*/
 	
 	// Filter hotel dropdown by village on itinerary edit screen
 	function filter_hotel_dropdown_by_village_id( $args, $field, $post_id ) {

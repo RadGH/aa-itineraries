@@ -14,6 +14,10 @@ class Class_Hike_Post_Type extends Class_Abstract_Post_Type {
 		
 		add_filter( 'single_template', array( $this, 'replace_page_template' ) );
 		
+		// Adds links to the Smartsheet meta box to view the spreadsheet or run the sync
+		// The field key is for "Smartsheet Actions" in the group "Smartsheet Settings - Hike"
+		add_filter( 'acf/load_field/key=field_648bb503354c6', array( $this, 'acf_add_smartsheet_actions' ) );
+		
 	}
 	
 	/**
@@ -130,6 +134,57 @@ class Class_Hike_Post_Type extends Class_Abstract_Post_Type {
 		$name = get_field( 'hike_name', $post_id );
 		if ( ! $name ) $name = get_the_title( $post_id );
 		return $name;
+	}
+	
+	/*
+	 * URLs used on the Smartsheet Actions field group
+	 */
+	public function get_sync_admin_page_url() {
+		return admin_url('admin.php?page=ah-smartsheet-hikes');
+	}
+	
+	public function get_smartsheet_sheet_url() {
+		return AH_Smartsheet_Sync_Hikes()->get_smartsheet_permalink();
+	}
+	
+	public function get_sync_item_url() {
+		return AH_Smartsheet_Sync_Hikes()->get_sync_hike_link( get_the_ID() );
+	}
+	
+	/**
+	 * Search for a hike with the given name and region. Returns the hike ID if found, or false if not found.
+	 *
+	 * @param string       $hike_name  Name of the hike: "Schwarzwaldalp to Grindelwald"
+	 * @param string|null  $region     Short name of the region: "BO"
+	 *
+	 * @return int|false
+	 */
+	public function get_hike_by_name_and_region( $hike_name, $region = null ) {
+		
+		// For now, just use the hike name
+		return AH_Smartsheet_Sync_Hikes()->get_hike_by_smartsheet_id( $hike_name );
+		
+		/*
+		$query = new WP_Query(array(
+			'post_type' => $this->get_post_type(),
+			'meta_query' => array(
+				array(
+					'key' => 'smartsheet_id',
+					'value' => $hike_name,
+				),
+				array(
+					'key' => 'smartsheet_region',
+					'value' => $region,
+				),
+			),
+		));
+		
+		if ( $query->have_posts() ) {
+			return $query->posts[0]->ID;
+		} else {
+			return false;
+		}
+		*/
 	}
 	
 }

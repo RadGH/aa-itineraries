@@ -118,4 +118,45 @@ class Class_AH_Smartsheet_Sync_Sheets {
 		exit;
 	}
 	
+	/**
+	 * Get the sheet id, name and url
+	 *
+	 * @param string|int $sheet_id
+	 *
+	 * @return array|false
+	 */
+	public function get_sheet_data( $sheet_id ) {
+		if ( ! $sheet_id ) return false;
+		
+		$sheet = false;
+		
+		// Check for the sheet in the list of stored sheets, which may skip an unneeded API call
+		$stored_sheets = $this->get_stored_sheet_list();
+		if ( $stored_sheets ) {
+			foreach( $stored_sheets as $i => $s ) {
+				if ( $s['id'] == $sheet_id ) {
+					$sheet = $s;
+					break;
+				}
+			}
+		}
+		
+		// Get the sheet details using the Smartsheet API
+		if ( ! $sheet ) {
+			$sheet = AH_Smartsheet_API()->get_sheet_by_id( $sheet_id );
+		}
+		
+		// If still not found
+		if ( ! $sheet ) {
+			return false;
+		}
+		
+		// Return information about the sheet itself
+		return array(
+			'sheet_id' => $sheet['id'], // 7567715780061060
+			'sheet_name' => $sheet['name'], // "Copy of Master List - Hotel Info"
+			'permalink' => $sheet['permalink'], // "https://app.smartsheet.com/sheets/FXq9cXvg56pv22JCpVCPC69mW2j7jf29PHRr7x31"
+		);
+	}
+	
 }

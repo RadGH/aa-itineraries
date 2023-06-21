@@ -20,8 +20,9 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 	public $column_hotel;
 	public $column_luggage;
 	public $column_departure;
-	public $column_hike_list;
-	public $column_outdoor_active;
+	public $column_hike;
+	public $column_outdooractive;
+	public $column_region;
 	
 	// Stores rows that contain data
 	public $rows;
@@ -42,6 +43,7 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		$column_info = AH_Smartsheet_API()->get_sheet_columns( $sheet_id, true );
 		
 		$columns = $column_info['data'];
+		
 		$this->columns = $columns;
 		
 		// $columns[0] = !!! (Checkboxes)
@@ -89,16 +91,22 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		// $columns[13] = Assigned To
 		
 		// Hike list is the name of a hike
-		$this->column_hike_list = $columns[14];
+		$this->column_hike = $columns[14];
 		
 		// $columns[15] = Due date
 		// $columns[16] = Em to Client
 		// $columns[17] = Due Date Override
 		
 		// Outdoor active links for each hike (only one link?)
-		$this->column_outdoor_active = $columns[18];
+		$this->column_outdooractive = $columns[18];
 		
-		// Columns 19+ are removed from the result in $this->rows in $this->load_rows
+		// $columns[19] = Signup Date
+		// $columns[20] = Tags
+		// $columns[21] = Print Pages Lookup
+		
+		$this->column_region = $columns[22];
+		
+		// Columns 23+ are removed from the result in $this->rows in $this->load_rows
 	}
 	
 	/**
@@ -113,7 +121,7 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		
 		// Only keep columns 0 through 18
 		foreach( $this->rows as &$row ) {
-			$row['cells'] = array_slice( $row['cells'], 0, 19 );
+			$row['cells'] = array_slice( $row['cells'], 0, 23 );
 		}
 		
 		// Rows are identified by the Task column
@@ -312,7 +320,7 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 	 *
 	 * @return void
 	 */
-	public function sync_itinerary_with_sheet( $post_id, $sheet_id ) {
+	public function display_sync_results_page( $post_id, $sheet_id ) {
 		
 		// API request to get columns, stored in $this->column_NAME
 		$this->load_columns( $sheet_id );
@@ -329,78 +337,106 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		
 		$hikes = $this->get_hikes();
 		
-		$fields_before = new Class_Sync_Itinerary_Fields( $post_id );
+		$fields = new Class_Sync_Itinerary_Fields( $post_id, $client, $hotels, $dates, $hikes );
 		
-		$fields_after = new Class_Sync_Itinerary_Fields( $client, $hotels, $dates, $hikes );
+		$compare = new Class_Compare_Field_Values( $post_id, $fields );
 		
-		// -- Custom fields --
-		// Title:
-		// Subtitle:
-		// Date range: ($dates['arrival_date'] and $dates['departure_date'] formatted as: September 6-16, 2022)
-		// Introduction message:
-		// Contact information:
-		// Schedule: (based on $hotels)
+		$compare->display_form();
 		
-		// @todo
+	}
+	
+	/**
+	 * Save data from a completed sync form for this itinerary
+	 *
+	 * @param $post_id
+	 * @param $values
+	 * @param $fields_to_sync
+	 *
+	 * @return void
+	 */
+	public function save_sync_item_data( $post_id, $values, $fields_to_sync ) {
+		$f = new Class_Sync_Itinerary_Fields( null );
 		
-		echo '<h2>TODO: Sync itinerary with smartsheet</h2>';
+		// Loop through each field that might be updated
+		foreach( $values as $meta_key => $value ) {
+			// Check if the field was checked to be updated
+			if ( ! isset($fields_to_sync[$meta_key]) ) continue;
+			
+			$field = $f->get_field( $meta_key );
+			
+			$new_value = null;
+			
+			switch( $field['type'] ) {
+				
+				// Save plain text fields directly
+				case 'text':
+				case 'textarea':
+				case 'editor':
+					$new_value = $value;
+					break;
+					
+				// Save repeaters, preserving any rows that were not checked to be updated
+				case 'repeater':
+					$repeater_template = $field['repeater_row_template'] ?? false;
+					$sync_fields = $fields_to_sync[$meta_key];
+					$old_value = get_field( $meta_key, $post_id );
+					$new_value = $this->build_repeater_value( $value, $old_value, $sync_fields, $repeater_template );
+					break;
+			}
+			
+			if ( $new_value !== null ) {
+				update_field( $meta_key, $new_value, $post_id );
+			}
+			
+		}
 		
-		echo '<p>Client:</p>';
-		pre_dump($client);
+	}
+	
+	/**
+	 * Creates an array when saving a repeater, containing items that were selected during the sync
+	 *
+	 * @param $new_value
+	 * @param $old_value
+	 * @param $sync_fields
+	 * @param $repeater_template
+	 *
+	 * @return array
+	 */
+	public function build_repeater_value( $new_value, $old_value, $sync_fields, $repeater_template ) {
+		$final_items = array();
 		
-		echo '<p>Hotels:</p>';
-		pre_dump( $hotels );
+		if ( ! is_array($new_value) ) $new_value = array();
+		if ( ! is_array($old_value) ) $old_value = array();
 		
-		echo '<p>Dates:</p>';
-		pre_dump($dates);
+		$row_count = max( count($new_value), count($old_value) );
 		
-		echo '<p>Hikes:</p>';
-		pre_dump($hikes);
+		for ( $i = 0; $i < $row_count; $i++ ) {
+			$row = array();
+			$sync_row_fields = $sync_fields[$i] ?? false;
+			
+			foreach( $repeater_template as $col_key => $default_value ) {
+				if ( isset($sync_row_fields[$col_key]) ) {
+					// Use new value
+					$v = $new_value[$i][$col_key] ?? false;
+				}else{
+					$v = false;
+				}
+				
+				if ( ! $v ) {
+					// Keep old value, or use the default
+					$v = $old_value[$i][$col_key] ?? $default_value;
+				}
+			
+				$row[$col_key] = $v;
+			}
+			
+			// Skip completely blank rows
+			if ( ! ah_is_array_recursively_empty($row) ) {
+				$final_items[$i] = $row;
+			}
+		}
 		
-		echo '<p>Before / After:</p>';
-		echo '<table><tbody><tr><td style="vertical-align: top;">';
-		pre_dump($fields_before->get_values());
-		echo '</td><td style="vertical-align: top;">';
-		pre_dump($fields_after->get_values());
-		echo '</td></tr></tbody></table>';
-		
-		echo '<p>Dates:</p>';
-		pre_dump($dates);
-		
-		echo '<hr>';
-		
-		echo '<p>Sheet ID: ' . $sheet_id . '</p>';
-		
-		/*
-		echo '<p>Column B (Task):</p>';
-		pre_dump($this->column_task);
-		
-		echo '<p>Row 2 (Hotel1):</p>';
-		$r = $this->rows[1];
-		unset($r['cells']);
-		pre_dump($r);
-		
-		echo '<p>Cell B2 (Task -> Hotel1):</p>';
-		pre_dump($this->rows[1]['cells'][1]);
-		*/
-		
-		echo '<p>Rows found:</p>';
-		$row_counts = array(
-			'hotels' => count( $this->rows_hotels ),
-			'restaurants' => count( $this->rows_restaurants ),
-			'hikes' => count( $this->rows_hikes ),
-			'arrival_date' => empty( $this->row_arrival ) ? 0 : 1, // single row
-			'departure_date' => empty( $this->row_departure ) ? 0 : 1, // single row
-		);
-		pre_dump($row_counts);
-		/*
-		echo '<p>All columns:</p>';
-		pre_dump($this->columns);
-		
-		echo '<p>All rows:</p>';
-		pre_dump($this->rows);
-		*/
-		exit;
+		return $final_items;
 	}
 	
 	/**
@@ -476,15 +512,23 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		
 		foreach( $this->rows_hotels as $i => $row ) {
 			$hotel = array(
+				'hotel_name'     => $this->get_cell_value( $row, $this->column_hotel['id'] ),
+				'hotel_id'       => null,
+				
+				'village_name'   => $this->get_cell_value( $row, $this->column_location['id'] ),
+				'village_id'     => null,
+				
 				'room'           => $this->get_cell_value( $row, $this->column_room['id'] ),
 				'meal'           => $this->get_cell_value( $row, $this->column_meal['id'] ),
-				'village_name'   => $this->get_cell_value( $row, $this->column_location['id'] ),
-				'hotel_name'     => $this->get_cell_value( $row, $this->column_hotel['id'] ),
+				'luggage'        => $this->get_cell_value( $row, $this->column_luggage['id'] ),
+				'region'         => $this->get_cell_value( $row, $this->column_region['id'] ),
+				
 				'arrival_date'   => $this->get_cell_value( $row, $this->column_arrival['id'] ),
 				'departure_date' => $this->get_cell_value( $row, $this->column_departure['id'] ),
-				'luggage'        => $this->get_cell_value( $row, $this->column_luggage['id'] ),
-				'hotel_id'       => null,
-				'village_id'     => null,
+				'arrival_ts'     => null,
+				'departure_ts'   => null,
+				
+				'duration'       => null,
 			);
 			
 			// Hotel and location are required or else the row will be skipped
@@ -550,54 +594,40 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		$ts = $hotel[ $arrival ? 'arrival_ts' : 'departure_ts' ] ?? false;
 		
 		return $ts ? date( 'Y-m-d', $ts ) : false;
-		
-		/*
-		$found_ts = 0;
-		
-		if ( $hotels ) foreach( $hotels as $hotel ) {
-			$ts = $hotel[ $arrival ? 'arrival_ts' : 'departure_ts' ];
-			
-			if ( $found_ts <= 0 ) {
-				$found_ts = $ts;
-			}else{
-				if ( $arrival ) {
-					// Arrival uses first day
-					$found_ts = min( $found_ts, $ts );
-				}else{
-					// Departure uses last date
-					$found_ts = max( $found_ts, $ts );
-				}
-			}
-		}
-		
-		return ( $found_ts > 0 ) ? date( 'Y-m-d', $found_ts ) : false;
-		*/
 	}
 	
 	/**
-	 * Returns a list of hikes
+	 * Returns a list of hike IDs and URLs from the provided rows.
 	 *
 	 * @return array {
-	 *     @type string $name     Schwarzwaldalp to Grindelwald
-	 *     @type string $url      https://www.outdooractive.com/en/r/64809261
+	 *     @type string $hike_name  Schwarzwaldalp to Grindelwald
+	 *     @type string $url        https://www.outdooractive.com/en/r/64809261
 	 * }
 	 */
 	public function get_hikes() {
 		$hikes = array();
 		
 		foreach( $this->rows_hikes as $i => $row ) {
-			$hike_name = $this->get_cell_value( $row, $this->column_hike_list['id'] );
-			$url = $this->get_cell_value( $row, $this->column_outdoor_active['id'] );
+			// $hike_name = "Schwarzwaldalp to Grindelwald"
+			$hike_name = $this->get_cell_value( $row, $this->column_hike['id'] );
+			if ( ! $hike_name ) continue;
 			
-			// @todo: get hike post ID
+			// $url = "https://www.outdooractive.com/en/r/64809261"
+			$url = $this->get_cell_value( $row, $this->column_outdooractive['id'] );
+			if ( ! $url ) continue;
 			
-			if ( ! $hike_name && ! $url ) {
-				continue;
-			}
+			// $region = "BO"
+			$region = $this->get_cell_value( $row, $this->column_region['id'] );
+			
+			// Look up the hike post from WordPress that matches the hike name and region
+			// $hike_id = AH_Hike()->get_hike_by_name_and_region( $hike_name, $region );
+			$hike_id = AH_Smartsheet_Sync_Hikes()->get_hike_by_smartsheet_id( $hike_name );
 			
 			$hikes[] = array(
 				'hike_name' => $hike_name,
+				'hike_id' => $hike_id,
 				'url' => $url,
+				'region' => $region,
 			);
 		}
 		

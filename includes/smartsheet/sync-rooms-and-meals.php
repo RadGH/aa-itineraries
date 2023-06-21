@@ -67,7 +67,7 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 		update_option( 'ah_rooms_and_meals_sheet_id', $sheet_id, false );
 		
 		// Column IDs
-		$column_ids = $this->format_column_ids( $data['column_ids'] );
+		$column_ids = ah_prepare_columns( $this->columns,  $data['column_ids'] );
 		update_option( 'ah_rooms_and_meals_column_ids', $column_ids, false );
 		
 		// Reload the form (to clear post data from browser history)
@@ -82,7 +82,7 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 	public function get_column_ids() {
 		$column_ids = get_option( 'ah_rooms_and_meals_column_ids' );
 		
-		$column_ids = $this->format_column_ids( $column_ids );
+		$column_ids = ah_prepare_columns( $this->columns,  $column_ids );
 		
 		return $column_ids;
 	}
@@ -99,15 +99,8 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 	 * }
 	 */
 	public function format_column_ids( $column_data ) {
-		$column_ids = array();
-		
-		foreach( $this->columns as $key => $title ) {
-			$column_ids[$key] = null;
-		}
-		
-		$column_ids = shortcode_atts( $column_ids, $column_data );
-		
-		return $column_ids;
+		$template = array_fill_keys( array_keys($this->columns), null );
+		return ah_prepare_atts( $template, $column_data );
 	}
 	
 	/**
@@ -170,29 +163,18 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 	 * @return array|false
 	 */
 	public function sync_rooms_and_meals_from_smartsheet() {
-		// Get the sheet ID
-		$sheet_id = $this->get_sheet_id();
-		if ( ! $sheet_id ) return false;
+		// Get information about the sheet
+		$sheet = AH_Smartsheet_Sync_Sheets()->get_sheet_data( $this->get_sheet_id() );
+		if ( ! $sheet ) return false;
 		
 		// Get column IDs to use for structure
 		$column_ids = $this->get_column_ids();
 		if ( ! $column_ids ) return false;
 		
-		// Get the sheet details
-		$sheet = AH_Smartsheet_API()->get_sheet_by_id( $sheet_id );
-		if ( ! $sheet ) return false;
-		
-		// Store information about the sheet itself
-		$sheet_data = array(
-			'sheet_id' => $sheet['id'], // 
-			'name' => $sheet['name'], // "Copy of Master List - Rooms Meals Month Day"
-			'permalink' => $sheet['permalink'], // "https://app.smartsheet.com/sheets/325jvc9vPfWQmRJPvFgvJWfVMjRw3H3GrPjW8651"
-		);
-		
-		update_option( 'ah_meals_and_rooms_sheet', $sheet_data, false );
+		update_option( 'ah_meals_and_rooms_sheet', $sheet, false );
 		
 		// Get rows from the sheet
-		$rows = AH_Smartsheet_API()->get_rows_from_sheet( $sheet_id );
+		$rows = AH_Smartsheet_API()->get_rows_from_sheet( $sheet['sheet_id'] );
 		
 		// Get each room and meal
 		$room_list = array();

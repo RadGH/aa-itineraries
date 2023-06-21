@@ -141,6 +141,7 @@ if ( ah_is_pdf() ) {
 					foreach( $link_items as $l ) {
 						$url = $l['url'];
 						$label = $l['label'];
+						if ( ! $label ) $label = $url;
 						
 						echo '<li>';
 						

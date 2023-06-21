@@ -621,3 +621,77 @@ function ah_get_phone_number_link( $phone ) {
 		esc_html($extension)
 	);
 }
+
+/**
+ * Check if a URL is external (takes you to a different website)
+ *
+ * @param string $url
+ *
+ * @return bool
+ */
+function ah_is_link_external($url) {
+	// Parse the given URL
+	$parsed_url = wp_parse_url($url);
+	
+	// Check if the URL is relative, these are considered internal
+	if ( empty($parsed_url['host']) ) {
+		return false; // internal (relative)
+	}
+	
+	// Get the current website domain
+	$home_url = wp_parse_url(home_url());
+	
+	// Check if the URL domain matches the current website domain
+	if ( $parsed_url['host'] === $home_url['host'] ) {
+		return false; // internal
+	}
+	
+	return true; // external
+}
+
+/**
+ * Format an array of attributes based on the provided $template.
+ * If $is_array is true, assumes the $values are an array of args that each need to be prepared.
+ *
+ * Could also have been called ah_structure_atts() or ah_format_atts()
+ *
+ * @param array $template
+ * @param array|array[] $values
+ * @param bool $has_sub_items
+ *
+ * @return array
+ */
+function ah_prepare_atts( $template, $values, $has_sub_items = false ) {
+	if ( $has_sub_items ) {
+		// For arrays, prepare each item the same way
+		$value = array();
+		
+		if ( $values && is_array($values) ) foreach( $values as $k => $v ) {
+			$value[$k] = ah_prepare_atts( $template, $v );
+		}
+		
+		return $value;
+	}else{
+		// Apply the array template to single values
+		$result = array();
+		
+		foreach( $template as $key => $default_value ) {
+			$result[ $key ] = $values[ $key ] ?? $default_value;
+		}
+		
+		return $result;
+	}
+}
+
+/**
+ * Takes an array of column and data and returns an array formatted to match the columns using values from data
+ *
+ * @param array $columns
+ * @param array $data
+ *
+ * @return array
+ */
+function ah_prepare_columns( $columns, $data ) {
+	$template = array_fill_keys( array_keys($columns), null );
+	return ah_prepare_atts( $template, $data );
+}

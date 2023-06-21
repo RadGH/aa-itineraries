@@ -69,10 +69,10 @@ if ( ! function_exists('ah_list_hike_items') ) {
 				?>
 				<tr>
 					<?php if ( $mode == 'missing' ) { ?>
-						<td class="col-wordpress_title"><span class="cell"><?php echo esc_html(get_the_title($post_id) ?: '&ndash;'); ?></span></td>
-						<td class="col-smartsheet_id"><span class="cell"><?php echo esc_html($smartsheet_id ?: '<em>(empty)</em>'); ?></span></td>
+						<td class="col-wordpress_title"><span class="cell"><?php echo esc_html(get_the_title( $item['post_id'] ) ?: '&ndash;'); ?></span></td>
+						<td class="col-smartsheet_id"><span class="cell"><?php echo esc_html($smartsheet_id) ?: '<em>(empty)</em>'; ?></span></td>
 					<?php }else{ ?>
-						<td class="col-smartsheet_id"><span class="cell"><?php echo esc_html($smartsheet_id ?: '<em>(empty)</em>'); ?></span></td>
+						<td class="col-smartsheet_id"><span class="cell"><?php echo esc_html($smartsheet_id) ?: '<em>(empty)</em>'; ?></span></td>
 					<?php } ?>
 					
 					<td class="col-actions">
@@ -186,7 +186,7 @@ if ( ! function_exists('ah_list_hike_items') ) {
 								<p>
 									<a href="<?php echo esc_attr($sync_url); ?>" class="button button-secondary">Run Sync</a>
 								</p>
-								<p style="opacity:0.5;">Last sync: <?php echo ah_get_relative_date_html( $sync_date ) ?: '(never)'; ?></p>
+								<p class="ah-last-sync">Last sync: <?php echo ah_get_relative_date_html( $sync_date ) ?: '(never)'; ?></p>
 							</div>
 						</div>
 					
@@ -244,7 +244,7 @@ if ( ! function_exists('ah_list_hike_items') ) {
 										<div class="ah-content">
 											<?php
 											echo '<p class="description">These hikes only exist in WordPress and are not present in Smartsheet. Verify that the Smartsheet ID is correct for these items.</p>';
-											ah_list_hike_items( $missing_hikes, 'hike', 'missing' );
+											ah_list_hike_items( $missing_hikes, 'missing' );
 											?>
 										</div>
 									</div>
@@ -259,7 +259,7 @@ if ( ! function_exists('ah_list_hike_items') ) {
 										
 										<?php
 										echo '<p class="description"><strong>Action required:</strong> These hikes exist in Smartsheet but have not been created in WordPress. Use the buttons below to automatically create and begin editing each hike.</p>';
-										ah_list_hike_items( $unassigned_hikes, 'hike', 'unassigned' );
+										ah_list_hike_items( $unassigned_hikes, 'unassigned' );
 										?>
 										
 									</div>
@@ -275,7 +275,7 @@ if ( ! function_exists('ah_list_hike_items') ) {
 										<?php
 										if ( $assigned_hikes ) {
 											echo '<p class="description">No action needed – These hikes exist in both Smartsheet and WordPress.</p>';
-											ah_list_hike_items( $assigned_hikes, 'hike', 'assigned' );
+											ah_list_hike_items( $assigned_hikes, 'assigned' );
 										}else{
 											echo '<p class="description">No hikes have been assigned yet.</p>';
 										}
@@ -312,9 +312,7 @@ if ( ! function_exists('ah_list_hike_items') ) {
 								</div>
 								<div class="ah-field">
 									<input type="text" name="ah[sheet_id]" id="ah-sheet-id" value="<?php echo esc_attr($sheet_id); ?>">
-									<?php if ( $sheet_url ) { ?>
-										<a href="<?php echo $sheet_url; ?>" target="_blank" class="button button-secondary">View Spreadsheet <span class="dashicons dashicons-external ah-dashicon-inline"></span></a>
-									<?php } ?>
+									<?php if ( $sheet_url ) echo ah_create_html_link( $sheet_url, 'View Spreadsheet' ); ?>
 								</div>
 							</div>
 							

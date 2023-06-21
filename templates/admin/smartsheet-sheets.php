@@ -37,7 +37,7 @@ $sheet_list = AH_Smartsheet_Sync_Sheets()->get_stored_sheet_list();
 							<div class="inside">
 								<p>Updates the list of all spreadsheets from the Smartsheet account.</p>
 								<p><a href="<?php echo esc_attr($sync_url); ?>" class="button button-secondary">Run Sync</a></p>
-								<p style="opacity:0.5;">Last sync: <?php echo ah_get_relative_date_html( $sync_date ) ?: '(never)'; ?></p>
+								<p class="ah-last-sync">Last sync: <?php echo ah_get_relative_date_html( $sync_date ) ?: '(never)'; ?></p>
 							</div>
 						</div>
 						

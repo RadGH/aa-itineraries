@@ -3,13 +3,12 @@
 class Class_AH_Smartsheet_Sync_Hikes {
 	
 	public $columns = array(
-		'hike_id'   => 'Hike ID',
 		'hike_name' => 'Hike Name',
 		'region'    => 'Region',
 		'url'       => 'URL',
 	);
 	
-	public $hike_list = array();
+	public $hike_list = null;
 	
 	public function __construct() {
 		
@@ -68,7 +67,7 @@ class Class_AH_Smartsheet_Sync_Hikes {
 		update_option( 'ah_hike_sheet_id', $sheet_id, false );
 		
 		// Column IDs
-		$column_ids = $this->format_column_ids( $data['column_ids'] );
+		$column_ids = ah_prepare_columns( $this->columns,  $data['column_ids'] );
 		update_option( 'ah_hike_column_ids', $column_ids, false );
 		
 		// Reload the form (to clear post data from browser history)
@@ -83,35 +82,7 @@ class Class_AH_Smartsheet_Sync_Hikes {
 	public function get_column_ids() {
 		$column_ids = get_option( 'ah_hike_column_ids' );
 		
-		$column_ids = $this->format_column_ids( $column_ids );
-		
-		return $column_ids;
-	}
-	
-	/**
-	 * Takes column ID data (example: from options or $_POST) and returns a pre-formatted array with those values
-	 * Any extra columns provided are discarded.
-	 * Any missing columns are provided and set to null.
-	 *
-	 * @param array $column_data
-	 *
-	 * @return array {
-	 *      @type string|null $hike_id
-	 *      @type string|null $hike_name
-	 *      @type string|null $region
-	 *      @type string|null $url
-	 * }
-	 */
-	public function format_column_ids( $column_data ) {
-		$column_ids = array();
-		
-		foreach( $this->columns as $key => $title ) {
-			$column_ids[$key] = null;
-		}
-		
-		$column_ids = shortcode_atts( $column_ids, $column_data );
-		
-		return $column_ids;
+		return ah_prepare_columns( $this->columns, $column_ids );
 	}
 	
 	/**
@@ -239,40 +210,29 @@ class Class_AH_Smartsheet_Sync_Hikes {
 	 * @return array|false
 	 */
 	public function sync_hike_from_smartsheet() {
-		// Get the sheet ID
-		$sheet_id = $this->get_sheet_id();
-		if ( ! $sheet_id ) return false;
+		// Get information about the sheet
+		$sheet = AH_Smartsheet_Sync_Sheets()->get_sheet_data( $this->get_sheet_id() );
+		if ( ! $sheet ) return false;
+		
+		// Save sheet information
+		update_option( 'ah_hike_sheet', $sheet, false );
 		
 		// Get column IDs to use for structure
 		$column_ids = $this->get_column_ids();
 		if ( ! $column_ids ) return false;
 		
-		// Get the sheet details
-		$sheet = AH_Smartsheet_API()->get_sheet_by_id( $sheet_id );
-		if ( ! $sheet ) return false;
-		
-		// Store information about the sheet itself
-		$sheet_data = array(
-			// @todo sheet smartsheet_id
-			'sheet_id' => $sheet['id'], // 2463217603268484
-			'sheet_name' => $sheet['name'], // "Copy of Master List - Hikes/Maps"
-			'permalink' => $sheet['permalink'], // "https://app.smartsheet.com/sheets/866hH6jQCxmvF2f7w4cv3c2rPh9XXvgxVmmVX8W1?view=grid"
-		);
-		
-		update_option( 'ah_hike_sheet', $sheet_data, false );
 		
 		// Get rows from the sheet
-		$rows = AH_Smartsheet_API()->get_rows_from_sheet( $sheet_id );
+		$rows = AH_Smartsheet_API()->get_rows_from_sheet( $sheet['sheet_id'] );
 		if ( ! $rows ) return false;
 		
-		// Get a list of hikes
-		$hike_list = $this->get_values_from_rows( $rows, array(
-			'smartsheet_id'   => $column_ids['hike_id'],
-			'smartsheet_name' => $column_ids['hike_name'],
-			
-			'region'    => $column_ids['region'],
-			'url'       => $column_ids['url'],
-		) );
+		// Format the rows to match our intended columns array
+		// Before: $row[0]['cells'][1]['value'] = "Grindelwald to Wengen - BO"
+		// After:  $row[0]['hike_name']         = "Grindelwald to Wengen - BO"
+		$rows = AH_Smartsheet_Sync()->get_values_from_rows( $rows, 'hike_name', $column_ids );
+		
+		// Create a list of hikes
+		$hike_list = $this->get_hikes_from_rows( $rows );
 		
 		// Save the hike list
 		if ( $hike_list ) {
@@ -283,6 +243,35 @@ class Class_AH_Smartsheet_Sync_Hikes {
 		update_option( 'ah_hike_last_sync', current_time('Y-m-d H:i:s'), false );
 		
 		return $hike_list;
+	}
+	
+	/**
+	 * Get an array of hikes from the given rows
+	 *
+	 * @param array $rows
+	 *
+	 * @return array
+	 */
+	public function get_hikes_from_rows( $rows ) {
+		$hikes = array();
+		
+		foreach( $rows as $row ) {
+			// Hike ID is the same as hike name
+			$hike_id = $row['hike_name'];
+			
+			// By using hike_id as the key, duplicate hikes get removed automatically
+			$hikes[ $hike_id ] = array(
+				'smartsheet_id'   => $hike_id,
+				'smartsheet_name' => $row['hike_name'],
+				'region'          => $row['region'],
+				'url'             => $row['url'],
+			);
+		}
+		
+		// Sort by name
+		if ( $hikes ) $hikes = ah_sort_by_key( $hikes, 'smartsheet_name' );
+		
+		return $hikes;
 	}
 	
 	/**
@@ -311,9 +300,9 @@ class Class_AH_Smartsheet_Sync_Hikes {
 			
 			// Check that name and id are valid
 			if (
-				AH_Smartsheet_Sync()->is_cell_valid( $item['hike_id'] )
+				AH_Smartsheet_Sync()->is_cell_valid( $item['smartsheet_id'] )
 				&&
-				AH_Smartsheet_Sync()->is_cell_valid( $item['hike_name'] )
+				AH_Smartsheet_Sync()->is_cell_valid( $item['smartsheet_name'] )
 			) {
 				$items[ $item['smartsheet_id'] ] = $item;
 			}
@@ -588,14 +577,29 @@ class Class_AH_Smartsheet_Sync_Hikes {
 		// Smartsheet id
 		update_post_meta( $post_id, 'smartsheet_id', $smartsheet_id );
 		update_post_meta( $post_id, 'smartsheet_name', $smartsheet_name );
+		update_post_meta( $post_id, 'smartsheet_region', $data['region'] ?? '' );
 		
 		// Last sync date
 		update_post_meta( $post_id, 'smartsheet_last_sync', current_time('Y-m-d H:i:s') );
 		
 		// Hike fields
-		update_post_meta( $post_id, 'hike_name', $data['hike_name'] ?? '' );
-		update_post_meta( $post_id, 'region', $data['region'] ?? '' );
-		update_post_meta( $post_id, 'url', $data['url'] ?? '' );
+		update_post_meta( $post_id, 'hike_name', $data['smartsheet_name'] ?? '' );
+		
+		// Links (title + links[label + url])
+		$url = $data['url'] ?? '';
+		if ( $url ) {
+			$links = get_field( 'link', $post_id );
+			
+			// Prepare format, keep existing data if possible
+			if ( ! $links ) $links = array();
+			if ( empty($links['title']) ) $links['title'] = 'Outdoor Active Links';
+			if ( empty($links['links']) ) $links['links'] = array();
+			if ( empty($links['links'][0]) ) $links['links'][0] = array();
+			
+			$links['links'][0]['url'] = $data['url'];
+			
+			update_field( 'link', $links,$post_id );
+		}
 		
 		return true;
 	}

@@ -62,7 +62,7 @@ $meal_list = AH_Smartsheet_Sync_Rooms_And_Meals()->get_stored_meal_list();
 							<div class="inside">
 								<p>Updates the room list with current information from the Rooms and Meals master spreadsheet.</p>
 								<p><a href="<?php echo esc_attr($sync_url); ?>" class="button button-secondary">Run Sync</a></p>
-								<p style="opacity:0.5;">Last sync: <?php echo ah_get_relative_date_html( $sync_date ) ?: '(never)'; ?></p>
+								<p class="ah-last-sync">Last sync: <?php echo ah_get_relative_date_html( $sync_date ) ?: '(never)'; ?></p>
 							</div>
 						</div>
 						
@@ -207,9 +207,7 @@ $meal_list = AH_Smartsheet_Sync_Rooms_And_Meals()->get_stored_meal_list();
 								</div>
 								<div class="ah-field">
 									<input type="text" name="ah[sheet_id]" id="ah-sheet-id" value="<?php echo esc_attr($sheet_id); ?>">
-									<?php if ( $sheet_url ) { ?>
-										<a href="<?php echo $sheet_url; ?>" target="_blank" class="button button-secondary">View Spreadsheet <span class="dashicons dashicons-external ah-dashicon-inline"></span></a>
-									<?php } ?>
+									<?php if ( $sheet_url ) echo ah_create_html_link( $sheet_url, 'View Spreadsheet' ); ?>
 								</div>
 							</div>
 							
