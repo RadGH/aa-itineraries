@@ -35,31 +35,35 @@ window.AH_Public = new (function() {
 	}
 
 	o.setup_scroll_up_down = function() {
-		let scroll_y = -1;
-		let last_scroll_y = 0;
-		let last_scrolled_up = false;
-
 		$body.addClass('scrolled-down');
 
+		let scroll_y = 0;
+		let last_scroll_y = -1;
+		let last_direction = '';
+
 		let on_scroll = function() {
+			scroll_y = window.scrollY;
 
-			last_scroll_y = scroll_y;
-			scroll_y = Math.round( jQuery(this).scrollTop() );
+			console.log( 'scroll', scroll_y, last_scroll_y, last_direction );
 
-			if ( last_scroll_y > scroll_y && ! last_scrolled_up ) {
-				last_scrolled_up = true;
-
+			if ( scroll_y === last_scroll_y ) {
+				// Did not scroll
+				return;
+			}else if ( scroll_y > last_scroll_y && last_direction !== 'up' ) {
+				// Scrolled up
+				last_direction = 'up';
 				$body
 					.addClass('scrolled-up')
 					.removeClass('scrolled-down');
-			}else if ( last_scroll_y < scroll_y && last_scrolled_up ) {
-				// scrolling down
-				last_scrolled_up = false;
-
+			}else if ( scroll_y < last_scroll_y && last_direction !== 'down' ) {
+				// Scrolled down
+				last_direction = 'down';
 				$body
 					.removeClass('scrolled-up')
 					.addClass('scrolled-down');
 			}
+
+			last_scroll_y = scroll_y;
 
 		};
 
