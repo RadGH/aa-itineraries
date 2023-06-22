@@ -13,7 +13,8 @@ $contact_information = get_field( 'contact_information', get_the_ID() );
 
 $date_range = get_field( 'date_range', get_the_ID() );
 
-$schedule = get_field( 'schedule', get_the_ID() );
+$schedule = (array) get_field( 'schedule', get_the_ID() );
+if ( ah_is_array_recursively_empty($schedule) ) $schedule = array();
 
 $departure_information = get_field( 'departure_information', get_the_ID() );
 

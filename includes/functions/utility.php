@@ -695,3 +695,32 @@ function ah_prepare_columns( $columns, $data ) {
 	$template = array_fill_keys( array_keys($columns), null );
 	return ah_prepare_atts( $template, $data );
 }
+
+/**
+ * All post types added by this plugin
+ */
+function ah_get_custom_post_types() {
+	return array(
+		'ah_document',
+		'ah_account_page',
+		'ah_hike',
+		'ah_hotel',
+		'ah_invoice',
+		'ah_itinerary',
+		'ah_itinerary_tpl',
+		'ah_village',
+	);
+}
+
+/**
+ * Post types used by the itinerary system
+ */
+function ah_get_itinerary_post_types() {
+	return array(
+		'ah_hike',
+		'ah_hotel',
+		'ah_itinerary',
+		'ah_itinerary_tpl',
+		'ah_village',
+	);
+}

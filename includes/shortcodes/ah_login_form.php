@@ -4,9 +4,9 @@ function shortcode_ah_login_form( $atts, $content = '', $shortcode_name = 'ah_lo
 	$atts = shortcode_atts(array(
 	), $atts, $shortcode_name);
 	
-	ob_start();
 	
 	$args = array(
+		'echo' => false,
 		'form_id' => 'ah-login-form',
 		'label_username' => 'Email (Username) *',
 		'label_password' => 'Password *',
@@ -19,8 +19,12 @@ function shortcode_ah_login_form( $atts, $content = '', $shortcode_name = 'ah_lo
 		$args['redirect'] = stripslashes($_GET['redirect_to']);
 	}
 	
-	wp_login_form($args);
+	if ( is_user_logged_in() ) {
+		$url = $args['redirect'] ?: site_url( '/account/' );
+		wp_redirect( $url );
+		exit;
+	}
 	
-	return ob_get_clean();
+	return wp_login_form($args);
 }
 add_shortcode( 'ah_login_form', 'shortcode_ah_login_form' );

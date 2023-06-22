@@ -383,6 +383,10 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		}
 	}
 	
+	public function get_itinerary_data( $itinerary_id ) {
+	
+	}
+	
 	/**
 	 * Generate table of contents for an itinerary, an array of items that can be used in a nested list
 	 * Each item contains: title, link, children
@@ -392,11 +396,9 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 	 * @return array
 	 */
 	public function get_table_of_contents( $itinerary_id ) {
-		$toc_list = array();
+		if ( get_post_type( $itinerary_id ) != $this->get_post_type() ) return array();
 		
-		if ( get_post_type( $itinerary_id ) != $this->get_post_type() ) {
-			return array();
-		}
+		$toc_list = array();
 		
 		// Itinerary
 		$introduction_message = get_field( 'introduction_message', $itinerary_id );

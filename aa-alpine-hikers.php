@@ -23,6 +23,7 @@ function AH_Plugin() {
 /* Shorthands of our objects */
 function AH_Cron() { return AH_Plugin()->Cron; }
 function AH_Admin() { return AH_Plugin()->Admin; }
+function AH_Editor() { return AH_Plugin()->Editor; }
 function AH_Enqueue() { return AH_Plugin()->Enqueue; }
 function AH_Rewrites() { return AH_Plugin()->Rewrites; }
 function AH_Reminders() { return AH_Plugin()->Reminders; }
@@ -65,6 +66,7 @@ class Class_AH_Plugin {
 	// Objects
 	public Class_AH_Cron                       $Cron;
 	public Class_AH_Admin                      $Admin;
+	public Class_AH_Editor                     $Editor;
 	public Class_AH_Enqueue                    $Enqueue;
 	public Class_AH_Rewrites                   $Rewrites;
 	public Class_AH_Reminders                  $Reminders;
@@ -143,6 +145,9 @@ class Class_AH_Plugin {
 		
 		require_once( __DIR__ . '/includes/classes/admin.php' );
 		$this->Admin = new Class_AH_Admin();
+		
+		require_once( __DIR__ . '/includes/classes/editor.php' );
+		$this->Editor = new Class_AH_Editor();
 		
 		require_once( __DIR__ . '/includes/classes/enqueue.php' );
 		$this->Enqueue = new Class_AH_Enqueue();
