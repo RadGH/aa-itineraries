@@ -385,7 +385,7 @@ if ( ah_is_pdf() ) {
 
 <?php
 if ( $show_villages ) {
-	echo '<div id="'. $pages['villages']['id']  .'"></div>';
+	echo '<div id="'. $pages['villages']['id']  .'">';
 	
 	foreach( $villages as $i => $s ) {
 		$village_id = (int) $s['village'];
@@ -401,12 +401,14 @@ if ( $show_villages ) {
 		
 		if ( $village_id ) include( __DIR__ . '/village.php' );
 	}
+	
+	echo '</div>';
 }
 ?>
 
 <?php
 if ( $show_hikes ) {
-	echo '<div id="hikes"></div>';
+	echo '<div id="'. $pages['hikes']['id']  .'">';
 	
 	foreach( $hikes as $i => $s ) {
 		$post_id = (int) $s['hike'];
@@ -422,6 +424,8 @@ if ( $show_hikes ) {
 		
 		if ( $post_id ) include( __DIR__ . '/hike.php' );
 	}
+	
+	echo '</div>';
 }
 ?>
 

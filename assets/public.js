@@ -5,12 +5,13 @@ window.AH_Public = new (function() {
 
 	let $body = null;
 	let $account_nav = null;
+	let $itinerary_menu = null;
 
 	o.init = function() {
 
 		$body = jQuery('body');
-
 		$account_nav = jQuery('.account-sidebar');
+		$itinerary_menu = jQuery('#menu-itinerary');
 
 		// Everywhere
 		o.setup_notices();
@@ -22,6 +23,13 @@ window.AH_Public = new (function() {
 			o.setup_scroll_account_nav();
 
 			o.setup_account_menu_scrolling();
+		}
+
+		// Itinerary page
+		if ( $itinerary_menu.length > 0 ) {
+
+			o.setup_itinerary_menu_scroll_indicators( $itinerary_menu );
+
 		}
 
 	};
@@ -44,18 +52,16 @@ window.AH_Public = new (function() {
 		let on_scroll = function() {
 			scroll_y = window.scrollY;
 
-			console.log( 'scroll', scroll_y, last_scroll_y, last_direction );
-
 			if ( scroll_y === last_scroll_y ) {
 				// Did not scroll
 				return;
-			}else if ( scroll_y > last_scroll_y && last_direction !== 'up' ) {
+			}else if ( scroll_y < last_scroll_y && last_direction !== 'up' ) {
 				// Scrolled up
 				last_direction = 'up';
 				$body
 					.addClass('scrolled-up')
 					.removeClass('scrolled-down');
-			}else if ( scroll_y < last_scroll_y && last_direction !== 'down' ) {
+			}else if ( scroll_y > last_scroll_y && last_direction !== 'down' ) {
 				// Scrolled down
 				last_direction = 'down';
 				$body
@@ -113,7 +119,7 @@ window.AH_Public = new (function() {
 		// When clicking an internal link in the account navigation:
 		// 1. Close the navigation menu (mobile)
 		// 2. Scroll to the element
-		jQuery('.ah-account-menu-nav a').on('click', function() {
+		jQuery(document.body).on('click', '.ah-account-menu-nav a, .menu-dots a', function() {
 
 			let $a = jQuery(this);
 			let href = $a.attr('href');
@@ -150,6 +156,123 @@ window.AH_Public = new (function() {
 
 			}
 
+		});
+
+	}
+
+	o.setup_itinerary_menu_scroll_indicators = function( $itinerary_menu ) {
+
+		$itinerary_menu.addClass('scroll-tracking-menu');
+
+		let activeMenuItem = null;
+		let activeMenuDotItem = null;
+		const observerEntries = new Map();
+		const links = $itinerary_menu[0].querySelectorAll(':scope > li.menu-item > a');
+		const menuItemDots = new Map();
+
+		// Create a separate list used for dots that correspond to each menu item from the "links" variable
+		const create_linked_menu_dots = function( menuItems ) {
+
+			// Create a new unordered list
+			const dotList = document.createElement('ul');
+
+			dotList.classList.add('menu-dots');
+
+			// For each menu item...
+			menuItems.forEach((menuItem) => {
+				// Create a new list item for the new list
+				const dotItem = document.createElement('li');
+				dotItem.classList.add('menu-dot');
+
+				// Create a new anchor element
+				const dotLink = document.createElement('a');
+				dotLink.href = menuItem.getAttribute('href'); // Set the href to match the original menu item
+
+				// Create a span inside the anchor
+				const dotSpan = document.createElement('span');
+				dotSpan.textContent = menuItem.textContent; // Set the text to match the original menu item
+
+				// Append the new span to the new anchor
+				dotLink.appendChild(dotSpan);
+
+				// Append the new anchor to the new list item
+				dotItem.appendChild(dotLink);
+
+				// Append the new list item to the new list
+				dotList.appendChild(dotItem);
+
+				// Associate the original menu item with the new list item
+				menuItemDots.set(menuItem, dotItem);
+			});
+
+			// Append the new list to the body
+			document.body.appendChild(dotList);
+
+			// Indicate the dot nav is added to the body
+			document.body.classList.add('menu-dots-added');
+
+		};
+
+		// Searches for the closest menu item to the middle of the screen
+		const get_closest_observer_entry = function() {
+			// Get viewport height and midpoint
+			const viewportHeight = window.innerHeight;
+			const viewportMidpoint = viewportHeight / 2;
+
+			// Filter observerEntries where the center line of the viewport falls within the element
+			// Returns the first entry in the array is the closest to the viewport's center
+			return Array.from(observerEntries.values()).find(entry => {
+				const bounds = entry.target.getBoundingClientRect();
+				return bounds.top <= viewportMidpoint && bounds.bottom >= viewportMidpoint;
+			});
+		};
+
+		// Observer is triggered when a target element enters the viewport
+		const observer = new IntersectionObserver((entries) => {
+
+			// Add the observed items to the observerEntries map
+			entries.forEach(entry => {
+				observerEntries.set(entry.target, entry);
+			});
+
+			// Find the closest item from the observed elements
+			const active_entry = get_closest_observer_entry();
+			const id = active_entry ? active_entry.target.getAttribute('id') : false;
+			const menuItem = id ? document.querySelector(`#menu-itinerary a[href="#${id}"]`) : false;
+			if ( ! menuItem ) return;
+
+			// Deactivate the previous menu item and dot
+			if ( activeMenuItem !== null ) {
+				activeMenuItem.parentElement.classList.remove('scroll-target');
+				activeMenuItem = null;
+			}
+
+			if ( activeMenuDotItem !== null ) {
+				activeMenuDotItem.classList.remove('scroll-target');
+				activeMenuDotItem = null;
+			}
+
+			activeMenuItem = menuItem;
+			activeMenuDotItem = menuItemDots.get(menuItem);
+
+			// Activate the menu item
+			activeMenuItem.parentElement.classList.add('scroll-target');
+			activeMenuDotItem.classList.add('scroll-target');
+		}, {
+			rootMargin: '-60px 0px', // negative margin = highlight the menu after this far in the viewport
+			threshold: [0, 0.5] // 0 = trigger when any amount is visible, 1 = trigger when 100% in viewport
+		});
+
+		// Create separate list of menu dots, used as dot navigation on mobile
+		create_linked_menu_dots( links );
+
+		// Add all the sections you want to observe
+		links.forEach((el) => {
+			const selector = el.getAttribute('href');
+			if ( !selector || selector.substring(0, 1) !== '#' ) return;
+
+			const target = document.querySelector(selector);
+			if (target) observer.observe(target);
 		});
 
 	}
