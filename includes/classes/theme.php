@@ -46,7 +46,6 @@ class Class_AH_Theme {
 			include( AH_PATH . '/templates/parts/pdf-footer.php' );
 			$html = ob_get_clean();
 			
-			
 			// Generate PDF
 			AH_PDF()->generate_from_html( $html, $pdf_title, null, false );
 			exit;

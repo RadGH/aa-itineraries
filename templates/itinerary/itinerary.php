@@ -2,44 +2,53 @@
 // Itinerary content
 // Used when viewing an itinerary, or when download a pdf
 
-$slug = get_post_field( 'post_name', get_the_ID() );
+if ( ! isset($itinerary_settings) ) {
+	echo 'Error: $itinerary_settings does not exist in ' . __FILE__ . ':' . __LINE__;
+	return;
+}
 
-$logo_id = get_field( 'white_logo', 'ah_settings' );
+/**
+ * For structure @see Class_Itinerary_Post_Type::get_itinerary_settings()
+ */
+$data = $itinerary_settings['data'];
+$pages = $itinerary_settings['pages'];
 
-$title = get_field( 'title', get_the_ID() );
-$subtitle = get_field( 'subtitle', get_the_ID() );
-$introduction_message = get_field( 'introduction_message', get_the_ID() );
-$contact_information = get_field( 'contact_information', get_the_ID() );
+$slug = $data['slug'];
+$logo_id = $data['logo_id'];
 
-$date_range = get_field( 'date_range', get_the_ID() );
+$title = $data['title'];
+$subtitle = $data['subtitle'];
+$introduction_message = $data['introduction_message'];
+$contact_information = $data['contact_information'];
+$date_range = $data['date_range'];
 
-$schedule = (array) get_field( 'schedule', get_the_ID() );
-if ( ah_is_array_recursively_empty($schedule) ) $schedule = array();
+$schedule = $data['schedule'];
 
-$departure_information = get_field( 'departure_information', get_the_ID() );
+$departure_information = $data['departure_information'];
 
-$all_phone_numbers = (array) get_field( 'phone_numbers', get_the_ID() ); // title, phone_number, content
-$has_phone_numbers = ! ah_is_array_recursively_empty( $all_phone_numbers );
+$phone_numbers = $data['phone_numbers'];
 
-$country_codes = get_field( 'country_codes', get_the_ID() );
+$country_codes = $data['country_codes'];
 
-$tour_overview = get_field( 'tour_overview', get_the_ID() );
+$tour_overview = $data['tour_overview'];
 
-$villages = get_field( 'villages', get_the_ID() );
+$hike_summary = $data['hike_summary'];
 
-$hikes = get_field( 'hikes', get_the_ID() );
+$villages = $data['villages'];
 
-$attached_documents = get_field( 'attached_documents', get_the_ID() );
+$hikes = $data['hikes'];
+
+$documents = $data['documents'];
 
 // Check which sections will be displayed
-$show_intro_page = ( $introduction_message || $contact_information );
-$show_schedule_page = ( $schedule || $departure_information || ! $show_intro_page );
-$show_directory_page = ( $has_phone_numbers || $country_codes );
-$show_tour_overview = ($tour_overview != '');
-$show_villages = ! ah_is_array_recursively_empty($villages);
-
-$hike_summary = ah_get_hike_summary( get_the_ID() );
-$show_hike_summary = ($hike_summary != '' );
+$show_intro_page = $pages['introduction']['enabled'];
+$show_schedule_page = $pages['schedule']['enabled'];
+$show_directory_page = $pages['directory']['enabled'];
+$show_tour_overview = $pages['tour_overview']['enabled'];
+$show_hike_summary = $pages['hike_summary']['enabled'];
+$show_villages = $pages['villages']['enabled'];
+$show_hikes = $pages['hikes']['enabled'];
+$show_documents = $pages['documents']['enabled'];
 
 if ( ! ah_is_pdf() ) {
 	// Web page view
@@ -68,7 +77,7 @@ if ( ah_is_pdf() ) {
 			color: #204f66;
 		}
 		
-		#intro {
+		#<?php echo $pages['introduction']['id']; ?> {
 			page: itinerary_intro;
 		}
 
@@ -89,7 +98,7 @@ if ( ah_is_pdf() ) {
 	</htmlpagefooter>
 	
 	<style>
-		#schedule {
+		#<?php echo $pages['schedule']['id']; ?> {
 			page: itinerary_schedule;
 		}
 
@@ -109,7 +118,7 @@ if ( ah_is_pdf() ) {
 	</htmlpagefooter>
 	
 	<style>
-		#directory {
+		#<?php echo $pages['directory']['id']; ?> {
 			page: itinerary_directory;
 		}
 
@@ -129,7 +138,7 @@ if ( ah_is_pdf() ) {
 	</htmlpagefooter>
 	
 	<style>
-		#tour-overview {
+		#<?php echo $pages['tour_overview']['id']; ?> {
 			page: itinerary_tour_overview;
 		}
 		
@@ -149,7 +158,7 @@ if ( ah_is_pdf() ) {
 	</htmlpagefooter>
 	
 	<style>
-		#hike-summary {
+		#<?php echo $pages['hike_summary']['id']; ?> {
 			page: itinerary_hike_summary;
 		}
 		
@@ -188,9 +197,9 @@ if ( ah_is_pdf() ) {
 	
 	if ( $show_intro_page ) {
 	?>
-	<div class="pdf-page" id="intro">
+	<div class="pdf-page" id="<?php echo $pages['introduction']['id']; ?>">
 		
-		<?php ah_display_bookmark( 'Introduction', 0 ); ?>
+		<?php ah_display_bookmark( $pages['introduction']['title'], 0 ); ?>
 		
 		<?php if ( $title && !ah_is_pdf() ) { ?>
 			<div class="section-heading itinerary-heading">
@@ -224,9 +233,9 @@ if ( ah_is_pdf() ) {
 	<?php
 	if ( $show_schedule_page ) {
 	?>
-	<div class="pdf-page" id="schedule">
+	<div class="pdf-page" id="<?php echo $pages['schedule']['id']; ?>">
 		
-		<?php ah_display_bookmark( 'Schedule', 0 ); ?>
+		<?php ah_display_bookmark( $pages['schedule']['title'], 0 ); ?>
 		
 		<div class="section-heading itinerary-heading">
 			<?php if ( $title ) echo '<h1 class="pdf-title">', $title, '</h1>'; ?>
@@ -276,20 +285,20 @@ if ( ah_is_pdf() ) {
 	<?php
 	if ( $show_directory_page ) {
 	?>
-	<div class="pdf-page" id="directory">
+	<div class="pdf-page" id="<?php echo $pages['directory']['id']; ?>">
 		
-		<?php ah_display_bookmark( 'Directory', 0 ); ?>
+		<?php ah_display_bookmark( $pages['directory']['title'], 0 ); ?>
 		
 		<div class="section-heading itinerary-heading">
-			<h1>Directory</h1>
+			<h1 class="pdf-title"><?php echo $pages['directory']['title']; ?></h1>
 		</div>
 		
 		<div class="section-directory">
 			
 			<?php
-			if ( $all_phone_numbers ) {
+			if ( $phone_numbers ) {
 				echo '<table class="directory-table columns-2"><tbody>';
-				foreach( $all_phone_numbers as $i ) {
+				foreach( $phone_numbers as $i ) {
 					
 					$phone_number_display = ah_get_phone_number_link( $i['phone_number'] );
 					
@@ -331,9 +340,9 @@ if ( ah_is_pdf() ) {
 	<?php
 	if ( $show_tour_overview ) {
 	?>
-	<div class="pdf-page" id="tour-overview">
+	<div class="pdf-page" id="<?php echo $pages['tour_overview']['id']; ?>">
 		
-		<?php ah_display_bookmark( 'Tour Overview', 0 ); ?>
+		<?php ah_display_bookmark( $pages['tour_overview']['title'], 0 ); ?>
 		
 		<div class="section-heading itinerary-heading">
 			<?php echo '<h1 class="pdf-title">Tour Overview</h1>'; ?>
@@ -353,12 +362,12 @@ if ( ah_is_pdf() ) {
 	<?php
 	if ( $show_hike_summary ) {
 	?>
-	<div class="pdf-page" id="hike-summary">
+	<div class="pdf-page" id="<?php echo $pages['hike_summary']['id']; ?>">
 		
-		<?php ah_display_bookmark( 'Hike Summary', 0 ); ?>
+		<?php ah_display_bookmark( $pages['hike_summary']['title'], 0 ); ?>
 		
 		<div class="section-heading itinerary-heading">
-			<?php echo '<h1 class="pdf-title">Hike Summary</h1>'; ?>
+			<?php echo '<h1 class="pdf-title">'. $pages['hike_summary']['title'] .'</h1>'; ?>
 		</div>
 		
 		<?php if ( $hike_summary ) { ?>
@@ -376,13 +385,19 @@ if ( ah_is_pdf() ) {
 
 <?php
 if ( $show_villages ) {
-	echo '<div id="villages"></div>';
+	echo '<div id="'. $pages['villages']['id']  .'"></div>';
 	
 	foreach( $villages as $i => $s ) {
 		$village_id = (int) $s['village'];
+		if ( ! AH_Village()->is_valid($village_id) ) continue;
+		
 		$hotel_id = $s['hotel'] ?? false;
 		$additional_content = $s['add_text'] ? $s['content'] : '';
 		$first_bookmark = ($i == 0);
+		
+		$subpage = $pages['villages']['children'][ $village_id ] ?? false;
+		$bookmark_title = $pages['villages']['title'];
+		$html_id = $subpage ? $subpage['id'] : ('village-' . $village_id);
 		
 		if ( $village_id ) include( __DIR__ . '/village.php' );
 	}
@@ -390,15 +405,20 @@ if ( $show_villages ) {
 ?>
 
 <?php
-$show_hikes = ! ah_is_array_recursively_empty($hikes);
 if ( $show_hikes ) {
 	echo '<div id="hikes"></div>';
 	
 	foreach( $hikes as $i => $s ) {
 		$post_id = (int) $s['hike'];
+		if ( ! AH_Hike()->is_valid( $post_id ) ) continue;
+		
 		$additional_content = $s['add_text'] ? $s['content'] : '';
 		
 		$first_bookmark = ($i == 0);
+		
+		$subpage = $pages['hikes']['children'][ $post_id ] ?? false;
+		$bookmark_title = $pages['hikes']['title'];
+		$html_id = $subpage ? $subpage['id'] : ('hike-' . $post_id);
 		
 		if ( $post_id ) include( __DIR__ . '/hike.php' );
 	}
@@ -406,23 +426,28 @@ if ( $show_hikes ) {
 ?>
 
 <?php
-if ( $attached_documents ) {
+if ( $show_documents ) {
 	?>
-	<section id="documents" class="pdf-section documents">
+	<section id="<?php echo $pages['documents']['id']; ?>" class="pdf-section documents">
 	
 		<div class="pdf-page page-documents" id="page-documents">
 			
-			<?php ah_display_bookmark( 'Documents', 0 ); ?>
+			<?php ah_display_bookmark( $pages['documents']['title'], 0 ); ?>
 		
 			<?php
-			foreach( $attached_documents as $post_id ) {
+			foreach( $documents as $post_id ) {
+				if ( ! AH_Document()->is_valid( $post_id ) ) continue;
+				
 				$document_url = ah_get_document_redirect_url( $post_id );
 				$date = date('m/d/Y', strtotime( $post_id ) );
 				$image_id = ah_get_document_preview_image( $post_id );
 				
+				$subpage = $pages['documents']['children'][ $post_id ] ?? false;
+				$html_id = $subpage ? $subpage['id'] : ('document-' . $post_id);
+				
 				$title = get_the_title($post_id);
 				?>
-				<div id="document-<?php echo $post_id; ?>" class="section-document document-image document-id-<?php echo $post_id; ?>">
+				<div id="<?php echo $html_id; ?>" class="section-document document-image document-id-<?php echo $post_id; ?>">
 					
 					<?php ah_display_bookmark( $title, 1 ); ?>
 					

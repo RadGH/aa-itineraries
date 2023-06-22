@@ -9,6 +9,9 @@ if ( is_singular( 'ah_itinerary_tpl') ) {
 	AH_Itinerary()->protect_page();
 }
 
-AH_Theme()->load_template( __DIR__ . '/itinerary/itinerary.php' );
+// Get data and pages used on the itinerary
+$itinerary_settings = AH_Itinerary()->get_itinerary_settings( get_the_ID() );
+
+AH_Theme()->load_template( __DIR__ . '/itinerary/itinerary.php', array( 'itinerary_settings' => $itinerary_settings ) );
 
 return;

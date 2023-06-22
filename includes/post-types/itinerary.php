@@ -383,129 +383,235 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		}
 	}
 	
-	public function get_itinerary_data( $itinerary_id ) {
-	
-	}
-	
 	/**
-	 * Generate table of contents for an itinerary, an array of items that can be used in a nested list
-	 * Each item contains: title, link, children
+	 * Get an array of all settings for an itinerary, including custom field data and menu structure (used for table of contents)
 	 *
 	 * @param $itinerary_id
 	 *
-	 * @return array
+	 * @return array[] {
+	 *     @type array $data
+	 *     @type array $pages
+	 * }
 	 */
-	public function get_table_of_contents( $itinerary_id ) {
-		if ( get_post_type( $itinerary_id ) != $this->get_post_type() ) return array();
+	public function get_itinerary_settings( $itinerary_id ) {
 		
-		$toc_list = array();
+		// schedule is now empty if blank
+		// all_phone_numbers -> phone_numbers
+		// has_phone_numbers removed
+		// menu items had link changed to "id" without #
+		// added show_hikes
+		// added show_documents
+		// attached_documents -> documents
 		
-		// Itinerary
-		$introduction_message = get_field( 'introduction_message', $itinerary_id );
-		$contact_information = get_field( 'contact_information', $itinerary_id );
-		$show_intro_page = ( $introduction_message || $contact_information );
-		if ( $show_intro_page ) {
-			$this->_add_toc_item( $toc_list, 'Introduction', '#intro' );
-		}
+		$data = array();
+		$pages = array();
 		
-		// SCHEDULE
-		$schedule = get_field( 'schedule', $itinerary_id );
-		$departure_information = get_field( 'departure_information', $itinerary_id );
-		$show_schedule_page = ( $schedule || $departure_information );
-		if ( ! $show_intro_page ) $show_schedule_page = true;
-		if ( $show_schedule_page ) {
-			$this->_add_toc_item( $toc_list, 'Schedule', '#schedule' );
-		}
+		// ------------------------------
+		// Data
 		
-		// DIRECTORY
-		$all_phone_numbers = (array) get_field( 'phone_numbers', $itinerary_id ); // title, phone_number, content
-		$has_phone_numbers = ! ah_is_array_recursively_empty( $all_phone_numbers );
-		$country_codes = get_field( 'country_codes', $itinerary_id );
-		$show_directory_page = ( $has_phone_numbers || $country_codes );
-		if ( $show_directory_page ) {
-			$this->_add_toc_item( $toc_list, 'Directory', '#directory' );
-		}
+		// External
+		$data['slug'] = get_post_field( 'post_name', $itinerary_id );
+		$data['logo_id'] = (int) get_field( 'white_logo', 'ah_settings' );
 		
-		// TOUR OVERVIEW
-		$tour_overview = get_field( 'tour_overview', $itinerary_id );
-		$show_tour_overview = ($tour_overview != '');
-		if ( $show_tour_overview ) {
-			$this->_add_toc_item( $toc_list, 'Tour Overview', '#tour-overview' );
-		}
+		// Itinerary Details
+		$data['title'] = get_field( 'title', $itinerary_id );
+		$data['subtitle'] = get_field( 'subtitle', $itinerary_id );
+		$data['introduction_message'] = get_field( 'introduction_message', $itinerary_id );
+		$data['contact_information'] = get_field( 'contact_information', $itinerary_id );
+		$data['date_range'] = get_field( 'date_range', $itinerary_id );
 		
-		// HIKE SUMMARY
-		$hike_summary = ah_get_hike_summary( get_the_ID() );
-		$show_hike_summary = ($hike_summary != '' );
-		if ( $show_hike_summary ) {
-			$this->_add_toc_item( $toc_list, 'Hike Summary', '#hike-summary' );
-		}
+		// [repeater] schedule: column_1, column_2, column_3
+		$data['schedule'] = (array) get_field( 'schedule', $itinerary_id );
+		if ( ah_is_array_recursively_empty($data['schedule']) ) $data['schedule'] = array();
 		
-		// Villages
-		$villages = get_field( 'villages', $itinerary_id );
-		$show_villages = ! ah_is_array_recursively_empty($villages);
-		if ( $show_villages ) {
-			$this->_add_toc_item( $toc_list, 'Villages', '#villages', $village_list );
-			
-			foreach( $villages as $s ) {
+		$data['departure_information'] = get_field( 'departure_information', $itinerary_id );
+		
+		// [repeater] phone_numbers: title, phone_number, content
+		$data['phone_numbers'] = (array) get_field( 'phone_numbers', $itinerary_id );
+		if ( ah_is_array_recursively_empty($data['phone_numbers']) ) $data['phone_numbers'] = array();
+		
+		$data['country_codes'] = get_field( 'country_codes', $itinerary_id );
+		
+		$data['tour_overview'] = get_field( 'tour_overview', $itinerary_id );
+		
+		// Hike Summary
+		$data['hike_summary'] = ah_get_hike_summary( $itinerary_id );
+		
+		// Itinerary - Villages
+		// [repeater] villages: village, hotel, add_text, content
+		$data['villages'] = (array) get_field( 'villages', $itinerary_id );
+		if ( ah_is_array_recursively_empty($data['villages']) ) $data['villages'] = array();
+		
+		// Itinerary - Hikes
+		// [repeater] hikes: hike, add_text, content
+		$data['hikes'] = (array) get_field( 'hikes', $itinerary_id );
+		if ( ah_is_array_recursively_empty($data['hikes']) ) $data['hikes'] = array();
+		
+		// Itinerary - Documents
+		$data['documents'] = (array) get_field( 'attached_documents', $itinerary_id );
+		if ( ah_is_array_recursively_empty($data['documents']) ) $data['documents'] = array();
+		
+		// ------------------------------
+		// Pages
+		$pages['introduction'] = $this->add_itinerary_page(
+			'Introduction',
+			'introduction',
+			(bool) ( $data['introduction_message'] || $data['contact_information'] )
+		);
+		
+		$pages['schedule'] = $this->add_itinerary_page(
+			'Schedule',
+			'schedule',
+			(bool) ( $data['schedule'] || $data['departure_information'] || ! $pages['introduction']['enabled'] )
+		);;
+		
+		$pages['directory'] = $this->add_itinerary_page(
+			'Directory',
+			'directory',
+			(bool) ( $data['phone_numbers'] || $data['country_codes'] )
+		);;
+		
+		$pages['tour_overview'] = $this->add_itinerary_page(
+			'Tour Overview',
+			'tour-overview',
+			(bool) ( $data['tour_overview'] )
+		);;
+		
+		$pages['hike_summary'] = $this->add_itinerary_page(
+			'Hike Summary',
+			'hike-summary',
+			(bool) ( $data['hike_summary'] )
+		);;
+		
+		$pages['villages'] = $this->add_itinerary_page(
+			'Villages',
+			'villages',
+			(bool) ( $data['villages'] )
+		);;
+		
+		$pages['hikes'] = $this->add_itinerary_page(
+			'Hikes',
+			'hikes',
+			(bool) ( $data['hikes'] )
+		);;
+		
+		$pages['documents'] = $this->add_itinerary_page(
+			'Documents',
+			'documents',
+			(bool) ( $data['documents'] )
+		);;
+		
+		// Pages - Village Submenu
+		if ( $pages['villages']['enabled'] ) {
+			foreach( $data['villages'] as $s ) {
 				$village_id = (int) $s['village'];
+				if ( ! $village_id ) continue;
+				
 				$title = get_field( 'village_name', $village_id ) ?: get_the_title( $village_id );
-				$link = '#village-' . esc_attr(get_post_field( 'post_name', $village_id ));
-				$this->_add_toc_item( $village_list['children'], $title, $link );
+				$id = 'village-' . esc_attr(get_post_field( 'post_name', $village_id ));
+				$pages['villages']['children'][ $village_id ] = $this->add_itinerary_page( $title, $id );
 			}
 		}
 		
-		
-		// Hikes
-		$hikes = get_field( 'hikes', $itinerary_id );
-		$show_hikes = ! ah_is_array_recursively_empty($hikes);
-		if ( $show_hikes ) {
-			$this->_add_toc_item( $toc_list, 'Hikes', '#hikes', $hike_list );
-			
-			foreach( $hikes as $s ) {
+		// Pages - Hikes Submenu
+		if ( $pages['hikes']['enabled'] ) {
+			foreach( $data['hikes'] as $s ) {
 				$hike_id = (int) $s['hike'];
-				$title = get_the_title( $hike_id );
-				$link = '#hike-' . esc_attr(get_post_field( 'post_name', $hike_id ));
-				$this->_add_toc_item( $hike_list['children'], $title, $link );
+				if ( ! $hike_id ) continue;
+				
+				$title = get_field( 'hike_name', $hike_id ) ?: get_the_title( $hike_id );
+				$id = 'hike-' . esc_attr(get_post_field( 'post_name', $hike_id ));
+				$pages['hikes']['children'][ $hike_id ] = $this->add_itinerary_page( $title, $id );
 			}
 		}
 		
-		
-		// Documents
-		$attached_documents = get_field( 'attached_documents', $itinerary_id );
-		
-		if ( $attached_documents ) {
-			$this->_add_toc_item( $toc_list, 'Documents', '#documents', $document_list );
-			
-			foreach( $attached_documents as $document_id ) {
-				$title = get_the_title( $document_id );
-				$link = '#document-' . $document_id;
-				$this->_add_toc_item( $document_list['children'], $title, $link );
+		// Pages - Documents Submenu
+		if ( $pages['documents']['enabled'] ) {
+			// Note: Documents are not a repeater, just an array of post ids
+			foreach( $data['documents'] as $document_id ) {
+				if ( ! $document_id ) continue;
+				
+				$title = get_field( 'document_name', $document_id ) ?: get_the_title( $document_id );
+				$id = 'document-' . esc_attr(get_post_field( 'post_name', $document_id ));
+				$pages['documents']['children'][ $document_id ] = $this->add_itinerary_page( $title, $id );
 			}
 		}
 		
-		return $toc_list;
+		return array(
+			'data' => $data,
+			'pages' => $pages,
+		);
 	}
 	
 	/**
-	 * Add an item to the table of contents, @see get_table_of_contents()
+	 * Add a page used in @see get_itinerary_settings()
 	 *
-	 * @internal
+	 * @param string $title
+	 * @param string $id
+	 * @param bool $enabled
 	 *
-	 * @param $list
-	 * @param $title
-	 * @param $link
-	 * @param $new_item
+	 * @return array
+	 */
+	private function add_itinerary_page( $title, $id, $enabled = true ) {
+		return array(
+			'title' => (string) $title,
+			'id' => (string) $id,
+			'enabled' => (bool) $enabled,
+			'children' => array(),
+		);
+	}
+	
+	/**
+	 * Displays a list of <li> menu items (without <ul>) for the table of contents
+	 *
+	 * @param array $pages
 	 *
 	 * @return void
 	 */
-	public function _add_toc_item( &$list, $title, $link, &$new_item = array() ) {
-		$new_item = array(
-			'title' => $title,
-			'link' => $link,
-			'children' => array(),
-		);
+	public function display_table_of_contents( $pages ) {
+		foreach( $pages as $p ) {
+			$this->_display_toc_item( $p, 0 );
+		}
+	}
+	
+	/**
+	 * Display a single table of contents item, and recurse for children items
+	 *
+	 * @param $item
+	 *
+	 * @return void
+	 */
+	public function _display_toc_item( $item ) {
+		$title = $item['title'];
+		$id = $item['id'];
+		$enabled = $item['enabled'];
+		$children = $item['children'];
+		if ( ! $enabled ) return;
 		
-		$list[] = &$new_item;
+		$classes = 'menu-item';
+		if ( $children ) $classes .= ' menu-item-has-children';
+		
+		?>
+		<li class="<?php echo esc_attr( $classes ); ?>">
+			
+			<a href="#<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $title ); ?></a>
+			
+			<?php
+			if ( $children ) {
+				?>
+				<ul class="sub-menu">
+					<?php
+					foreach( $children as $child_item ) {
+						$this->_display_toc_item( $child_item );
+					}
+					?>
+				</ul>
+				<?php
+			}
+			?>
+		
+		</li>
+		<?php
 	}
 	
 	// Show meta box

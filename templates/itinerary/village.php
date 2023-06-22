@@ -10,6 +10,10 @@ if ( !isset($first_bookmark) ) $first_bookmark = false;
 
 $slug = get_post_field( 'post_name', $village_id );
 
+// Data from itinerary.php. Not used on village single page template.
+if ( !isset($html_id) ) $html_id = 'village-' . $slug;
+if ( !isset($bookmark_title) ) $bookmark_title = 'Villages';
+
 $title = get_field( 'village_name', $village_id ) ?: get_the_title( $village_id );
 $intro = get_field( 'village_intro', $village_id );
 $details = get_field( 'around_the_village', $village_id );
@@ -52,14 +56,15 @@ if ( ah_is_pdf() ) {
 }
 ?>
 
-<section id="village-<?php echo esc_attr($slug); ?>" class="pdf-section village village-<?php echo esc_attr($slug); ?> village-id-<?php echo $village_id; ?>">
+<section id="<?php echo esc_attr($html_id); ?>" class="pdf-section village village-<?php echo esc_attr($slug); ?> village-id-<?php echo $village_id; ?>">
 	
 	<div class="pdf-page" id="village-main-<?php echo $village_id; ?>">
 	
 	<?php if ( $first_bookmark ) { ?>
-		<?php ah_display_bookmark( 'Villages', 0 ); ?>
+		<?php ah_display_bookmark( $bookmark_title, 0 ); ?>
 	<?php } ?>
-		<?php ah_display_bookmark( $title, 1 ); ?>
+	
+	<?php ah_display_bookmark( $title, 1 ); ?>
 	
 	<?php if ( $title || $hotel_name ) { ?>
 	<div class="section-heading village-heading">
@@ -90,7 +95,7 @@ if ( ah_is_pdf() ) {
 	
 	<?php if ( $details ) { ?>
 	<div class="section-content around-the-village">
-		<?php echo '<h2>In and Around ', $title, '</h2>'; ?>
+		<?php echo '<h2 class="pdf-subtitle">In and Around ', $title, '</h2>'; ?>
 		
 		<?php echo wpautop( $details ); ?>
 		

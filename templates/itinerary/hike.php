@@ -3,10 +3,13 @@
 // These can be overwritten, see content/itinerary.php
 if ( !isset($post_id) ) $post_id = get_the_ID();
 if ( !isset($additional_content) ) $additional_content = false;
-
 if ( !isset($first_bookmark) ) $first_bookmark = false;
 
 $slug = get_post_field( 'post_name', $post_id );
+
+// Data from itinerary.php. Not used on hike single page template.
+if ( !isset($html_id) ) $html_id = 'hike-' . $slug;
+if ( !isset($bookmark_title) ) $bookmark_title = 'Hikes';
 
 $title = get_field( 'hike_name', $post_id ) ?: get_the_title( $post_id );
 $summary = get_field( 'summary', $post_id );
@@ -106,7 +109,7 @@ if ( ah_is_pdf() ) {
 	<?php
 }
 ?>
-<section id="hike-<?php echo esc_attr($slug); ?>" class="pdf-section hike hike-<?php echo esc_attr($slug); ?> hike-id-<?php echo $post_id; ?>">
+<section id="<?php echo esc_attr($html_id); ?>" class="pdf-section hike hike-<?php echo esc_attr($slug); ?> hike-id-<?php echo $post_id; ?>">
 	
 	<?php
 	$show_hike_page = ( $summary || $link_items || $elevation_diagram || $content );
@@ -115,7 +118,7 @@ if ( ah_is_pdf() ) {
 	<div class="pdf-page page-hike" id="page-hike-main-<?php echo esc_attr($slug); ?>">
 		
 		<?php if ( $first_bookmark ) { ?>
-			<?php ah_display_bookmark( 'Hikes', 0 ); ?>
+			<?php ah_display_bookmark( $bookmark_title, 0 ); ?>
 		<?php } ?>
 		
 		<?php ah_display_bookmark( $title, 1 ); ?>
