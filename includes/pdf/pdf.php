@@ -21,30 +21,6 @@ class Class_AH_PDF {
 			$this->use_preview = true;
 		}
 		
-		// https://alpinehikerdev.wpengine.com/?preview_pdf_fonts
-		if ( isset($_GET['preview_pdf_fonts']) ) {
-			add_action( 'init', array( $this, 'preview_pdf_fonts' ) );
-		}
-		
-		// https://alpinehikerdev.wpengine.com/?preview_test_page
-		if ( isset($_GET['preview_test_page']) ) {
-			add_action( 'init', array( $this, 'preview_test_page' ) );
-		}
-		
-	}
-	
-	// https://alpinehikerdev.wpengine.com/?preview_pdf_fonts
-	public function preview_pdf_fonts() {
-		$html = file_get_contents( AH_PATH . '/assets/fonts/fonts.html' );
-		
-		$this->generate_with_wkhtmltopdf_api( $html );
-	}
-	
-	// https://alpinehikerdev.wpengine.com/?preview_test_page
-	public function preview_test_page() {
-		$html = file_get_contents( AH_PATH . '/assets/fonts/test.html' );
-		
-		$this->generate_with_wkhtmltopdf_api( $html );
 	}
 	
 	public function generate_from_html( $html, $title, $filename = null, $force_download = false ) {
@@ -57,72 +33,7 @@ class Class_AH_PDF {
 		add_filter( 'intermediate_image_sizes_advanced', '__return_false' );
 		
 		// Generate the PDF
-		// $this->generate_with_wkhtmltopdf_api( $html, $title, $filename, $force_download );
 		$this->generate_with_mpdf( $html, $title, $filename, $force_download ); // old method
-	}
-	
-	private function generate_with_wkhtmltopdf_api( $html, $title = '', $filename = '', $force_download = false ) {
-		
-		// Preview as HTML
-		if ( $this->use_preview ) {
-			echo $html;
-			exit;
-		}
-		
-		$title = $this->format_pdf_title( $title );
-		
-		$filename = $this->format_pdf_filename( $filename, $title );
-		
-		$url = 'https://wkhtmltopdf.radgh.com/';
-		
-		$wkhtml_args = array(
-			'orientation' => 'portrait',
-		);
-		
-		$headers = array();
-		
-		$post_fields = array(
-			'html' => $html,
-			'args' => $wkhtml_args,
-			'filename' => $filename,
-		);
-		
-		$args = array(
-			'headers' => $headers,
-			'body' => $post_fields,
-			'timeout' => 30,
-		);
-		
-		$response = wp_remote_post( $url, $args );
-		
-		if ( wp_remote_retrieve_response_code( $response ) == 200 ) {
-			$body = wp_remote_retrieve_body( $response );
-			
-			$mime = 'application/pdf';
-			$filesize = mb_strlen($body, '8bit'); // 8-bit required for filesize instead of string length
-			
-			ob_clean();
-			
-			header( "Content-type: " . $mime, true, 200 );
-			header( "Content-Transfer-Encoding: Binary" );
-			header( "Content-length: " . $filesize );
-			header( "Pragma: no-cache" );
-			header( "Expires: 0" );
-			header( "Cache-Control: no-store, no-cache, must-revalidate" );
-			header( "Cache-Control: post-check=0, pre-check=0", false );
-			
-			if ( $force_download ) {
-				header( "Content-disposition: attachment;filename=" . esc_attr($filename) );
-			}else{
-				header( "Content-disposition: inline;filename=" . esc_attr($filename) );
-			}
-			
-			echo $body;
-			exit();
-		}
-		
-		pre_dump($response);
-		exit;
 	}
 	
 	public function format_pdf_title( $title ) {
@@ -208,8 +119,14 @@ class Class_AH_PDF {
 						'B' => 'freight-text-pro-bold.ttf',
 						'BI' => 'freight-text-pro-bold-italic.ttf',
 					),
-					'blkad' => array(
-						'R' => 'blkad.ttf',
+					'montserrat' => array(
+						'R' => 'montserrat-regular.ttf',
+						'I' => 'montserrat-italic.ttf',
+						'B' => 'montserrat-bold.ttf',
+						'BI' => 'montserrat-bold-italic.ttf',
+					),
+					'ammer-handwriting' => array(
+						'R' => 'ammer-handwriting-regular.ttf',
 					),
 				),
 			
@@ -278,8 +195,19 @@ class Class_AH_PDF {
 	
 	// Add stylesheet to the PDF (embedded directly, not a link)
 	public function add_mpdf_stylesheet() {
-		$stylesheet = file_get_contents(__DIR__ . '/../../assets/pdf.css');
-		$this->pdf->WriteHTML($stylesheet, 1); // The parameter 1 tells that this is css/style only and no body/html/text
+		$path = realpath(__DIR__ . '/../../assets/pdf.css');
+		if ( file_exists($path) ) {
+			$stylesheet = file_get_contents($path);
+			$this->pdf->WriteHTML($stylesheet, 1); // The parameter 1 tells that this is css/style only and no body/html/text
+		}
+		
+		// Add the editor styles
+		// This adds support for classes like "color-navy" which are available in the Formats dropdown of the visual editor
+		$path = get_template_directory() . '/_static/styles/_admin/editor-styles.min.css';
+		if ( file_exists($path) ) {
+			$stylesheet = file_get_contents($path);
+			$this->pdf->WriteHTML($stylesheet, 1);
+		}
 	}
 	
 }
