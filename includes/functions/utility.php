@@ -256,7 +256,7 @@ function ah_display_image( $image_id, $max_w = 1055, $max_h = 815 ) {
 	if ( !$alt ) $alt = get_the_title($image_id);
 	
 	echo sprintf(
-		'<img src="%s" class="ah-image" width="%d" height="%d" alt="%s">',
+		'<img src="%s" class="ah-image" width="%d" height="%d" alt="%s" loading="lazy">',
 		esc_attr($img_src),
 		intval($img_w),
 		intval($img_h),
