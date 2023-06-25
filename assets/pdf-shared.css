@@ -269,10 +269,6 @@ table.directory-table .column-2 {
 .itinerary-hike-summary ul.hike-list {
 	margin: 0 0 15px;
 }
-
-.itinerary-hike-summary ul.hike-list a {
-	word-wrap: break-word;
-}
 /* End: Hike List */
 
 /* Start: Hikes */

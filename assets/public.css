@@ -800,11 +800,13 @@ ul.menu-dots a::before {
 	border-radius: 100%;
 	background: #ffffff;
 	box-shadow: inset 0 0 0 1px #fff;
-	border: 1px solid #303333;
+	/*border: 1px solid #303333;*/
+	border: 1px solid #966228;
 }
 
 ul.menu-dots li.scroll-target a::before {
-	background: #204f66;
+	/*background: #204f66;*/
+	background: #966228;
 }
 
 ul.menu-dots span {
@@ -822,6 +824,62 @@ ul.menu-dots {
 @media ( max-width: 980px ) {
 	ul.menu-dots {
 		display: block;
+	}
+}
+
+/* Dot menu - show section name when activated */
+li.menu-dot a {
+	display: block;
+	position: relative;
+}
+
+li.menu-dot a span {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	left: 16px;
+	padding: 3px;
+	font-size: 15px;
+	line-height: 1;
+	font-weight: 700;
+	/*color: #204f66;*/
+	color: #966228;
+	background: #fff;
+	border-radius: 3px;
+}
+
+li.menu-dot.scroll-target a span {
+	display: block;
+}
+
+li.menu-dot.scroll-target a span {
+	/* Clip is used to hide the element, and prevent it from being clicked */
+	clip: rect(1px, 1px, 1px, 1px);
+	opacity: 0;
+	animation: fadeInDotText 1.25s linear;
+}
+
+@keyframes fadeInDotText {
+	0% {
+		clip: rect(1px, 1px, 1px, 1px);
+		opacity: 0;
+	}
+	1% {
+		clip: auto;
+	}
+	20% {
+		opacity: 1;
+	}
+
+	90% {
+		opacity: 1;
+	}
+	99% {
+		clip: auto;
+	}
+	100% {
+		clip: rect(1px, 1px, 1px, 1px);
+		opacity: 0;
 	}
 }
 /* End: Itinerary Dots menu */
