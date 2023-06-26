@@ -1,5 +1,6 @@
 <?php
 
+/*
 class Class_AH_Smartsheet_Invoices  {
 	
 	public function __construct() {
@@ -44,7 +45,7 @@ class Class_AH_Smartsheet_Invoices  {
 	 * @param $post_id
 	 *
 	 * @return void
-	 */
+	 *~/
 	public function add_to_queue( $post_id ) {
 		if ( ! AH_Invoice()->is_valid( $post_id ) ) return;
 		
@@ -139,7 +140,7 @@ class Class_AH_Smartsheet_Invoices  {
 	 * @param $post_id
 	 *
 	 * @return null[]
-	 */
+	 *~/
 	public function get_post_cells( $post_id ) {
 		$cells = array(
 			'post_id' => null,
@@ -167,7 +168,7 @@ class Class_AH_Smartsheet_Invoices  {
 	 * @param $name
 	 *
 	 * @return string
-	 */
+	 *~/
 	public function get_cell_value( $post_id, $name ) {
 		switch( $name ) {
 			case 'post_id':
@@ -205,7 +206,7 @@ class Class_AH_Smartsheet_Invoices  {
 	 * @param $post_id
 	 *
 	 * @return void
-	 */
+	 *~/
 	public function on_modified_post( $post_id ) {
 		if ( ! AH_Invoice()->is_valid( $post_id ) ) return;
 		
@@ -218,7 +219,7 @@ class Class_AH_Smartsheet_Invoices  {
 	 * @param $acf_id
 	 *
 	 * @return void
-	 */
+	 *~/
 	public function acf_on_save_post( $acf_id ) {
 		$info = acf_get_post_id_info( $acf_id );
 		if ( $info['type'] != 'post' ) return;
@@ -235,7 +236,7 @@ class Class_AH_Smartsheet_Invoices  {
 	 * @param $field
 	 *
 	 * @return mixed
-	 */
+	 *~/
 	public function acf_on_update_value( $value, $acf_id, $field ) {
 		$info = acf_get_post_id_info( $acf_id );
 		if ( $info['type'] != 'post' ) return $value;
@@ -271,3 +272,4 @@ class Class_AH_Smartsheet_Invoices  {
 	}
 	
 }
+*/

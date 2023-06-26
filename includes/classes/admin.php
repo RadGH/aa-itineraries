@@ -56,17 +56,6 @@ class Class_AH_Admin {
 				'capability'    => 'manage_options',
 			));
 			
-			// Invoices -> Settings
-			acf_add_options_page(array(
-				'page_title' 	=> 'Invoice Settings (ah_invoices)',
-				'menu_title' 	=> 'Settings',
-				'parent_slug' 	=> 'edit.php?post_type=ah_invoice',
-				'post_id'       => 'ah_invoices',
-				'slug'          => 'acf-ah-invoices',
-				'autoload'      => false,
-				'capability'    => 'manage_options',
-			));
-			
 			// Alpine Hikers Settings
 			acf_add_options_page(array(
 				'menu_slug'     => 'acf-ah-settings-parent',
@@ -89,47 +78,6 @@ class Class_AH_Admin {
 				'post_id'     => 'ah_settings',
 				'autoload'      => false,
 			) );
-			
-			// Smartsheet Settings
-			/*
-			acf_add_options_sub_page(array(
-				'parent_slug'   => 'acf-ah-settings',
-				'page_title' 	=> 'Smartsheet Settings (ah_smartsheet)',
-				'menu_title' 	=> 'Smartsheet Settings',
-				'post_id'       => 'ah_smartsheet',
-				'menu_slug'     => 'acf-ah-smartsheet-parent',
-				'capability'    => 'manage_options',
-				'icon_url'      => 'dashicons-smartsheet',
-				'autoload'      => false,
-				'redirect' 		=> true, // True = Use first sub-page instead
-			));
-			*/
-			/*
-			acf_add_options_page(array(
-				'page_title' 	=> 'Smartsheet Settings (ah_smartsheet)',
-				'menu_title' 	=> 'Smartsheet Settings',
-				'post_id'       => 'ah_smartsheet',
-				'menu_slug'     => 'acf-ah-smartsheet-parent',
-				'capability'    => 'manage_options',
-				'icon_url'      => 'dashicons-smartsheet',
-				'autoload'      => false,
-				'redirect' 		=> true, // True = Use first sub-page instead
-			));
-			*/
-			
-			// Smartsheet Settings -> Settings (Duplicate of the above)
-			acf_add_options_sub_page( array(
-				'parent_slug' => 'acf-ah-settings', //'acf-ah-smartsheet-parent',
-				'page_title'  => 'Smartsheet Settings (ah_smartsheet)',
-				'menu_title'  => 'Smartsheet Settings',
-				'capability'  => 'manage_options',
-				'post_id'     => 'ah_smartsheet',
-				'menu_slug'   => 'acf-ah-smartsheet',
-				'autoload'      => false,
-			) );
-			
-			// Smartsheet Settings -> Hotel Info
-			// Moved to: smartsheet-hotel-info.php
 			
 		}
 	}

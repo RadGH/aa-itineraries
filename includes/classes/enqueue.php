@@ -168,7 +168,7 @@ class Class_AH_Enqueue {
 				},
 
 				'screen': {
-					// post-new.php?post_type=ah_invoice == action: add, base: post, id: ah_invoice
+					// post-new.php?post_type=ah_itinerary == action: add, base: post, id: ah_itinerary
 					'action': <?php echo json_encode( $screen['action'] ?? false ); ?>,
 					'base': <?php echo json_encode( $screen['base'] ?? false ); ?>,
 					'id': <?php echo json_encode( $screen['id'] ?? false ); ?>,

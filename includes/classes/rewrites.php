@@ -13,13 +13,6 @@ class Class_AH_Rewrites {
 	
 	public function add_rewrite_rules() {
 		
-		// Account and Invoice pages
-		add_rewrite_rule(
-			'(account/invoice)/([^/]+)?(:/([0-9]+))?/?$',
-			'index.php?post_type=ah_invoice&ah_invoice=$matches[2]&page=&slug=$matches[1]',
-			'top'
-		);
-		
 		// Documents with ability to download
 		add_rewrite_rule(
 			'(document)/([^/]+)?(:/([0-9]+))?/download/?$',
@@ -27,10 +20,17 @@ class Class_AH_Rewrites {
 			'top'
 		);
 		
-		// Smartsheet callback URL
+		// Smartsheet webhook callback URL
 		add_rewrite_rule(
 			'(smartsheet)/([^/]+)?(:/([0-9]+))?/?$',
 			'index.php?pagename=&page=&ah_action=smartsheet_webhook&ah_webhook=$matches[2]',
+			'top'
+		);
+		
+		// Invoices (this is the default slug for the post type, but needed higher priority)
+		add_rewrite_rule(
+			'(account/invoice)/([^/]+)?/?$',
+			'index.php?post_type=ah_invoice&ah_invoice=$matches[2]&page=&slug=$matches[1]',
 			'top'
 		);
 		

@@ -39,6 +39,24 @@ function ah_adjust_date( $offset, $format, $current_time = null ) {
 }
 
 /**
+ * Format a date with standard php date formatting.
+ *
+ * @param string $date    "2019-01-01" or other date-compatible string
+ * @param string $format
+ *
+ * @return string
+ */
+function ah_format_date( $date, $format = 'F j, Y' ) {
+	if ( $date === null ) {
+		$timestamp = current_time( 'timestamp' );
+	}else{
+		$timestamp = strtotime( $date );
+	}
+	
+	return $timestamp > 0 ? date( $format, $timestamp ) : $date;
+}
+
+/**
  * Displays a relative date (eg: 3 days ago) in HTML. Hover to view the actual date.
  *
  * @param string      $date     Formatted date string, must be compatible with strtotime()

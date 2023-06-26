@@ -1,5 +1,4 @@
 <?php
-
 function ah_invoice_merge_tags_shortcode_in_acf( $field ) {
 	// Do not filter when editing the field group
 	if ( acf_is_screen( 'acf-field-group' ) ) return $field;

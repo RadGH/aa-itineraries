@@ -244,7 +244,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		$args['labels']['view_item'] = 'View Itinerary';
 		
 		$args['menu_icon'] = 'dashicons-location-alt';
-		$args['menu_position'] = 22;
+		$args['menu_position'] = 10;
 		
 		$args['publicly_queryable'] = true;
 		$args['rewrite'] = array(

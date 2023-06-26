@@ -26,11 +26,9 @@ function AH_Admin() { return AH_Plugin()->Admin; }
 function AH_Editor() { return AH_Plugin()->Editor; }
 function AH_Enqueue() { return AH_Plugin()->Enqueue; }
 function AH_Rewrites() { return AH_Plugin()->Rewrites; }
-function AH_Reminders() { return AH_Plugin()->Reminders; }
 function AH_Theme() { return AH_Plugin()->Theme; }
 
 function AH_Smartsheet_API() { return AH_Plugin()->Smartsheet_API; }
-function AH_Smartsheet_Invoices() { return AH_Plugin()->Smartsheet_Invoices; }
 function AH_Smartsheet_Webhooks() { return AH_Plugin()->Smartsheet_Webhooks; }
 function AH_Smartsheet_Sheet_Select() { return AH_Plugin()->Smartsheet_Sheet_Select; }
 
@@ -69,11 +67,9 @@ class Class_AH_Plugin {
 	public Class_AH_Editor                     $Editor;
 	public Class_AH_Enqueue                    $Enqueue;
 	public Class_AH_Rewrites                   $Rewrites;
-	public Class_AH_Reminders                  $Reminders;
 	public Class_AH_Theme                      $Theme;
 	
 	public Class_AH_Smartsheet_API             $Smartsheet_API;
-	public Class_AH_Smartsheet_Invoices        $Smartsheet_Invoices;
 	public Class_AH_Smartsheet_Webhooks        $Smartsheet_Webhooks;
 	public Class_AH_Smartsheet_Sheet_Select    $Smartsheet_Sheet_Select;
 	
@@ -152,9 +148,6 @@ class Class_AH_Plugin {
 		require_once( __DIR__ . '/includes/classes/enqueue.php' );
 		$this->Enqueue = new Class_AH_Enqueue();
 		
-		require_once( __DIR__ . '/includes/classes/reminders.php' );
-		$this->Reminders = new Class_AH_Reminders();
-		
 		require_once( __DIR__ . '/includes/classes/theme.php' );
 		$this->Theme = new Class_AH_Theme();
 		
@@ -171,9 +164,6 @@ class Class_AH_Plugin {
 		
 		require_once( __DIR__ . '/includes/smartsheet/sheet-select.php' );
 		$this->Smartsheet_Sheet_Select = new Class_AH_Smartsheet_Sheet_Select();
-		
-		require_once( __DIR__ . '/includes/smartsheet/invoices.php' );
-		$this->Smartsheet_Invoices = new Class_AH_Smartsheet_Invoices();
 		
 		// Smartsheet - Sync utilities
 		require_once( __DIR__ . '/includes/smartsheet/sync.php' );
@@ -226,12 +216,12 @@ class Class_AH_Plugin {
 		// 7. Include other functions
 		require_once( AH_PATH . '/includes/functions/general.php' );
 		require_once( AH_PATH . '/includes/functions/utility.php' );
+		require_once( AH_PATH . '/includes/functions/cleanup-old-theme.php' );
 		
 		// ----------------------------------------
 		// 8. Shortcodes
 		require_once( AH_PATH . '/includes/shortcodes/ah_accordion.php' );
 		require_once( AH_PATH . '/includes/shortcodes/ah_documents.php' );
-		require_once( AH_PATH . '/includes/shortcodes/ah_invoice_merge_tags_preview.php' );
 		require_once( AH_PATH . '/includes/shortcodes/ah_invoices.php' );
 		require_once( AH_PATH . '/includes/shortcodes/ah_itineraries.php' );
 		require_once( AH_PATH . '/includes/shortcodes/ah_login_form.php' );

@@ -1,5 +1,5 @@
 <?php
-
+/*
 class Class_AH_Reminders {
 	
 	public $debug_mode = false;
@@ -304,3 +304,4 @@ class Class_AH_Reminders {
 	}
 	
 }
+*/

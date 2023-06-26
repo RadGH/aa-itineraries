@@ -16,7 +16,7 @@ window.AH_Admin = new (function() {
 
 		// When editing an invoice, disable the post title. It is generated when the invoice is saved.
 		if ( is_post_edit_screen && post_type === 'ah_invoice' ) {
-			o.disable_post_title();
+			o.setup_invoice_post_titles();
 		}
 
 		// When clicking to create or update a (village, hotel, itinerary), change the button appearance
@@ -102,6 +102,7 @@ window.AH_Admin = new (function() {
 	/**
 	 * Make post title readonly, assuming it will be generated when the post gets saved
 	 */
+	/*
 	o.disable_post_title = function() {
 		ah_log( 'AH: Disabling post title' );
 
@@ -111,6 +112,32 @@ window.AH_Admin = new (function() {
 		title_value = title_value.replace( 'Add New', 'New' );
 
 		if ( jQuery('#title').val() === '' && title_value ) jQuery('#title').val( title_value );
+	};
+	*/
+
+	/**
+	 * Make invoices generate a post title automatically based on the invoice number
+	 */
+	o.setup_invoice_post_titles = function() {
+		let $invoice_number = jQuery('#acf-field_6498ac9d1e899');
+		let $post_title = jQuery('#title');
+		let $title_label = jQuery('#title-prompt-text');
+
+		let update_title_placeholder = function() {
+			let invoice_number = $invoice_number.val();
+
+			if ( invoice_number ) {
+				$title_label.text( 'Invoice #' + invoice_number );
+			}else{
+				$title_label.text( 'Invoice' );
+			}
+		};
+
+		$invoice_number.on('change keyup', function() {
+			update_title_placeholder();
+		});
+
+		update_title_placeholder();
 	};
 
 	/**

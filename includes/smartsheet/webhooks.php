@@ -5,19 +5,19 @@ class Class_AH_Smartsheet_Webhooks  {
 	public function __construct() {
 	
 		
-		// Process to generate invoice webhook, for smartsheet support ticket
+		// Process to generate aa_webhook webhook, for smartsheet support ticket
 		//
 		// View saved webhooks
 		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_webhooks_view_all
 		//
-		// Delete "invoice" webhook
-		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_delete_webhook&webhook_action=invoice
+		// Delete "aa_webhook" webhook
+		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_delete_webhook&webhook_action=aa_webhook
 		//
-		// Create "invoice" webhook (not enabled yet)
-		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_add_webhook&sheet_id=7609265092355972&webhook_action=invoice&scope=sheet&title=Invoice
+		// Create "aa_webhook" webhook (not enabled yet)
+		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_add_webhook&sheet_id=7609265092355972&webhook_action=aa_webhook&scope=sheet&title=Aa_Webhook
 		//
-		// Enable "invoice" webhook
-		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_toggle_webhook&webhook_action=invoice&enabled=1
+		// Enable "aa_webhook" webhook
+		// https://alpinehikerdev.wpengine.com/?ah_smartsheet_toggle_webhook&webhook_action=aa_webhook&enabled=1
 		//
 		// Once enabled, a callback is sent that is handled by smartsheet-webhooks.php -> capture_webhook_callback()
 		
@@ -236,7 +236,7 @@ class Class_AH_Smartsheet_Webhooks  {
 	public function ah_smartsheet_webhooks_test_callback() {
 		if ( ! current_user_can('administrator') ) aa_die( __FUNCTION__ . ' is admin only' );
 		
-		$url = site_url('/smartsheet/invoice/');
+		$url = site_url('/smartsheet/aa_webhook/');
 		$challenge = $_GET['challenge'] ?? false;
 		
 		if ( ! $challenge ) {

@@ -154,29 +154,7 @@ Start: Account Menus
 End: Account Menus
 */
 
-/*
-Start: Status indicators --- DISABLED 3/1/2023
-*/
 
-/*
-.ah-invoice-status-indicator {
-	display: inline-block;
-	width: 10px;
-	height: 10px;
-	border-radius: 100%;
-	background: #eee;
-	transform: translateY( -1px );
-	margin-right: 2px;
-}
-
-.ah-invoice-status-indicator.status-awaiting-payment { background: #0d83bc; }
-.ah-invoice-status-indicator.status-processing { background: #bcb30d; }
-.ah-invoice-status-indicator.status-payment-failed { background: #d54f10; }
-.ah-invoice-status-indicator.status-paid { background: #c1c1c1; display: none; }
-*/
-/*
-End: Status indicators
-*/
 
 
 /*
@@ -219,20 +197,6 @@ html .ah-button.button-secondary:active {
 
 /*
 End: Custom buttons
-*/
-
-/*
-Start: Invoices
-*/
-table.ah-invoice-table {
-	width: 100%;
-}
-
-.invoice-additional-details {
-	margin-top: 40px;
-}
-/*
-End: Invoices
 */
 
 /*
@@ -883,3 +847,21 @@ li.menu-dot.scroll-target a span {
 	}
 }
 /* End: Itinerary Dots menu */
+
+
+
+
+/*
+Start: Invoices
+*/
+.invoice-list {
+	display: grid;
+	gap: 30px;
+}
+
+.invoice-title {
+	margin: 0 0 10px;
+}
+/*
+End: Invoices
+*/
