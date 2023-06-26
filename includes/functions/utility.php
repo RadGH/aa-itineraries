@@ -389,9 +389,7 @@ function ah_sanitize_mpdf_img( $img_tag ) {
 		'/ srcset="(.*?)"/',
 	);
 	
-	$img_tag = preg_replace( $removal, '', $img_tag );
-	
-	return $img_tag;
+	return preg_replace( $removal, '', $img_tag );
 }
 
 /**

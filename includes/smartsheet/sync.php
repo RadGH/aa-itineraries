@@ -11,7 +11,7 @@ class Class_AH_Smartsheet_Sync {
 		add_action( 'admin_menu', array( $this, 'register_admin_menus' ), 20 );
 		
 		// Save the values from a "Sync Item" form
-		add_action( 'init', array( $this, 'save_sync_item_data' ) );
+		add_action( 'admin_init', array( $this, 'save_sync_item_data' ) );
 		
 	}
 	

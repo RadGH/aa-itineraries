@@ -12,6 +12,7 @@ class Class_Itinerary_Template_Post_Type extends Class_Abstract_Post_Type {
 		
 		parent::__construct();
 		
+		// Custom page template
 		add_filter( 'single_template', array( $this, 'replace_page_template' ) );
 		
 	}

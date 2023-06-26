@@ -18,8 +18,8 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		// Load itinerary data from template
 		add_action( 'admin_init', array( $this, 'load_from_template' ) );
 		
+		// Custom page template
 		add_filter( 'single_template', array( $this, 'replace_page_template' ) );
-		
 		
 		// Display a <select> to pick a sheet for an itinerary
 		add_action( 'add_meta_boxes', array( $this, 'register_smartsheet_meta_box' ), 5 );
@@ -462,8 +462,41 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		if ( ah_is_array_recursively_empty($data['hikes']) ) $data['hikes'] = array();
 		
 		// Itinerary - Documents
-		$data['documents'] = (array) get_field( 'attached_documents', $itinerary_id );
-		if ( ah_is_array_recursively_empty($data['documents']) ) $data['documents'] = array();
+		$data['documents'] = array();
+		
+		// -- Itinerary Documents
+		$it_docs = get_field( 'itinerary_documents', $itinerary_id );
+		if ( $it_docs ) foreach( $it_docs as $d ) {
+			if ( ! $d['file'] ) continue;
+			
+			$document_title = $d['title'];
+			$image_id = $d['file'];
+			$url = get_attached_file( $image_id );
+			
+			$data['documents'][] = array(
+				'title' => $document_title,
+				'slug' => sanitize_title_with_dashes($document_title),
+				'image_id' => $image_id,
+				'url' => $url,
+			);
+		}
+		
+		// -- Client Documents
+		$cl_docs = get_field( 'attached_documents', $itinerary_id );
+		if ( $cl_docs ) foreach( $cl_docs as $document_id ) {
+			if ( ! AH_Document()->is_valid( $document_id ) ) continue;
+			
+			$document_title = AH_Document()->get_document_title( $document_id );
+			$image_id = ah_get_document_preview_image( $document_id );
+			$url = ah_get_document_link( $document_id );
+			
+			$data['documents'][] = array(
+				'title' => $document_title,
+				'slug' => sanitize_title_with_dashes($document_title),
+				'image_id' => $image_id,
+				'url' => $url,
+			);
+		}
 		
 		// ------------------------------
 		// Pages
@@ -541,13 +574,11 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		
 		// Pages - Documents Submenu
 		if ( $pages['documents']['enabled'] ) {
-			// Note: Documents are not a repeater, just an array of post ids
-			foreach( $data['documents'] as $document_id ) {
-				if ( ! $document_id ) continue;
+			foreach( $data['documents'] as $d ) {
+				$title = $d['title'];
+				$id = 'document-' . $d['slug'];
 				
-				$title = get_field( 'document_name', $document_id ) ?: get_the_title( $document_id );
-				$id = 'document-' . esc_attr(get_post_field( 'post_name', $document_id ));
-				$pages['documents']['children'][ $document_id ] = $this->add_itinerary_page( $title, $id );
+				$pages['documents']['children'][] = $this->add_itinerary_page( $title, $id );
 			}
 		}
 		

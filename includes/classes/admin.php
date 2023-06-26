@@ -22,24 +22,6 @@ class Class_AH_Admin {
 		// Loads notices from the query arg "ah_notice"
 		add_action( 'admin_init', array( $this, 'prepare_url_notices' ) );
 		
-		// Add a test notice
-		// https://alpinehikerdev.wpengine.com/?ah_test_notice
-		if ( isset($_GET['ah_test_notice']) ) add_action( 'init', array( $this, 'ah_test_notice' ) );
-	}
-	
-	/**
-	 * Add a test notice
-	 *
-	 * @return void
-	 */
-	public function ah_test_notice() {
-		if ( ! current_user_can('administrator') ) aa_die( 'ah_test_notice is admin only' );
-		$type = 'success';
-		$message = 'Hello world!' . "\n\n" . 'This is a message.';
-		$data = array( 'first_name' => 'Radley', 'last_name' => 'Sustaire' );
-		$this->add_notice( $type, $message, $data, 'test_notice' );
-		echo 'notice added';
-		exit;
 	}
 	
 	public function register_admin_menus() {

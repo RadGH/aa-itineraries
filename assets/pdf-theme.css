@@ -56,6 +56,12 @@
 	display: none;
 }
 
+/* Start: Space between sections */
+.pdf-section {
+	margin-bottom: 150px;
+}
+/* End: Space between sections */
+
 /* Start: Images */
 .full-page-image {
 }

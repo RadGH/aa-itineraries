@@ -66,7 +66,7 @@ abstract class Class_Abstract_Post_Type {
 	
 	public function __construct() {
 		
-		add_action( 'init', array( $this, 'register_post_type' ), 25 );
+		add_action( 'init', array( $this, 'register_post_type' ), 5 );
 		
 		add_filter( "manage_edit-{$this->post_type}_columns", array( $this, 'customize_columns' ), 50 );
 		

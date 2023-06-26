@@ -43,7 +43,7 @@ class Class_Compare_Field_Values {
 			table.compare-fields td {
 				vertical-align: top;
 				text-align: left;
-				padding: 3px 5px;
+				padding: 6px 5px;
 			}
 
 			table.compare-fields th.field-header {
@@ -58,7 +58,41 @@ class Class_Compare_Field_Values {
 			}
 
 			table.compare-fields .type-repeater .repeater-col-name {
-				opacity: 0.33;
+				min-width: 50px;
+				font-weight: 300;
+				font-size: 12px;
+			}
+
+			table.compare-fields .repeater-col-value {
+				white-space: pre;
+			}
+			
+			table.compare-fields .repeater-col-value > :first-child {
+				margin-top: 0;
+			}
+			table.compare-fields .repeater-col-value > :last-child {
+				margin-bottom: 0;
+			}
+
+			.compare-fields tr.has-new-value.values-changed .field-value.value-new {
+				background-color: #f3f1ea;
+			}
+
+			.compare-fields tr.selected.has-new-value.values-changed .field-value.value-new {
+				background-color: #eaf3ea;
+			}
+			
+			.compare-fields tr.selected.has-new-value .field-value.value-new {
+				color: #109e10;
+			}
+			
+			.compare-fields tr.selected.no-new-value.values-changed .field-value.value-old {
+				color: #9e1010;
+				background-color: #f3eaea;
+			}
+			
+			.compare-fields .field-value a {
+				color: inherit;
 			}
 		</style>
 		
@@ -118,7 +152,7 @@ class Class_Compare_Field_Values {
 							
 							$value = $this->new_values[ $field['meta_key'] ];
 							$old_value = $this->old_values[ $field['meta_key'] ];
-							
+
 							$this->display_field( $field, $value, $old_value );
 							
 						}
@@ -136,6 +170,20 @@ class Class_Compare_Field_Values {
 			</div> <!-- .postbox -->
 		
 		</form>
+		
+		<script type="text/javascript">
+		jQuery(function() {
+			jQuery('.compare-fields').on('change click', 'input[type="checkbox"]', function() {
+				let $row = jQuery(this).closest('tr');
+				
+				if ( this.checked ) {
+					$row.addClass('selected');
+				} else {
+					$row.removeClass('selected');
+				}
+			});
+		});
+		</script>
 		<?php
 	}
 	
@@ -200,6 +248,20 @@ class Class_Compare_Field_Values {
 	}
 	
 	/**
+	 * Compare two variables and return true if they match. Strings will ignore different line breaks.
+	 *
+	 * @param $a
+	 * @param $b
+	 *
+	 * @return bool
+	 */
+	private function compare_values( $a, $b ) {
+		$a_str = preg_replace( '/(\r\n|\r|\n)+/', "\n", (string) $a );
+		$b_str = preg_replace( '/(\r\n|\r|\n)+/', "\n", (string) $b );
+		return $a_str === $b_str;
+	}
+	
+	/**
 	 * Display a row of field columns
 	 *
 	 * @param array $field
@@ -216,15 +278,19 @@ class Class_Compare_Field_Values {
 		if ( $row_i !== null ) $field_name .= '[' . $row_i . ']';
 		if ( $col_key !== null ) $field_name .= '[' . $col_key . ']';
 		
-		$values_match = $new_html === $old_html;
+		$values_match = $this->compare_values( $new_html, $old_html);
+		
+		$checked = false;
+		if ( $new_html && ! $values_match ) $checked = true;
 		
 		$classes  = 'key-' . $field['meta_key'];
 		$classes .= ' type-' . $field['type'];
+		$classes .= $values_match ? ' values-match' : ' values-changed';
+		$classes .= $old_html ? ' has-old-value' : ' no-old-value';
+		$classes .= $new_html ? ' has-new-value' : ' no-new-value';
 		if ( $row_i !== null ) $classes .= ' row-' . $row_i;
 		if ( $col_key !== null ) $classes .= ' col-' . $col_key;
-		if ( $values_match ) $classes .= ' values-match';
-		
-		$checked = !empty($new_html);
+		if ( $checked ) $classes .= ' selected';
 		?>
 		<tr class="<?php echo esc_attr($classes); ?>">
 			<th class="field-title" scope="row">

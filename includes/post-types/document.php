@@ -189,6 +189,18 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 	}
 	
 	/**
+	 * Get the document title
+	 *
+	 * @param $post_id
+	 *
+	 * @return false|string
+	 */
+	public function get_document_title( $post_id = null ) {
+		if ( ! $this->is_valid( $post_id ) ) return false;
+		return get_the_title( $post_id );
+	}
+	
+	/**
 	 * Check if a user has access to a document
 	 *
 	 * @param $post_id

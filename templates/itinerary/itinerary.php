@@ -431,24 +431,27 @@ if ( $show_documents ) {
 			<?php ah_display_bookmark( $pages['documents']['title'], 0 ); ?>
 		
 			<?php
-			foreach( $documents as $post_id ) {
-				if ( ! AH_Document()->is_valid( $post_id ) ) continue;
+			foreach( $documents as $d ) {
+				$title = $d['title'];
+				$html_id = 'document-' . $d['slug'];
+				$image_id = $d['image_id'];
+				$url = $d['url'];
 				
-				$document_url = ah_get_document_redirect_url( $post_id );
-				$date = date('m/d/Y', strtotime( $post_id ) );
-				$image_id = ah_get_document_preview_image( $post_id );
-				
-				$subpage = $pages['documents']['children'][ $post_id ] ?? false;
-				$html_id = $subpage ? $subpage['id'] : ('document-' . $post_id);
-				
-				$title = get_the_title($post_id);
 				?>
-				<div id="<?php echo $html_id; ?>" class="section-document document-image document-id-<?php echo $post_id; ?>">
+				<div id="<?php echo $html_id; ?>" class="section-document">
 					
 					<?php ah_display_bookmark( $title, 1 ); ?>
 					
-					<?php ah_display_document_embed( $post_id ); ?>
+					<?php
+					if ( $url ) echo '<a href="', esc_attr($url), '">';
 					
+					$img = wp_get_attachment_image( $image_id, 'document-embed' );
+					$img = ah_sanitize_mpdf_img( $img );
+					echo $img;
+					
+					if ( $url ) echo '</a>';
+					?>
+				
 				</div>
 				<?php
 			}
