@@ -24,7 +24,7 @@ class Class_Document_Post_Type extends Class_Abstract_Post_Type {
 		add_action( 'acf/save_post', array( $this, 'save_post_separate_multiple_user_id_meta' ), 40 );
 		
 		// Add document categories to account menu
-		add_filter( 'wp_nav_menu_objects', array( $this, 'add_categories_to_account_menu' ), 10, 2 );
+		// add_filter( 'wp_nav_menu_objects', array( $this, 'add_categories_to_account_menu' ), 10, 2 );
 		
 		// Custom page template
 		add_filter( 'single_template', array( $this, 'replace_page_template' ) );

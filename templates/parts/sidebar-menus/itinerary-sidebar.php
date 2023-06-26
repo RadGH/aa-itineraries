@@ -4,8 +4,11 @@
 	
 	<?php
 	if ( isset($itinerary_settings) ) {
-		echo '<li class="separator"></li>';
-	
+		?>
+		
+		<li class="separator"></li>
+		
+		<?php
 		AH_Itinerary()->display_table_of_contents( $itinerary_settings['pages'] );
 	}
 	?>

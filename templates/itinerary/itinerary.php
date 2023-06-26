@@ -51,14 +51,13 @@ $show_hikes = $pages['hikes']['enabled'];
 $show_documents = $pages['documents']['enabled'];
 
 if ( ! ah_is_pdf() ) {
-	// Web page view
+	// Web page view: Show pdf download button
 	?>
 	<div class="ah-pdf-download-button">
-		<a href="<?php echo get_permalink(); ?>/download/" target="download_<?php the_ID(); ?>" class="button">Download PDF</a>
+		<a href="<?php echo get_permalink(); ?>/download/" target="download_<?php the_ID(); ?>" class="button">Download as PDF</a>
 	</div>
 	<?php
 }
-
 
 if ( ah_is_pdf() ) {
 	// PDF view
@@ -201,18 +200,11 @@ if ( ah_is_pdf() ) {
 		
 		<?php ah_display_bookmark( $pages['introduction']['title'], 0 ); ?>
 		
-		<?php if ( $title && !ah_is_pdf() ) { ?>
-			<div class="section-heading itinerary-heading">
-				<?php echo '<h1 class="pdf-title">', $title, '</h1>'; ?>
-			</div>
-		<?php }else if ( $logo_id ) { ?>
+		<?php if ( ah_is_pdf() && $logo_id ) { ?>
 			<div class="section-logo itinerary-logo">
 				<a href="<?php echo site_url('/'); ?>"><?php ah_display_image( $logo_id, 250, 0 ); ?></a>
 			</div>
 		<?php } ?>
-		
-		<!-- Clear float for download PDF button -->
-		<div style="overflow: hidden;clear: both;"></div>
 		
 		<?php if ( $introduction_message ) { ?>
 			<div class="section-content itinerary-summary">

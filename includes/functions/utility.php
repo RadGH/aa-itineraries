@@ -273,6 +273,14 @@ function ah_display_image( $image_id, $max_w = 1055, $max_h = 815 ) {
 	$alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
 	if ( !$alt ) $alt = get_the_title($image_id);
 	
+	if ( ! ah_is_pdf() ) {
+		// On the web version, we want to scale the image to fit the container
+		$percentage = round($img_h / $img_w * 10000) / 100; // 0.12345 => 12.34%
+		
+		echo '<div class="ah-image-frame">';
+		echo '<div class="ah-image-scale" style="padding-top: '. $percentage .'%">';
+	}
+	
 	echo sprintf(
 		'<img src="%s" class="ah-image" width="%d" height="%d" alt="%s" loading="lazy">',
 		esc_attr($img_src),
@@ -280,6 +288,24 @@ function ah_display_image( $image_id, $max_w = 1055, $max_h = 815 ) {
 		intval($img_h),
 		esc_attr($alt)
 	);
+	
+	if ( ! ah_is_pdf() ) {
+		echo '</div> <!-- /.ah-image-scale --> ';
+		echo '</div> <!-- /.ah-image-frame --> ';
+	}
+}
+
+/**
+ * Displays a full size image at the original aspect ratio
+ *
+ * @param $image_id
+ * @param $max_w
+ * @param $max_h
+ *
+ * @return void
+ */
+function ah_display_scaled_image( $image_id, $max_w = 1055, $max_h = 815 ) {
+	ah_display_image( $image_id, $max_w, $max_h, true );
 }
 
 /**

@@ -170,7 +170,7 @@ class Class_Account_Page_Post_Type extends Class_Abstract_Post_Type {
 	 */
 	public function get_active_menu() {
 		// Get all menus
-		$menus = get_field( 'menus', 'ah_account_page' );
+		$menus = get_field( 'menus', 'ah_settings' );
 		if ( !$menus ) return false;
 		
 		// Loop through each menu, checking the condition. Return the first menu matching that condition.
@@ -223,7 +223,7 @@ class Class_Account_Page_Post_Type extends Class_Abstract_Post_Type {
 	
 	public function register_nav_menus() {
 		// Get all menus
-		$menus = get_field( 'menus', 'ah_account_page' );
+		$menus = get_field( 'menus', 'ah_settings' );
 		if ( !$menus ) return;
 		
 		// Register a menu location for each one

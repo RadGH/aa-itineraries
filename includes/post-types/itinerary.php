@@ -244,7 +244,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		$args['labels']['view_item'] = 'View Itinerary';
 		
 		$args['menu_icon'] = 'dashicons-location-alt';
-		$args['menu_position'] = 10;
+		$args['menu_position'] = 21;
 		
 		$args['publicly_queryable'] = true;
 		$args['rewrite'] = array(
@@ -381,6 +381,20 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		if ( $user_ids ) foreach( $user_ids as $user_id ) {
 			add_post_meta( $post_id, 'assigned_user_id', $user_id );
 		}
+	}
+	
+	/**
+	 * Get the itinerary title from an acf custom field, or the post title if the custom field is empty
+	 *
+	 * @param int|null $post_id
+	 *
+	 * @return string
+	 */
+	public function get_itinerary_title( $post_id = null ) {
+		if ( $post_id === null ) $post_id = get_the_ID();
+		
+		$title = get_field( 'title', $post_id );
+		return $title ?: get_the_title($post_id);
 	}
 	
 	/**

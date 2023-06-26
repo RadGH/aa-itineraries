@@ -275,6 +275,10 @@ Start: ACF labels and tidy
 
 .acf-input > p:first-child { margin-top: 0; }
 .acf-input > p:last-child { margin-bottom: 0; }
+
+#acf-group_641b294014d5a .acf-image-uploader .image-wrap {
+	max-width: 300px !important;
+}
 /*
 End: ACF labels and tidy
 */

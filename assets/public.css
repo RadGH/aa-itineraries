@@ -715,10 +715,10 @@ End: Grid content layout
 	position: relative;
 }
 .scroll-tracking-menu .menu-item > a::before {
+	content: '\00276f ';
 	position: absolute;
 	right: 100%;
 	margin-right: 5px;
-	content: '❯ ';
 	font-family: Arial, sans-serif;
 	display: none;
 }
@@ -759,18 +759,17 @@ ul.menu-dots a {
 ul.menu-dots a::before {
 	content: '';
 	display: block;
-	width: 12px;
-	height: 12px;
+	width: 8px;
+	height: 8px;
 	border-radius: 100%;
 	background: #ffffff;
-	box-shadow: inset 0 0 0 1px #fff;
-	/*border: 1px solid #303333;*/
-	border: 1px solid #966228;
+	border: 1px solid #303333;
+	/*border: 1px solid #966228;*/
 }
 
 ul.menu-dots li.scroll-target a::before {
-	/*background: #204f66;*/
-	background: #966228;
+	background: #303333;
+	/*background: #966228;*/
 }
 
 ul.menu-dots span {
@@ -807,21 +806,21 @@ li.menu-dot a span {
 	line-height: 1;
 	font-weight: 700;
 	/*color: #204f66;*/
-	color: #966228;
-	background: #fff;
+	color: #333;
 	border-radius: 3px;
 }
 
+/*
 li.menu-dot.scroll-target a span {
 	display: block;
 }
 
 li.menu-dot.scroll-target a span {
-	/* Clip is used to hide the element, and prevent it from being clicked */
 	clip: rect(1px, 1px, 1px, 1px);
 	opacity: 0;
 	animation: fadeInDotText 1.25s linear;
 }
+*/
 
 @keyframes fadeInDotText {
 	0% {
@@ -864,4 +863,21 @@ Start: Invoices
 }
 /*
 End: Invoices
+*/
+
+/*
+Start: Scaled images
+*/
+.ah-image-scale {
+	position: relative;
+	text-align: left;
+}
+
+.ah-image-scale img {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+/*
+End: Scaled images
 */

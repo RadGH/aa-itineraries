@@ -46,6 +46,7 @@ class Class_AH_Admin {
 		if ( function_exists('acf_add_options_page') ) {
 			
 			// Account Pages -> Settings
+			/*
 			acf_add_options_page(array(
 				'page_title' 	=> 'Account Page Settings (ah_account_page)',
 				'menu_title' 	=> 'Settings',
@@ -55,6 +56,7 @@ class Class_AH_Admin {
 				'autoload'      => false,
 				'capability'    => 'manage_options',
 			));
+			*/
 			
 			// Alpine Hikers Settings
 			acf_add_options_page(array(

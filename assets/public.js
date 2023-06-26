@@ -260,7 +260,7 @@ window.AH_Public = new (function() {
 			activeMenuDotItem.classList.add('scroll-target');
 		}, {
 			rootMargin: '-60px 0px', // negative margin = highlight the menu after this far in the viewport
-			threshold: [0, 0.5] // 0 = trigger when any amount is visible, 1 = trigger when 100% in viewport
+			threshold: [0, 0.1, 0.5] // 0 = trigger when any amount is visible, 1 = trigger when 100% in viewport
 		});
 
 		// Create separate list of menu dots, used as dot navigation on mobile

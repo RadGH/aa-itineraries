@@ -52,6 +52,10 @@
 	}
 }
 
+.pdf-section.itinerary .section-heading {
+	display: none;
+}
+
 /* Start: Images */
 .full-page-image {
 }
