@@ -280,7 +280,7 @@ class Class_Sync_Itinerary_Fields {
 		$start_village = AH_Village()->get_village_name( $start_hotel['village_id'] );
 		if ( ! $start_village ) {
 			if ( $start_village['hotel_name'] ) {
-				$this->add_warning( '[Subtitle] Start hotel does not exist on the site: "'. $end_hotel['hotel_name'] . '"', $end_hotel['village_id'] );
+				$this->add_warning( '[Subtitle] Start hotel does not exist on the site: "'. $end_hotel['hotel_name'] . '". Try <a href="admin.php?page=ah-smartsheet-villages-and-hotels">syncing the hotel</a> first.', $end_hotel['village_id'] );
 			}else{
 				$this->add_warning( '[Subtitle] Start hotel name is invalid', $end_hotel['village_id'] );
 			}
@@ -291,7 +291,7 @@ class Class_Sync_Itinerary_Fields {
 		$end_village = AH_Village()->get_village_name( $end_hotel['village_id'] );
 		if ( ! $end_village ) {
 			if ( $end_hotel['hotel_name'] ) {
-				$this->add_warning( '[Subtitle] End hotel does not exist on the site: "'. $end_hotel['hotel_name'] . '"', $end_hotel['village_id'] );
+				$this->add_warning( '[Subtitle] End hotel does not exist on the site: "'. $end_hotel['hotel_name'] . '". Try <a href="admin.php?page=ah-smartsheet-villages-and-hotels">syncing the hotel</a> first.', $end_hotel['village_id'] );
 				$end_village = $end_hotel['village_name'];
 			}else{
 				$this->add_warning( '[Subtitle] End hotel name is invalid', $end_hotel['village_id'] );
@@ -399,7 +399,7 @@ class Class_Sync_Itinerary_Fields {
 			$output[] = $hotel_name;
 		}else{
 			$output[] = '[Missing Hotel: "' . $hotel['hotel_name'] . '"]';
-			$this->add_warning( '[Schedule]['. $i .'][Column 2] The hotel provided in Smartsheet does not yet exist on this website: "'. $hotel['hotel_name'] .'"' );
+			$this->add_warning( '[Schedule]['. $i .'][Column 2] The hotel provided in Smartsheet does not yet exist on this website: "'. $hotel['hotel_name'] .'". Try <a href="admin.php?page=ah-smartsheet-villages-and-hotels">syncing the hotel</a> first.' );
 		}
 		
 		// breakfast & dinner included
@@ -416,8 +416,10 @@ class Class_Sync_Itinerary_Fields {
 		$room_name = AH_Smartsheet_Sync_Rooms_And_Meals()->get_room( $room_code, 'room_name' );
 		if ( $room_name ) {
 			$output[] = $room_name;
+		}else if ( $room_code ) {
+			$this->add_warning( '[Schedule]['. $i .'][Column 2] Room code "'. $room_code .'" not found for hotel "'. $hotel['hotel_name'] .'". Try <a href="admin.php?page=ah-smartsheet-rooms-and-meals">syncing the room codes</a> first.' );
 		}else{
-			$this->add_warning( '[Schedule]['. $i .'][Column 2] No rooms for hotel "'. $hotel['hotel_name'] .'"' );
+			$this->add_warning( '[Schedule]['. $i .'][Column 2] No rooms entered for hotel "'. $hotel['hotel_name'] .'"' );
 		}
 		
 		// luggage: yes
@@ -456,11 +458,11 @@ class Class_Sync_Itinerary_Fields {
 			$hotel_id = $hotel['hotel_id'] ?: false;
 			
 			if ( ! $village_id ) {
-				$this->add_warning( '[Villages]['. $i .'] Village not found: "'. esc_html($hotel['village_name']) .'"' );
+				$this->add_warning( '[Villages]['. $i .'] Village not found: "'. esc_html($hotel['village_name']) .'". Try <a href="admin.php?page=ah-smartsheet-villages-and-hotels">syncing the village</a> first.' );
 			}
 			
 			if ( ! $hotel_id ) {
-				$this->add_warning( '[Villages]['. $i .'] Hotel not found: "'. esc_html($hotel['hotel_name']) .'"' );
+				$this->add_warning( '[Villages]['. $i .'] Hotel not found: "'. esc_html($hotel['hotel_name']) .'". Try <a href="admin.php?page=ah-smartsheet-villages-and-hotels">syncing the hotel</a> first.' );
 			}
 			
 			$item = array(
@@ -484,7 +486,7 @@ class Class_Sync_Itinerary_Fields {
 			$hike_id = AH_Smartsheet_Sync_Hikes()->get_hike_by_smartsheet_id( $hike_name );
 			
 			if ( $hike_name && ! $hike_id ) {
-				$this->add_warning( '[Hikes]['. $i .'] Hike not found: "'. esc_html($hike_name) .'"' );
+				$this->add_warning( '[Hikes]['. $i .'] Hike not found: "'. esc_html($hike_name) .'". Try <a href="admin.php?page=ah-smartsheet-hikes">syncing the hike</a> first.' );
 			}
 			
 			$list[] = array(

@@ -193,6 +193,8 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 	 * @return array
 	 */
 	public function find_rows_by_property( $value, $key = 'value' ) {
+		if ( ! $value ) return array();
+		
 		return $this->find_row_by_property( $value, $key, true );
 	}
 	
@@ -341,7 +343,9 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		
 		$compare = new Class_Compare_Field_Values( $post_id, $fields );
 		
-		$compare->display_form();
+		$debug_info = compact( 'client', 'hotels', 'dates', 'hikes' );
+		
+		$compare->display_form($debug_info );
 		
 	}
 	

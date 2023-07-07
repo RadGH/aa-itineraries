@@ -24,7 +24,7 @@ class Class_Compare_Field_Values {
 		$this->old_values = $fields->get_old_values();
 	}
 	
-	public function display_form() {
+	public function display_form( $debug_info = null ) {
 		$field_list = $this->fields->get_fields();
 		?>
 		<style>
@@ -126,6 +126,25 @@ class Class_Compare_Field_Values {
 							echo '</div>';
 						}
 						?>
+						
+						<?php if ( $debug_info ) { ?>
+						<div class="ah-accordion ah-collapsed" id="debugging-information">
+							<div class="ah-handle">
+								<a href="#debugging-information">Debugging Information</a>
+							</div>
+							<div class="ah-content">
+								<?php
+								foreach( $debug_info as $key => $data ) {
+									echo '<h3>', esc_html($key), '</h3>';
+									echo '<pre>';
+									echo esc_html( print_r( $data, true ) );
+									echo '</pre>';
+								}
+								?>
+							</div>
+						</div>
+						<?php } ?>
+						
 					</div>
 				</div>
 				<?php

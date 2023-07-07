@@ -1,9 +1,16 @@
 <?php
 
+// [ah_itineraries]
+
+// [ah_has_itineraries] ... [/ah_has_itineraries]
+// [ah_no_itineraries] ... [/ah_no_itineraries]
+
 function shortcode_ah_itineraries( $atts, $content = '', $shortcode_name = 'ah_itineraries' ) {
 	$atts = shortcode_atts(array(
+		'most_recent' => false,
 	), $atts, $shortcode_name);
 	
+	$show_most_recent = $atts['most_recent'] === 'true' || $atts['most_recent'] === '1';
 	$itineraries = AH_Itinerary()->get_user_itineraries();
 	
 	if ( ! $itineraries->have_posts() ) {
@@ -14,7 +21,7 @@ function shortcode_ah_itineraries( $atts, $content = '', $shortcode_name = 'ah_i
 	?>
 	<div class="ah-itineraries">
 		
-		<div class="itinerary-list">
+		<div class="itinerary-list count-<?php echo $itineraries->found_posts; ?>">
 			
 			<?php
 			foreach( $itineraries->posts as $p ) {
@@ -52,6 +59,8 @@ function shortcode_ah_itineraries( $atts, $content = '', $shortcode_name = 'ah_i
 					
 				</div>
 				<?php
+				
+				if ( $show_most_recent ) break;
 			}
 			?>
 			
@@ -62,3 +71,19 @@ function shortcode_ah_itineraries( $atts, $content = '', $shortcode_name = 'ah_i
 	return ob_get_clean();
 }
 add_shortcode( 'ah_itineraries', 'shortcode_ah_itineraries' );
+
+
+function shortcode_ah_has_itineraries( $atts, $content = '', $shortcode_name = 'ah_has_itineraries' ) {
+	$atts = shortcode_atts(array(
+	), $atts, $shortcode_name);
+	
+	$itineraries = AH_Itinerary()->get_user_itineraries();
+	$has_itineraries = $itineraries->have_posts();
+	
+	// reverse logic for [ah_no_itineraries]
+	if ( $shortcode_name == 'ah_no_itineraries' ) $has_itineraries = ! $has_itineraries;
+	
+	return $has_itineraries ? do_shortcode( $content ) : '';
+}
+add_shortcode( 'ah_has_itineraries', 'shortcode_ah_has_itineraries' );
+add_shortcode( 'ah_no_itineraries', 'shortcode_ah_has_itineraries' );

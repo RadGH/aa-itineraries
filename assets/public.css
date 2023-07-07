@@ -607,6 +607,9 @@ End: Grid content layout
 	}
 }
 
+
+/* (Show numbered list of itineraries) */
+/*
 @media ( min-width: 768px ) {
 	.itinerary-list .itinerary-item {
 		position: relative;
@@ -635,6 +638,8 @@ End: Grid content layout
 		text-align: center;
 	}
 }
+*/
+
 /* End: [ah_itinerary] shortcode */
 
 /* Start: button row (used in ah_itinerary shortcode) */
