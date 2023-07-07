@@ -57,13 +57,6 @@
 	color: #fff;
 }
 
-.pdf-page .section-document {
-	margin: 0 0 20px;
-	text-align: center;
-
-	page-break-inside: avoid;
-}
-
 bookmark {
 	display: none;
 }
@@ -276,3 +269,14 @@ ul.hike-link-list {
 	margin: 10px 0;
 }
 /* End: Hikes */
+
+/* Start: Documents */
+.pdf-page .section-document {
+	margin: 0 0 20px;
+	page-break-inside: avoid;
+}
+
+.page-documents .document-content {
+	margin: 10px 0;
+}
+/* End: Documents */

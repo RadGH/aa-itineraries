@@ -57,8 +57,9 @@
 }
 
 /* Start: Space between sections */
+.pdf-page,
 .pdf-section {
-	margin-bottom: 150px;
+	margin-bottom: 200px;
 }
 /* End: Space between sections */
 

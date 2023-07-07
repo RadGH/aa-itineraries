@@ -14,6 +14,11 @@ Start: Theme
 	color: #966228;
 }
 */
+
+pre, dl, table, ul, ol, li, form {
+	margin: 0 0 10px;
+}
+
 /*
 End: Theme
 */
@@ -556,6 +561,10 @@ End: Grid content layout
 */
 
 /* Start: [ah_itinerary] shortcode */
+.ah-itineraries:not(:first-child) {
+	margin-top: 40px;
+}
+
 .itinerary-list .title {
 	margin-bottom: 10px;
 }
@@ -580,7 +589,7 @@ End: Grid content layout
 }
 
 .itinerary-list .itinerary-item:not(:last-child) {
-	margin-bottom: 30px;
+	margin-bottom: 60px;
 }
 
 /* Itinerary list - counter */

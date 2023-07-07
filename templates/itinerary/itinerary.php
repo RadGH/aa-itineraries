@@ -429,13 +429,21 @@ if ( $show_documents ) {
 		<div class="pdf-page page-documents" id="page-documents">
 			
 			<?php ah_display_bookmark( $pages['documents']['title'], 0 ); ?>
-		
+			
+			<div class="section-heading documents-heading">
+				<h1 class="pdf-title"><?php echo $pages['documents']['title']; ?></h1>
+			</div>
+			
 			<?php
 			foreach( $documents as $d ) {
+				/**
+				 * @see Class_Itinerary_Post_Type::get_itinerary_settings()
+				 */
 				$title = $d['title'];
 				$html_id = 'document-' . $d['slug'];
 				$image_id = $d['image_id'];
 				$url = $d['url'];
+				$text = $d['text'];
 				
 				?>
 				<div id="<?php echo $html_id; ?>" class="section-document">
@@ -443,6 +451,18 @@ if ( $show_documents ) {
 					<?php ah_display_bookmark( $title, 1 ); ?>
 					
 					<?php
+					if ( $title ) {
+						?>
+						<h2 class="document-title"><?php echo esc_html($title); ?></h2>
+						<?php
+					}
+					
+					if ( $text ) {
+						?>
+						<div class="document-content"><?php echo wpautop($text); ?></div>
+						<?php
+					}
+					
 					if ( $url ) echo '<a href="', esc_attr($url), '">';
 					
 					$img = wp_get_attachment_image( $image_id, 'document-embed' );

@@ -471,6 +471,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 			
 			$document_title = $d['title'];
 			$image_id = $d['file'];
+			$text = $d['text'];
 			$url = get_attached_file( $image_id );
 			
 			$data['documents'][] = array(
@@ -478,6 +479,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 				'slug' => sanitize_title_with_dashes($document_title),
 				'image_id' => $image_id,
 				'url' => $url,
+				'text' => $text,
 			);
 		}
 		
@@ -489,12 +491,14 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 			$document_title = AH_Document()->get_document_title( $document_id );
 			$image_id = ah_get_document_preview_image( $document_id );
 			$url = ah_get_document_link( $document_id );
+			$text = get_field( 'content', $document_id );
 			
 			$data['documents'][] = array(
 				'title' => $document_title,
 				'slug' => sanitize_title_with_dashes($document_title),
 				'image_id' => $image_id,
 				'url' => $url,
+				'text' => $text,
 			);
 		}
 		
@@ -698,15 +702,32 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		
 		
 		if ( $sheet_url ) {
+			echo '<div id="sync-itinerary-controls">';
 			echo '<p>';
 			$sync_url = AH_Smartsheet_Sync()->get_sync_item_url( $post_id );
-			echo '<a href="'. esc_attr($sync_url) .'" class="button button-secondary" target="_blank">Run Sync</a> ';
+			echo '<a href="'. esc_attr($sync_url) .'" class="button button-secondary">Run Sync</a> ';
 			
 			echo ah_create_html_link( $sheet_url, 'View Spreadsheet' );
 			echo '</p>';
 			
 			$last_sync = get_post_meta( $post_id, 'smartsheet_last_sync', true );
 			echo '<p><span class="ah-last-sync">Last sync: ' . (ah_get_relative_date_html( $last_sync ) ?: '(never)') . '</span></p>';
+			echo '</div>';
+			
+			?>
+			<script type="text/javascript">
+			jQuery(function() {
+				var start_id = <?php echo json_encode($sheet_id); ?>;
+				jQuery('#smartsheet_sheet_id').on('change', function() {
+					var new_id = jQuery(this).val();
+					var changed = start_id !== new_id;
+					
+					// Hide controls if the sheet ID changed
+					jQuery('#sync-itinerary-controls').css( 'display', (changed ? 'none' : 'block') );
+				});
+			});
+			</script>
+			<?php
 		}
 		
 	}

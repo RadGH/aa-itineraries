@@ -176,7 +176,9 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	public function set_custom_post_title( $post_id ) {
 		if ( ! $this->is_valid( $post_id ) ) return;
 		
-		$post = get_post($post_id);
+		// Keep existing post title
+		if ( ! empty($post->post_title) ) return;
+		
 		$invoice_number = $this->get_invoice_number( $post_id );
 		
 		if ( $invoice_number ) {
@@ -186,17 +188,15 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		}
 		
 		// If the title is different, update it
-		if ( $post->post_title !== $post_title ) {
-			$args = array(
-				'ID' => $post_id,
-				'post_title' => $post_title,
-			);
-			
-			// Unhook and re-hook to avoid infinite loop
-			$this->toggle_save_post_hooks(false);
-			wp_update_post($args);
-			$this->toggle_save_post_hooks(true);
-		}
+		$args = array(
+			'ID' => $post_id,
+			'post_title' => $post_title,
+		);
+		
+		// Unhook and re-hook to avoid infinite loop
+		$this->toggle_save_post_hooks(false);
+		wp_update_post($args);
+		$this->toggle_save_post_hooks(true);
 	}
 	
 	/**
