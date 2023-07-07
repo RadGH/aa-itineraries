@@ -89,6 +89,53 @@ function ah_is_pdf_preview() {
 }
 
 /**
+ * Paged itineraries for developers only and must include a page in the url
+ * ATTENTION: THIS IS INCOMPLETE. The menu currently does not link properly and instead uses #itinerary instead of /itinerary/
+ *
+ * @see https://goalpinehikers.wpengine.com/itinerary/buchanan-sync-example/introduction/
+ * @see ah_should_show_itinerary_page()
+ * @deprecated (not actually deprecated, just don't use it until it is ready)
+ *
+ * @return bool
+ */
+function ah_use_paged_itineraries() {
+	$current_page = get_query_var( 'ah_itinerary_page' );
+	if ( ! $current_page ) return false;
+	
+	// Developers only, even if url is provided
+	if ( ! aa_is_developer() ) return false;
+	
+	return true;
+}
+
+/**
+ * Returns true if the itinerary page should be displayed.
+ * ATTENTION: THIS IS INCOMPLETE. The menu currently does not link properly and instead uses #itinerary instead of /itinerary/
+ * @see ah_use_paged_itineraries()
+ * @deprecated (not actually deprecated, just don't use it until it is ready)
+ *
+ * @param $page
+ *
+ * @return bool
+ */
+function ah_should_show_itinerary_page( $page ) {
+	$current_page = get_query_var( 'ah_itinerary_page' );
+	
+	// If paged itineraries is disabled, show all pages
+	if ( ! ah_use_paged_itineraries() ) {
+		return true;
+	}
+	
+	// Parent page must match
+	if ( $page != $current_page ) {
+		return false;
+	}
+	
+	// This is the correct page to show
+	return true;
+}
+
+/**
  * Gets the hike summary for an itinerary
  *
  * @param $itinerary_id

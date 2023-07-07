@@ -13,7 +13,7 @@ margin-right: 30px or 50px;
 @page {
 	even-footer-name: none;
 	odd-footer-name: none;
-	margin: 12mm 16mm 23mm;
+	/*margin: 12mm 16mm 23mm;*/
 	/*sheet-size: 815px 1055px;*/
 }
 
@@ -28,11 +28,17 @@ margin-right: 30px or 50px;
 
 .footer-table {
 	font-size: 14px;
+	border: none;
+	border-collapse: collapse;
+	border-spacing: 0;
+	margin: 0; /* adjust footer offset in pdf.php -> margin_footer */
 }
 
 .footer-table th,
 .footer-table td {
 	vertical-align: bottom;
+	border: none;
+	padding: 0;
 }
 
 .itinerary-contact p {

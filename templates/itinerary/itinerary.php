@@ -190,13 +190,13 @@ if ( ah_is_pdf() ) {
 }
 ?>
 
-<section id="itinerary" class="pdf-section itinerary itinerary-<?php echo esc_attr($slug); ?> itinerary-id-<?php the_ID(); ?>">
+<div id="itinerary" class="itinerary itinerary-<?php echo esc_attr($slug); ?> itinerary-id-<?php the_ID(); ?>">
 	
 	<?php
 	
-	if ( $show_intro_page ) {
+	if ( $show_intro_page && ah_should_show_itinerary_page('introduction') ) {
 	?>
-	<div class="pdf-page" id="<?php echo $pages['introduction']['id']; ?>">
+	<section class="pdf-page" id="<?php echo $pages['introduction']['id']; ?>">
 		
 		<?php ah_display_bookmark( $pages['introduction']['title'], 0 ); ?>
 		
@@ -219,13 +219,13 @@ if ( ah_is_pdf() ) {
 			</div>
 		<?php } ?>
 	
-	</div>
+	</section>
 	<?php } ?>
 	
 	<?php
-	if ( $show_schedule_page ) {
+	if ( $show_schedule_page && ah_should_show_itinerary_page('schedule') ) {
 	?>
-	<div class="pdf-page" id="<?php echo $pages['schedule']['id']; ?>">
+	<section class="pdf-page" id="<?php echo $pages['schedule']['id']; ?>">
 		
 		<?php ah_display_bookmark( $pages['schedule']['title'], 0 ); ?>
 		
@@ -269,15 +269,15 @@ if ( ah_is_pdf() ) {
 		</div>
 		<?php } ?>
 		
-	</div>
+	</section>
 	<?php
 	}
 	?>
 	
 	<?php
-	if ( $show_directory_page ) {
+	if ( $show_directory_page && ah_should_show_itinerary_page('directory') ) {
 	?>
-	<div class="pdf-page" id="<?php echo $pages['directory']['id']; ?>">
+	<section class="pdf-page" id="<?php echo $pages['directory']['id']; ?>">
 		
 		<?php ah_display_bookmark( $pages['directory']['title'], 0 ); ?>
 		
@@ -324,16 +324,16 @@ if ( ah_is_pdf() ) {
 			
 		</div>
 		
-	</div>
+	</section>
 	<?php
 	}
 	?>
 	
 	<?php
-	if ( $show_tour_overview ) {
+	if ( $show_tour_overview && ah_should_show_itinerary_page('tour-overview') ) {
 	?>
-	<div class="pdf-page" id="<?php echo $pages['tour_overview']['id']; ?>">
-		
+	<!-- tour_overview -->
+	<section class="pdf-page" id="<?php echo $pages['tour_overview']['id']; ?>">
 		<?php ah_display_bookmark( $pages['tour_overview']['title'], 0 ); ?>
 		
 		<div class="section-heading itinerary-heading">
@@ -345,17 +345,16 @@ if ( ah_is_pdf() ) {
 				<?php echo wpautop( $tour_overview ); ?>
 			</div>
 		<?php } ?>
-		
-	</div>
+	</section>
 	<?php
 	}
 	?>
 	
 	<?php
-	if ( $show_hike_summary ) {
+	if ( $show_hike_summary && ah_should_show_itinerary_page('hike-summary') ) {
 	?>
-	<div class="pdf-page" id="<?php echo $pages['hike_summary']['id']; ?>">
-		
+	<!-- hike_summary -->
+	<section id="hike-summary" class="pdf-page" id="<?php echo $pages['hike_summary']['id']; ?>">
 		<?php ah_display_bookmark( $pages['hike_summary']['title'], 0 ); ?>
 		
 		<div class="section-heading itinerary-heading">
@@ -367,17 +366,15 @@ if ( ah_is_pdf() ) {
 				<?php echo $hike_summary; ?>
 			</div>
 		<?php } ?>
-		
-	</div>
+	</section>
 	<?php
 	}
 	?>
 
-</section>
 
 <?php
-if ( $show_villages ) {
-	echo '<div id="'. $pages['villages']['id']  .'">';
+if ( $show_villages && ah_should_show_itinerary_page('villages') ) {
+	echo '<div id="'. $pages['villages']['id'] .'"></div>';
 	
 	foreach( $villages as $i => $s ) {
 		$village_id = (int) $s['village'];
@@ -393,14 +390,12 @@ if ( $show_villages ) {
 		
 		if ( $village_id ) include( __DIR__ . '/village.php' );
 	}
-	
-	echo '</div>';
 }
 ?>
 
 <?php
-if ( $show_hikes ) {
-	echo '<div id="'. $pages['hikes']['id']  .'">';
+if ( $show_hikes && ah_should_show_itinerary_page('hikes') ) {
+	echo '<div id="'. $pages['hikes']['id'] .'"></div>';
 	
 	foreach( $hikes as $i => $s ) {
 		$post_id = (int) $s['hike'];
@@ -416,70 +411,27 @@ if ( $show_hikes ) {
 		
 		if ( $post_id ) include( __DIR__ . '/hike.php' );
 	}
-	
-	echo '</div>';
 }
 ?>
 
 <?php
-if ( $show_documents ) {
-	?>
-	<section id="<?php echo $pages['documents']['id']; ?>" class="pdf-section documents">
+if ( $show_documents && ah_should_show_itinerary_page('documents') ) {
+	echo '<div id="'. $pages['documents']['id'] .'"></div>';
 	
-		<div class="pdf-page page-documents" id="page-documents">
-			
-			<?php ah_display_bookmark( $pages['documents']['title'], 0 ); ?>
-			
-			<div class="section-heading documents-heading">
-				<h1 class="pdf-title"><?php echo $pages['documents']['title']; ?></h1>
-			</div>
-			
-			<?php
-			foreach( $documents as $d ) {
-				/**
-				 * @see Class_Itinerary_Post_Type::get_itinerary_settings()
-				 */
-				$title = $d['title'];
-				$html_id = 'document-' . $d['slug'];
-				$image_id = $d['image_id'];
-				$url = $d['url'];
-				$text = $d['text'];
-				
-				?>
-				<div id="<?php echo $html_id; ?>" class="section-document">
-					
-					<?php ah_display_bookmark( $title, 1 ); ?>
-					
-					<?php
-					if ( $title ) {
-						?>
-						<h2 class="document-title"><?php echo esc_html($title); ?></h2>
-						<?php
-					}
-					
-					if ( $text ) {
-						?>
-						<div class="document-content"><?php echo wpautop($text); ?></div>
-						<?php
-					}
-					
-					if ( $url ) echo '<a href="', esc_attr($url), '">';
-					
-					$img = wp_get_attachment_image( $image_id, 'document-embed' );
-					$img = ah_sanitize_mpdf_img( $img );
-					echo $img;
-					
-					if ( $url ) echo '</a>';
-					?>
-				
-				</div>
-				<?php
-			}
-			?>
-			
-		</div>
+	foreach( $documents as $i => $d ) {
+		/**
+		 * @see Class_Itinerary_Post_Type::get_itinerary_settings()
+		 */
+		$title = $d['title'];
+		$html_id = 'document-' . $d['slug'];
+		$image_id = $d['image_id'];
+		$url = $d['url'];
+		$text = $d['text'];
 		
-	</section>
-	<?php
+		$first_bookmark = ($i == 0);
+		$bookmark_title = $pages['documents']['title'];
+		
+		include( __DIR__ . '/document.php' );
+	}
 }
 ?>

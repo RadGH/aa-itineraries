@@ -52,13 +52,8 @@
 	}
 }
 
-.pdf-section.itinerary .section-heading {
-	display: none;
-}
-
 /* Start: Space between sections */
-.pdf-page,
-.pdf-section {
+.pdf-page {
 	margin-bottom: 200px;
 }
 /* End: Space between sections */

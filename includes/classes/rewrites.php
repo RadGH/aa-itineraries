@@ -57,11 +57,25 @@ class Class_AH_Rewrites {
 			'top'
 		);
 		
+		// Itinerary - Separate pages instead of one long scrolling page
+		add_rewrite_rule(
+			'itinerary/([^/]+)/([^/]+)/?$',
+			'index.php?post_type=ah_itinerary&ah_itinerary=$matches[1]&ah_action=view&ah_itinerary_page=$matches[2]',
+			'top'
+		);
+		
 	}
 	
 	public function add_query_vars($query_vars) {
+		// Shared
 		$query_vars[] = 'ah_action';
+		
+		// Webhooks
 		$query_vars[] = 'ah_webhook';
+		
+		// Itineraries
+		$query_vars[] = 'ah_itinerary_page';
+		
 		return $query_vars;
 	}
 	

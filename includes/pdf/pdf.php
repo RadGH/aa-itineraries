@@ -151,20 +151,22 @@ class Class_AH_PDF {
 			
 			// Margins
 			/*
-			'margin_left'   => 0, // 15,
-			'margin_right'  => 0, // 15,
-			'margin_top'    => 0, // 16,
-			'margin_bottom' => 0, // 16,
-			'margin_header' => 0, // 9,
-			'margin_footer' => 0, // 9,
-			*/
-			
 			'margin_left'   => 16,
 			'margin_right'  => 16,
 			'margin_top'    => 12,
 			'margin_bottom' => 12,
 			'margin_header' => 12,
 			'margin_footer' => 12,
+			*/
+			
+			'margin_left'   => 12,
+			'margin_right'  => 12,
+			
+			'margin_top'    => 12,
+			'margin_header' => 0, // not used yet
+			
+			'margin_bottom' => 18, // changes the page size, does not effect the footer
+			'margin_footer' => 12, // moves the footer, but does not change the page size
 			
 		));
 	}

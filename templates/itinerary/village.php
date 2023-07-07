@@ -37,7 +37,7 @@ if ( ah_is_pdf() ) {
 	?>
 	<htmlpagefooter name="footer_village_main_<?php echo $village_id; ?>" style="display:none">
 		<table class="footer-table" width="100%"><tr>
-				<td width="50%"><?php echo $title; ?></td>
+				<td width="50%"><?php echo 'Village: '. $title; ?></td>
 				<td width="50%" align="right">{PAGENO}</td>
 			</tr></table>
 	</htmlpagefooter>
@@ -56,6 +56,7 @@ if ( ah_is_pdf() ) {
 }
 ?>
 
+<!-- village: <?php echo $slug; ?> -->
 <section id="<?php echo esc_attr($html_id); ?>" class="pdf-section village village-<?php echo esc_attr($slug); ?> village-id-<?php echo $village_id; ?>">
 	
 	<div class="pdf-page" id="village-main-<?php echo $village_id; ?>">

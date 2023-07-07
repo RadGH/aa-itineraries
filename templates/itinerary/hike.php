@@ -41,7 +41,7 @@ if ( ah_is_pdf() ) {
 	<!-- Main -->
 	<htmlpagefooter name="footer_hike_main_<?php echo $post_id; ?>" style="display:none">
 		<table class="footer-table" width="100%"><tr>
-				<td width="50%"><?php echo $title; ?></td>
+				<td width="50%"><?php echo 'Hike: '. $title; ?></td>
 				<td width="50%" align="right">{PAGENO}</td>
 			</tr></table>
 	</htmlpagefooter>
@@ -109,7 +109,9 @@ if ( ah_is_pdf() ) {
 	<?php
 }
 ?>
-<section id="<?php echo esc_attr($html_id); ?>" class="pdf-section hike hike-<?php echo esc_attr($slug); ?> hike-id-<?php echo $post_id; ?>">
+
+<!-- hike: <?php echo $slug; ?> -->
+<section id="<?php echo esc_attr($html_id); ?>" class="hike hike-<?php echo esc_attr($slug); ?> hike-id-<?php echo $post_id; ?>">
 	
 	<?php
 	$show_hike_page = ( $summary || $link_items || $elevation_diagram || $content );

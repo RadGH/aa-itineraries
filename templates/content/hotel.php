@@ -11,7 +11,7 @@ $hotel_description = get_field( 'description', $hotel_id );
 
 $village_map_id = get_field( 'village_map', $hotel_id, false );
 ?>
-<section id="hotel-<?php echo esc_attr($slug); ?>" class="pdf-section hotel hotel-<?php echo esc_attr($slug); ?> hotel-id-<?php echo $hotel_id; ?>">
+<section id="hotel-<?php echo esc_attr($slug); ?>" class="hotel hotel-<?php echo esc_attr($slug); ?> hotel-id-<?php echo $hotel_id; ?>">
 	
 	<div class="pdf-page" id="hotel-main-<?php echo $hotel_id; ?>">
 	
