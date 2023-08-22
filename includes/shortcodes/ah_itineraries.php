@@ -66,6 +66,18 @@ function shortcode_ah_itineraries( $atts, $content = '', $shortcode_name = 'ah_i
 			
 		</div>
 		
+		<?php
+		// Link to all itineraries
+		// Lazily hard-coded the post ID here, feel free to change later
+		if ( $show_most_recent && $itineraries->found_posts > 1 ) {
+			?>
+			<div class="button-row">
+				<p><a href="<?php echo get_permalink(6391); ?>" class="button button-outline">View More Itineraries &rightarrow;</a></p>
+			</div>
+			<?php
+		}
+		?>
+		
 	</div>
 	<?php
 	return ob_get_clean();

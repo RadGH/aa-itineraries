@@ -98,6 +98,8 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 		
 		return array_merge(
 			array_slice( $columns, 0, 2),
+			array('ah_invoice_number' => 'Invoice Number'),
+			array('ah_quickbooks_url' => 'Quickbooks URL'),
 			array('ah_user' => 'Assigned To'),
 			array_slice( $columns, 2, null),
 		);
@@ -114,6 +116,28 @@ class Class_Invoice_Post_Type extends Class_Abstract_Post_Type {
 	 */
 	public function display_columns( $column, $post_id ) {
 		switch( $column ) {
+			
+			case 'ah_invoice_number':
+				$invoice_number = get_field( 'invoice_number', $post_id );
+				
+				if ( $invoice_number ) {
+					echo esc_html($invoice_number);
+				}else{
+					echo '<em style="opacity: 0.5;">None</em>';
+				}
+				
+				break;
+			
+			case 'ah_quickbooks_url':
+				$url = get_field( 'quickbooks_url', $post_id );
+				
+				if ( $url ) {
+					echo '<a href="' . esc_attr($url) . '" target="_blank" class="ah-truncated-link">'. esc_html($url) .'</a>';
+				}else{
+					echo '<em style="opacity: 0.5;">None</em>';
+				}
+				
+				break;
 			
 			case 'ah_user':
 				$user_id = $this->get_owner( $post_id );

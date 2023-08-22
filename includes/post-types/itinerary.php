@@ -271,6 +271,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 	public function customize_columns( $columns ) {
 		return array_merge(
 			array_slice( $columns, 0, 2),
+			array('ah_review' => 'Content Review'),
 			array('ah_users' => 'Assigned To'),
 			array_slice( $columns, 2, null),
 		);
@@ -287,7 +288,36 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 	 */
 	public function display_columns( $column, $post_id ) {
 		switch( $column ) {
-
+			
+			case 'ah_review':
+				
+				$this->display_content_review_column(array(
+					'Itinerary Spreadsheet' => get_post_meta( $post_id, 'smartsheet_sheet_id', true ),
+					'Assigned Users' => get_post_meta( $post_id, 'user_ids', true ),
+					'General Content' =>
+						(  get_post_meta( $post_id, 'title', true )
+						|| get_post_meta( $post_id, 'introduction_message', true )
+						|| get_post_meta( $post_id, 'contact_information', true )
+						|| get_post_meta( $post_id, 'departure_information', true )
+						|| get_post_meta( $post_id, 'phone_numbers', true )
+						|| get_post_meta( $post_id, 'country_codes', true )
+						|| get_post_meta( $post_id, 'tour_overview', true )
+						),
+					'Sync-able Content' =>
+						(  get_post_meta( $post_id, 'subtitle', true )
+						|| get_post_meta( $post_id, 'date_range', true )
+						|| get_post_meta( $post_id, 'schedule', true )
+						),
+					'Villages' => get_post_meta( $post_id, 'villages', true ),
+					'Hikes' => get_post_meta( $post_id, 'hikes', true ),
+					'Documents' =>
+						( get_post_meta( $post_id, 'itinerary_documents', true )
+						|| get_post_meta( $post_id, 'attached_documents', true )
+						),
+				));
+				
+				break;
+				
 			case 'ah_users':
 				$user_ids = $this->get_assigned_users( $post_id );
 				

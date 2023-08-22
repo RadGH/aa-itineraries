@@ -61,6 +61,22 @@ End: General admin dashboard
 */
 
 /*
+Start: general
+*/
+.ah-truncated-link {
+	display: block;
+	width: fit-content;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+/*
+End: general
+*/
+
+
+/*
 Start: Fix select2 on top of datepickers
 */
 html .ui-datepicker {
