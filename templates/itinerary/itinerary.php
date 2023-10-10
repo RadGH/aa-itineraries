@@ -43,7 +43,6 @@ $documents = $data['documents'];
 // Check which sections will be displayed
 $show_intro_page = $pages['introduction']['enabled'];
 $show_schedule_page = $pages['schedule']['enabled'];
-$show_directory_page = $pages['directory']['enabled'];
 $show_tour_overview = $pages['tour_overview']['enabled'];
 $show_hike_summary = $pages['hike_summary']['enabled'];
 $show_villages = $pages['villages']['enabled'];
@@ -269,60 +268,56 @@ if ( ah_is_pdf() ) {
 		</div>
 		<?php } ?>
 		
-	</section>
-	<?php
-	}
-	?>
-	
-	<?php
-	if ( $show_directory_page && ah_should_show_itinerary_page('directory') ) {
-	?>
-	<section class="pdf-page" id="<?php echo $pages['directory']['id']; ?>">
-		
-		<?php ah_display_bookmark( $pages['directory']['title'], 0 ); ?>
-		
-		<div class="section-heading itinerary-heading">
-			<h1 class="pdf-title"><?php echo $pages['directory']['title']; ?></h1>
-		</div>
-		
-		<div class="section-directory">
-			
-			<?php
-			if ( $phone_numbers ) {
-				echo '<table class="directory-table columns-2"><tbody>';
-				foreach( $phone_numbers as $i ) {
-					
-					$phone_number_display = ah_get_phone_number_link( $i['phone_number'] );
-					
-					if ( $i['title'] || $phone_number_display ) {
-						echo '<tr>';
-						
-						if ( $phone_number_display ) {
-							echo '<td class="column column-1 title">', esc_html($i['title']), '</td>';
-							echo '<td class="column column-2 phone-number">', $phone_number_display, '</td>';
-						}else{
-							echo '<td class="column column-1-2 title" colspan="2">', esc_html($i['title']), '</td>';
-						}
-						
-						echo '</tr>';
-					}
-					
-					if ( $i['content'] ) {
-						echo '<tr>';
-						echo '<td class="column column-1-2 content" colspan="2">', esc_html($i['content']), '</td>';
-						echo '</tr>';
-					}
-					
-				}
-				echo '</tbody></table>';
-			}
-			
-			if ( $country_codes ) {
-				echo '<div class="country-codes"><strong>Country Codes:</strong> ', $country_codes, '</div>';
-			}
+		<!-- Directory (Used to be a separate page, now part of the schedule page) -->
+		<?php
+		if ( $phone_numbers || $country_codes ) {
 			?>
 			
-		</div>
+			<div class="section-heading itinerary-heading">
+				<h2 class="pdf-subtitle">Directory</h2>
+			</div>
+			
+			<div class="section-directory">
+				
+				<?php
+				if ( $phone_numbers ) {
+					echo '<table class="directory-table columns-2"><tbody>';
+					foreach( $phone_numbers as $i ) {
+						
+						$phone_number_display = ah_get_phone_number_link( $i['phone_number'] );
+						
+						if ( $i['title'] || $phone_number_display ) {
+							echo '<tr>';
+							
+							if ( $phone_number_display ) {
+								echo '<td class="column column-1 title">', esc_html($i['title']), '</td>';
+								echo '<td class="column column-2 phone-number">', $phone_number_display, '</td>';
+							}else{
+								echo '<td class="column column-1-2 title" colspan="2">', esc_html($i['title']), '</td>';
+							}
+							
+							echo '</tr>';
+						}
+						
+						if ( $i['content'] ) {
+							echo '<tr>';
+							echo '<td class="column column-1-2 content" colspan="2">', esc_html($i['content']), '</td>';
+							echo '</tr>';
+						}
+						
+					}
+					echo '</tbody></table>';
+				}
+				
+				if ( $country_codes ) {
+					echo '<div class="country-codes"><strong>Country Codes:</strong> ', $country_codes, '</div>';
+				}
+				?>
+				
+			</div>
+		<?php
+		}
+		?>
 		
 	</section>
 	<?php

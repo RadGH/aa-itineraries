@@ -249,15 +249,15 @@ class Class_Compare_Field_Values {
 				$new_col_value = $new_value[$row_i][$col_key] ?? $default_value;
 				$old_col_value = $old_value[$row_i][$col_key] ?? $default_value;
 				
+				// Skip empty rows
+				if ( ! $new_col_value && ! $old_col_value ) continue;
+				
 				if ( $first_col ) {
 					$title = $field['title'] . ' [' . ($row_i + 1) . ']';
 					$first_col = false;
 				}else{
 					$title = '&nbsp;';
 				}
-				
-				// Skip empty rows
-				if ( ! $new_col_value && ! $old_col_value ) continue;
 				
 				$this->display_field_preview_repeater_row( $field, $new_col_value, $old_col_value, $title, $row_i, $col_key );
 			}
@@ -292,7 +292,7 @@ class Class_Compare_Field_Values {
 	 *
 	 * @return void
 	 */
-	private function display_field_columns( $field, $field_title, $new_html, $old_html, $row_i = null, $col_key = null ) {
+	private function display_field_columns( $field, $field_title, $new_html, $old_html, $row_i = null, $col_key = null, $is_updated = null ) {
 		$field_name = 'ah[fields][' . $field['meta_key'] . ']';
 		if ( $row_i !== null ) $field_name .= '[' . $row_i . ']';
 		if ( $col_key !== null ) $field_name .= '[' . $col_key . ']';
@@ -301,6 +301,10 @@ class Class_Compare_Field_Values {
 		
 		$checked = false;
 		if ( $new_html && ! $values_match ) $checked = true;
+		
+		// Allow forcing whether the "update" field is checked
+		if ( $is_updated === true ) $checked = true;
+		if ( $is_updated === false ) $checked = false;
 		
 		$classes  = 'key-' . $field['meta_key'];
 		$classes .= ' type-' . $field['type'];
@@ -343,26 +347,58 @@ class Class_Compare_Field_Values {
 	private function display_field_preview_text( $field, $new_value, $old_value = null ) {
 		$new_html = $new_value ? esc_html( $new_value ) : '';
 		$old_html = $old_value ? esc_html( $old_value ) : '';
-		$this->display_field_columns( $field, $field['title'],$new_html, $old_html );
+		$is_updated = $old_value === $new_value;
+		$this->display_field_columns( $field, $field['title'],$new_html, $old_html, $is_updated );
 	}
 	
 	private function display_field_preview_textarea( $field, $new_value, $old_value = null ) {
 		$new_html = $new_value ? wpautop( $new_value ) : '';
 		$old_html = $old_value ? wpautop( $old_value ) : '';
-		$this->display_field_columns( $field, $field['title'], $new_html, $old_html );
+		$is_updated = $old_value === $new_value;
+		$this->display_field_columns( $field, $field['title'], $new_html, $old_html, $is_updated );
 	}
 	
 	private function display_field_preview_repeater_row( $field, $new_value, $old_value, $title, $row_i, $col_key ) {
-		// Format post IDs as links (for hikes, villages, etc)
-		if (
-			( $field['meta_key'] == 'villages' && $col_key == 'village' ) || // villages -> village
-			( $field['meta_key'] == 'villages' && $col_key == 'hotel' ) ||   // villages -> hotel
-			( $field['meta_key'] == 'hikes' && ( $col_key == 'hike' ) )      // hikes    -> hike
-		) {
-			$new_value = $this->get_preview_post_id_html( $new_value );
-			$old_value = $this->get_preview_post_id_html( $old_value );
+		// Check if this field changed
+		// Note: overwritten later for certain fields that do not sync (hike -> add_text and content)
+		$is_changed = ! $this->compare_values( $new_value, $old_value );
+		
+		if ( $field['meta_key'] == 'villages' ) {
+			// Villages
+			if ( $col_key == 'village' || $col_key == 'hotel' ) {
+				// villages -> village
+				// villages -> hotel
+				$new_value = $this->get_preview_post_id_html( $new_value );
+				$old_value = $this->get_preview_post_id_html( $old_value );
+			}else{
+				// other fields could be listed here
+				$is_changed = false; // not synced
+			}
+			
+		}else if ( $field['meta_key'] == 'hikes' ) {
+			// Hikes
+			if ( $col_key == 'hike' ) {
+				// hikes -> hike
+				$new_value = $this->get_preview_post_id_html( $new_value );
+				$old_value = $this->get_preview_post_id_html( $old_value );
+			}else{
+				// hikes -> add_text
+				// hikes -> content
+				$is_changed = false; // not synced
+			}
+			
+		}else{
+			// Other repeater fields...
+			
+			// Schedule
+			// schedule -> column_1
+			// schedule -> column_2
+			// schedule -> column_3
+			// $field['meta_key'] == 'schedule'
+			
 		}
 		
+		// Format repeater field as a row in itself
 		if ( $new_value ) {
 			$new_html = '<div class="repeater-col-name">'. $col_key . '</div><div class="repeater-col-value">' . $new_value . '</div>';
 		}else{
@@ -375,7 +411,8 @@ class Class_Compare_Field_Values {
 			$old_html = '';
 		}
 		
-		$this->display_field_columns( $field, $title,$new_html, $old_html, $row_i, $col_key );
+		// Display the field
+		$this->display_field_columns( $field, $title,$new_html, $old_html, $row_i, $col_key, $is_changed );
 	}
 	
 	private function get_preview_post_id_html( $post_id ) {

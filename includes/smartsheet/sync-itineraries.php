@@ -382,15 +382,14 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 				// Save repeaters, preserving any rows that were not checked to be updated
 				case 'repeater':
 					$repeater_template = $field['repeater_row_template'] ?? false;
-					$sync_fields = $fields_to_sync[$meta_key];
+					$sync_fields = $fields_to_sync[$meta_key]; // array( 'column_1' => '1', ... )
 					$old_value = get_field( $meta_key, $post_id );
 					$new_value = $this->build_repeater_value( $value, $old_value, $sync_fields, $repeater_template );
 					break;
 			}
 			
-			if ( $new_value !== null ) {
-				update_field( $meta_key, $new_value, $post_id );
-			}
+			// Update the field (even if blank - since the user checked the update checkbox)
+			update_field( $meta_key, $new_value, $post_id );
 			
 		}
 		
@@ -399,35 +398,34 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 	/**
 	 * Creates an array when saving a repeater, containing items that were selected during the sync
 	 *
-	 * @param $new_value
-	 * @param $old_value
-	 * @param $sync_fields
-	 * @param $repeater_template
+	 * @param array $new_value
+	 * @param array $old_value
+	 * @param array $sync_fields
+	 * @param array $repeater_template
 	 *
 	 * @return array
 	 */
 	public function build_repeater_value( $new_value, $old_value, $sync_fields, $repeater_template ) {
 		$final_items = array();
 		
+		// Note that $new_value may have NULL values for fields that do not sync
+		// If a field is not present in $sync_fields, keep the $old_value for that field
+		
 		if ( ! is_array($new_value) ) $new_value = array();
 		if ( ! is_array($old_value) ) $old_value = array();
 		
-		$row_count = max( count($new_value), count($old_value) );
+		$rows = max( count($new_value), count($old_value) );
 		
-		for ( $i = 0; $i < $row_count; $i++ ) {
+		for ( $i = 0; $i < $rows; $i++ ) {
 			$row = array();
 			$sync_row_fields = $sync_fields[$i] ?? false;
 			
 			foreach( $repeater_template as $col_key => $default_value ) {
 				if ( isset($sync_row_fields[$col_key]) ) {
-					// Use new value
+					// Sync this field - use the new value (even if blank)
 					$v = $new_value[$i][$col_key] ?? false;
 				}else{
-					$v = false;
-				}
-				
-				if ( ! $v ) {
-					// Keep old value, or use the default
+					// Keep the old value
 					$v = $old_value[$i][$col_key] ?? $default_value;
 				}
 			
@@ -436,7 +434,7 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 			
 			// Skip completely blank rows
 			if ( ! ah_is_array_recursively_empty($row) ) {
-				$final_items[$i] = $row;
+				$final_items[] = $row;
 			}
 		}
 		

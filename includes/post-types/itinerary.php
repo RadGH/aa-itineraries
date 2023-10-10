@@ -502,7 +502,7 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 			$document_title = $d['title'];
 			$image_id = $d['file'];
 			$text = $d['text'];
-			$url = get_attached_file( $image_id );
+			$url = wp_get_attachment_image_url( $image_id, 'full' );
 			
 			$data['documents'][] = array(
 				'title' => $document_title,
@@ -543,44 +543,38 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		$pages['schedule'] = $this->add_itinerary_page(
 			'Schedule',
 			'schedule',
-			(bool) ( $data['schedule'] || $data['departure_information'] || ! $pages['introduction']['enabled'] )
-		);;
-		
-		$pages['directory'] = $this->add_itinerary_page(
-			'Directory',
-			'directory',
-			(bool) ( $data['phone_numbers'] || $data['country_codes'] )
-		);;
+			(bool) ( $data['schedule'] || $data['departure_information'] || ! $pages['introduction']['enabled'] || $data['phone_numbers'] || $data['country_codes'] )
+		);
 		
 		$pages['tour_overview'] = $this->add_itinerary_page(
 			'Tour Overview',
 			'tour-overview',
 			(bool) ( $data['tour_overview'] )
-		);;
+		);
 		
 		$pages['hike_summary'] = $this->add_itinerary_page(
 			'Hike Summary',
 			'hike-summary',
 			(bool) ( $data['hike_summary'] )
-		);;
+		);
 		
 		$pages['villages'] = $this->add_itinerary_page(
 			'Villages',
 			'villages',
 			(bool) ( $data['villages'] )
-		);;
+		);
 		
 		$pages['hikes'] = $this->add_itinerary_page(
 			'Hikes',
 			'hikes',
 			(bool) ( $data['hikes'] )
-		);;
+		);
 		
 		$pages['documents'] = $this->add_itinerary_page(
 			'Documents',
 			'documents',
 			(bool) ( $data['documents'] )
-		);;
+		);
 		
 		// Pages - Village Submenu
 		if ( $pages['villages']['enabled'] ) {

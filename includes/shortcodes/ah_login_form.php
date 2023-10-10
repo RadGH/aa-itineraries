@@ -25,6 +25,15 @@ function shortcode_ah_login_form( $atts, $content = '', $shortcode_name = 'ah_lo
 		exit;
 	}
 	
-	return wp_login_form($args);
+	$html = '';
+	
+	// Check if the user is trying to sign in from an invitation link
+	if ( isset($_GET['ah_invited_user']) ) {
+		$html .= '<div class="notice"><p>You have already created your account. Please sign in below to view your itinerary.</div>';
+	}
+	
+	$html .= wp_login_form($args);
+	
+	return $html;
 }
 add_shortcode( 'ah_login_form', 'shortcode_ah_login_form' );

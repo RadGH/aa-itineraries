@@ -227,6 +227,11 @@ class Class_Sync_Itinerary_Fields {
 			'arrival_ts' => null,     // int(1692230400)
 			'departure_ts' => null,   // int(1692316800)
 			'duration' => null,       // int(1)
+			
+			// originally forgot to include these
+			'luggage' => null,        // bool(true)
+			'region' => null,         // string(2) "BO"
+			
 		), $hotels, true );
 		
 		// Prepare the dates
@@ -342,6 +347,8 @@ class Class_Sync_Itinerary_Fields {
 		$schedule = array();
 		
 		foreach( $hotels as $i => $hotel ) {
+			$i = $i + 1; // 1-indexed
+			
 			$column_1 = $this->get_formatted_schedule__column_1( $hotel, $i, $client, $hotels, $dates, $hikes, $field );
 			$column_2 = $this->get_formatted_schedule__column_2( $hotel, $i, $client, $hotels, $dates, $hikes, $field );
 			$column_3 = $this->get_formatted_schedule__column_3( $hotel, $i, $client, $hotels, $dates, $hikes, $field );
@@ -394,7 +401,8 @@ class Class_Sync_Itinerary_Fields {
 		$output = array();
 		
 		// Chalet Schwarzwaldalp
-		$hotel_name = AH_Hotel()->get_hotel_name($hotel['hotel_id'] );
+		$hotel_name = AH_Hotel()->get_village_and_hotel_name ($hotel['hotel_id'] );
+		
 		if ( $hotel['hotel_id'] && $hotel_name ) {
 			$output[] = $hotel_name;
 		}else{
@@ -404,7 +412,7 @@ class Class_Sync_Itinerary_Fields {
 		
 		// breakfast & dinner included
 		$meal_code = $hotel['meal']; // BD/B&B -> breakfast included
-		$meal_name = AH_Smartsheet_Sync_Rooms_And_Meals()->get_meal( $meal_code, 'meal_name_short' );
+		$meal_name = AH_Smartsheet_Sync_Rooms_And_Meals()->get_meal( $meal_code, 'meal_name_full' );
 		if ( $meal_name ) {
 			$output[] = $meal_name;
 		}else{
@@ -417,13 +425,17 @@ class Class_Sync_Itinerary_Fields {
 		if ( $room_name ) {
 			$output[] = $room_name;
 		}else if ( $room_code ) {
-			$this->add_warning( '[Schedule]['. $i .'][Column 2] Room code "'. $room_code .'" not found for hotel "'. $hotel['hotel_name'] .'". Try <a href="admin.php?page=ah-smartsheet-rooms-and-meals">syncing the room codes</a> first.' );
+			// Allow custom room text if it does not match a room code.
+			$output[] = $room_code;
+			$this->add_warning( '[Schedule]['. $i .'][Column 2] The room code "'. $room_code .'" will be preserved as-written because it does not match the <a href="admin.php?page=ah-smartsheet-rooms-and-meals">room code spreadsheet</a>.' );
 		}else{
 			$this->add_warning( '[Schedule]['. $i .'][Column 2] No rooms entered for hotel "'. $hotel['hotel_name'] .'"' );
 		}
 		
-		// luggage: yes
-		$output[] = 'luggage: ' . ($hotel['luggage'] ? 'yes' : 'no');
+		// If luggage is UNCHECKED, show "no luggage tonight"
+		if ( ! $hotel['luggage'] ) {
+			$output[] = 'no luggage tonight';
+		}
 		
 		return implode( "\n", $output );
 	}
@@ -453,6 +465,8 @@ class Class_Sync_Itinerary_Fields {
 		$villages = array();
 		
 		foreach( $hotels as $i => $hotel ) {
+			$i = $i + 1; // 1-indexed
+			
 			// each row should contain: village, hotel, add_text, content
 			$village_id = $hotel['village_id'] ?: false;
 			$hotel_id = $hotel['hotel_id'] ?: false;
@@ -482,6 +496,8 @@ class Class_Sync_Itinerary_Fields {
 		$list = array();
 		
 		if ( $hikes ) foreach( $hikes as $i => $hike ) {
+			$i = $i + 1; // 1-indexed
+			
 			$hike_name = $hike['hike_name'] ?? false;
 			$hike_id = AH_Smartsheet_Sync_Hikes()->get_hike_by_smartsheet_id( $hike_name );
 			

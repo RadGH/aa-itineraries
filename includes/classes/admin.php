@@ -5,10 +5,13 @@ class Class_AH_Admin {
 	public function __construct() {
 		
 		// Register ACF settings pages
-		add_action( 'admin_menu', array( $this, 'register_admin_menus' ), 20 );
+		add_action( 'acf/init', array( $this, 'register_admin_menus' ), 20 );
 		
 		// Register custom image sizes
 		add_action( 'after_setup_theme', array( $this, 'register_image_sizes' ) );
+		
+		// Change the "big image size" threshhold to match the largest itinerary image size (2560px)
+		add_filter('big_image_size_threshold', array( $this, 'custom_big_image_threshold' ), 10, 4);
 		
 		// Displays errors on the account dashboard
 		add_action( 'admin_notices', array( $this, 'display_notices' ) );
@@ -63,13 +66,68 @@ class Class_AH_Admin {
 				'autoload'      => false,
 			) );
 			
+			acf_add_options_sub_page( array(
+				'parent_slug' => 'acf-ah-settings-parent',
+				'menu_slug'   => 'acf-ah-email-settings',
+				'page_title'  => 'Email Settings (ah_emails)',
+				'menu_title'  => 'Email Settings',
+				'capability'  => 'manage_options',
+				'post_id'     => 'ah_emails',
+				'autoload'      => false,
+			) );
+			
+		}
+		
+		// redirect for old menu
+		$page = $_GET['page'] ?? false;
+		if ( $page === 'acf-ah-smartsheet' ) {
+			$url = add_query_arg(array('page' => 'acf-ah-settings'));
+			wp_redirect( $url );
+			exit;
 		}
 	}
 	
 	public function register_image_sizes() {
 		add_image_size( 'document-preview', 300, 300, false );
 		add_image_size( 'document-embed', 650, 900, false );
+		
+		// Image size for PDFs at 300dpi (8.5" wide)
+		add_image_size( 'itinerary-pdf', 2560, 0, false );
+		
+		// Image size for web (850px content width)
+		add_image_size( 'itinerary-web', 850, 0, false );
 	}
+	
+	/**
+	 * Set the max image size of "big images" so that the width is 2560px max
+	 *
+	 * @param int    $threshold     The threshold value in pixels. Default 2560.
+	 * @param array  $imagesize     {
+	 *     Indexed array of the image width and height in pixels.
+	 *
+	 *     @type int $0 The image width.
+	 *     @type int $1 The image height.
+	 * }
+	 * @param string $file          Full path to the uploaded image file.
+	 * @param int    $attachment_id Attachment post ID.
+	 *
+	 * @return int
+	 */
+	public function custom_big_image_threshold($threshold, $imagesize, $file, $attachment_id) {
+		$target_w = 2560;
+		
+		$w = $imagesize[0];
+		$h = $imagesize[1];
+		
+		if ( $h > $w ) {
+			// If the image is portrait (tall), adjust the height proportionally so the width remains at 2560
+			return ceil( $h * ( $target_w / $w ) );
+		}
+		
+		return $target_w;
+	}
+	
+	
 	
 	/**
 	 * Notices: Display, add, get, delete, and delete via ajax

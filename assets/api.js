@@ -97,17 +97,16 @@ window.AH_API = new (function() {
 					response = jQuery.parseJSON( response_text );
 				}else if ( typeof response_text === 'object' ) {
 					response = response_text;
-					response_text = jQuery.stringify( response );
+					response_text = JSON.stringify( response );
 				}else{
 					response = false;
 				}
 
-				// @todo: For some reason these don't get called? wwwhhyyy
 				if ( typeof response === 'object' ) {
-					console.log( 'Ajax successful', url, response );
+					o.log( 'Ajax successful', url, args, response, response_text );
 					success_callback( response, textStatus, jqXHR );
 				}else{
-					console.log( 'Ajax FAILED', url, response_text );
+					o.log( 'Ajax FAILED', url, args, response_text );
 					error_callback( response_text, textStatus, jqXHR );
 				}
 			});

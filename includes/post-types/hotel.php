@@ -165,11 +165,50 @@ class Class_Hotel_Post_Type extends Class_Abstract_Post_Type {
 		}
 	}
 	
+	/**
+	 * Get the hotel name. This does not include the village name.
+	 *
+	 * "Hotel Belvedere"
+	 *
+	 * @param $post_id
+	 *
+	 * @return mixed|string|null
+	 */
 	public function get_hotel_name( $post_id ) {
 		if ( ! $post_id ) return null;
 		$name = get_field( 'hotel_name', $post_id );
 		if ( ! $name ) $name = get_the_title( $post_id );
 		return $name;
+	}
+	
+	/**
+	 * Get the "Village and hotel name" which is used on the schedule section.
+	 *
+	 * "Grindelwald, Hotel Belvedere"
+	 *
+	 * @param $post_id
+	 *
+	 * @return mixed|string|null
+	 */
+	public function get_village_and_hotel_name( $post_id ) {
+		if ( ! $post_id ) return null;
+		
+		// Get the formatted village and hotel name which is its own column in smartsheets
+		$name = get_field( 'village_and_hotel_name', $post_id );
+		if ( $name ) return $name;
+		
+		// Fall back to generating its own village + hotel name
+		$village_id = get_field( 'village', $post_id );
+		$village_name = $village_id ? AH_Village()->get_village_name( $village_id ) : false;
+		
+		$hotel_name = get_field( 'hotel_name', $post_id );
+		if ( ! $hotel_name ) $hotel_name = get_the_title( $post_id );
+		
+		if ( $village_name ) {
+			return $village_name . ', ' . $hotel_name;
+		}else{
+			return $hotel_name;
+		}
 	}
 	
 	/*

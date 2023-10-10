@@ -329,3 +329,32 @@ a.ah-link:not(.button) .dashicons::before {
 /*
 End: AH Links from ah_create_html_link()
 */
+
+
+/*
+Start: Itinerary invitations
+*/
+input#ah_invite_email {
+	width: calc(100% - 120px);
+	margin-right: 10px;
+	max-width: 300px;
+}
+
+#ah_invite_list {
+	display: grid;
+	grid-template-columns: auto auto 1fr;
+	gap: 10px 20px;
+	align-items: center;
+}
+
+#ah_invite_list .user-invite {
+	display: contents;
+}
+
+#ah_invite_list .user-invite.processing * {
+	opacity: 0.75;
+	pointer-events: none;
+}
+/*
+End: Itinerary invitations
+*/

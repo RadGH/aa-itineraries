@@ -25,9 +25,15 @@ window.AH_Admin = new (function() {
 		// Enable select2 with ajax results when using the "Search Sheets" dropdown, see sheet-select.php
 		o.setup_sheet_search_fields();
 
-		// The hotel dropdown used in the Villages repeater should only show hotels assigned to the selected village
+		// Editing an itinerary...
 		if ( is_post_edit_screen && post_type === 'ah_itinerary' ) {
+
+			// The hotel dropdown used in the Villages repeater should only show hotels assigned to the selected village
 			o.link_hotel_and_village_dropdowns();
+
+			// Allow inviting a user by email address to create an account for this itinerary
+			o.setup_invite_user_to_itinerary();
+
 		}
 
 	};
@@ -266,6 +272,313 @@ window.AH_Admin = new (function() {
 
 			return data;
 		});
+	};
+
+	/**
+	 * Allow inviting a user by email address to create an account for this itinerary
+	 */
+	o.setup_invite_user_to_itinerary = function() {
+
+		// Get the post ID being edited
+		const itinerary_id = document.querySelector('#post_ID').value;
+		if ( ! itinerary_id ) {
+			alert('Unable to locate the ID of this itinerary. Cannot invite users.');
+			return;
+		}
+
+		// Get the form and list elements, which come from PHP through acf message fields.
+		const invite_form = document.querySelector('#ah_invite_form');
+		const invite_list = document.querySelector('#ah_invite_list');
+
+		// New fields that will be added when the form is set up
+		const email_input = document.createElement('input');
+		const invite_button = document.createElement('input');
+
+		// Prepare the form to Send an invitation to an email address
+		const setup_form = function() {
+
+			// Remove the loading field from the form
+			invite_form.innerHTML = '';
+
+			// Add email field
+			email_input.setAttribute('type', 'email');
+			email_input.setAttribute('placeholder', 'Email address');
+			// email_input.setAttribute('required', true);
+			email_input.setAttribute('id', 'ah_invite_email');
+			invite_form.appendChild(email_input);
+
+			// Add submit button (invite button)
+			invite_button.setAttribute('type', 'button');
+			invite_button.setAttribute('class', 'button button-secondary');
+			invite_button.value = 'Invite';
+			invite_form.appendChild(invite_button);
+		};
+
+		// Prepare the list of invites
+		const setup_list = function() {
+
+			refresh_list();
+
+		};
+
+		// Refresh the list of invites
+		const refresh_list = function() {
+
+			// Get the list from users.php using ajax
+			AH_API.ajax(
+
+				AH_API.get_setting('admin', 'ajaxurl'),
+
+				{
+					method: 'POST',
+					data: {
+						action: 'ah_refresh_invitation_list',
+						itinerary_id: itinerary_id
+					}
+				},
+
+				function( response, textStatus, jqXHR ) {
+
+					html = response.data.html;
+					if ( html ) invite_list.innerHTML = html;
+
+				},
+
+				function( response_text, textStatus, jqXHR ) {
+					// Error occurred
+					ah_log( 'Error refreshing: ', {response_text:response_text, textStatus:textStatus, jqXHR:jqXHR} );
+					alert( 'Error refreshing: ' + response_text );
+				}
+			);
+
+		};
+
+		// Send an invitation to the user who is entered in the text area, adding them to the list of invites
+		const add_invitation_for_email = function() {
+
+			const email = email_input.value;
+			if ( ! email ) return;
+
+			// Validate email
+			if ( ! email.match( /^[^@]+@[^@]+\.[^@]+$/ ) ) {
+				alert( 'Please enter a valid email address.' );
+				return;
+			}
+
+			// Disable the email field and button
+			invite_form.classList.add('processing');
+			email_input.setAttribute('disabled', true);
+			invite_button.setAttribute('disabled', true);
+
+			// Re-enable the email field and button after ajax call (success or fail)
+			const after_ajax = function() {
+				invite_form.classList.remove('processing');
+				email_input.removeAttribute('disabled');
+				invite_button.removeAttribute('disabled');
+			};
+
+			// Send the invite to users.php
+			AH_API.ajax(
+
+				AH_API.get_setting('admin', 'ajaxurl'),
+
+				{
+					method: 'POST',
+					data: {
+						action: 'ah_add_invitation',
+						itinerary_id: itinerary_id,
+						email: email
+					}
+				},
+
+				function( response, textStatus, jqXHR ) {
+					if ( ! response || ! response.data ) {
+						alert('Ajax response failed when adding user to itinerary. See console for details.');
+						ah_log( 'Ajax response failed when adding user to itinerary.', {response:response, textStatus:textStatus, jqXHR:jqXHR} );
+						after_ajax();
+						return;
+					}
+
+					// Update the field if a new list was returned
+					if ( response.data.html ) {
+						invite_list.innerHTML = response.data.html;
+					}
+
+					// Show a message if one was returned
+					// This might warn that the user already existed, for example
+					if ( response.data.message ) {
+						alert( response.data.message );
+					}
+
+					// Clear the email field
+					email_input.value = '';
+
+					// Re-enable the email field and button
+					after_ajax();
+				},
+
+				function( response_text, textStatus, jqXHR ) {
+					// Error occurred
+					ah_log( 'Error inviting user: ', {response_text:response_text, textStatus:textStatus, jqXHR:jqXHR} );
+					alert( 'Error inviting user: ' + response_text );
+
+					// Re-enable the email field and button
+					after_ajax();
+				}
+			);
+
+		};
+
+		// Prepare the form to invite an email address
+		setup_form();
+
+		// Prepare the list
+		setup_list();
+
+		// When the invite button is clicked, invite the user
+		invite_button.addEventListener('click', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			add_invitation_for_email();
+		});
+
+		// When enter is pressed while focusing the email input, invite the user
+		invite_form.addEventListener('keyup', function(e) {
+			if ( e.keyCode === 13 ) {
+				e.preventDefault();
+				e.stopPropagation();
+				add_invitation_for_email();
+			}
+		});
+
+		// Resend an invitation to an email who has already been invited
+		const resend_invite = function( $row ) {
+			let email = $row.attr('data-email');
+			if ( ! email ) return;
+
+			// Ask to confirm
+			if ( ! confirm( 'Are you sure you want to resend the invitation to ' + email + '?' ) ) {
+				return;
+			}
+
+			$row.addClass('processing');
+
+			// Re-enable the email field and button after ajax call (success or fail)
+			const after_ajax = function() {
+				$row.removeClass('processing');
+			};
+
+			// Send the invite to users.php
+			AH_API.ajax(
+
+				AH_API.get_setting('admin', 'ajaxurl'),
+
+				{
+					method: 'POST',
+					data: {
+						action: 'ah_send_invitation',
+						itinerary_id: itinerary_id,
+						email: email
+					}
+				},
+
+				function( response, textStatus, jqXHR ) {
+					if ( ! response || ! response.data ) {
+						alert('Ajax response failed when re-sending an invitation. See console for details.');
+						ah_log( 'Ajax response failed when re-sending an invitation.', {response:response, textStatus:textStatus, jqXHR:jqXHR} );
+						after_ajax();
+						return;
+					}
+
+					// Update the list if a new list was returned
+					if ( response.data.html ) {
+						invite_list.innerHTML = response.data.html;
+					}
+
+					after_ajax();
+				},
+
+				function( response_text, textStatus, jqXHR ) {
+					// Error occurred
+					ah_log( 'Error re-sending invitation: ', {response_text:response_text, textStatus:textStatus, jqXHR:jqXHR} );
+					alert( 'Error re-sending invitation: ' + response_text );
+
+					// Re-enable the email field and button
+					after_ajax();
+				}
+			);
+		};
+
+		// Remove an invitation from the list
+		const remove_invitation = function( $row ) {
+			let email = $row.attr('data-email');
+			if ( ! email ) return;
+
+			$row.addClass('processing');
+
+			// Re-enable the email field and button after ajax call (success or fail)
+			const after_ajax = function() {
+				$row.removeClass('processing');
+			};
+
+			// Send the invite to users.php
+			AH_API.ajax(
+
+				AH_API.get_setting('admin', 'ajaxurl'),
+
+				{
+					method: 'POST',
+					data: {
+						action: 'ah_remove_invitation',
+						itinerary_id: itinerary_id,
+						email: email
+					}
+				},
+
+				function( response, textStatus, jqXHR ) {
+					if ( ! response || ! response.data ) {
+						alert('Ajax response failed when adding user to itinerary. See console for details.');
+						ah_log( 'Ajax response failed when adding user to itinerary.', {response:response, textStatus:textStatus, jqXHR:jqXHR} );
+						after_ajax();
+						return;
+					}
+
+					// Update the list if a new list was returned
+					if ( response.data.html ) {
+						invite_list.innerHTML = response.data.html;
+					}
+
+					// Don't need to run after ajax because the list has been updated.
+					// after_ajax();
+				},
+
+				function( response_text, textStatus, jqXHR ) {
+					// Error occurred
+					ah_log( 'Error removing invite: ', {response_text:response_text, textStatus:textStatus, jqXHR:jqXHR} );
+					alert( 'Error removing invite: ' + response_text );
+
+					// Re-enable the email field and button
+					after_ajax();
+				}
+			);
+		};
+
+		// When clicking "Send Invite", re-send the invite email
+		// When clicking on a "Remove" button in the invite list, remove that invitation
+		invite_list.addEventListener('click', function(e) {
+			let $button = jQuery(e.target);
+			let $row = $button.closest('.user-invite');
+
+			if ( $button.hasClass('send-invite') ) {
+				resend_invite( $row );
+			}
+
+			if ( $button.hasClass('remove-invite') ) {
+				remove_invitation( $row );
+			}
+
+		});
+
 	};
 
 })();

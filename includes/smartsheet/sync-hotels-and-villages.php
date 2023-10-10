@@ -3,15 +3,16 @@
 class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 	
 	public $columns = array(
-		'hotel_id'        => 'Hotel',               // "Viallet - Areches"
-		'hotel_name'      => 'Hotel Name',          // "Areches, Hotel Viallet"
-		'village_id'      => 'Location',            // "Areches - FR"
-		'region'          => 'Region',              // "TMB"
-		'proprietor_name' => 'Proprietor Name',     // "Brigitte"
-		'email'           => 'Email',               // "contact@hotelviallet.com"
-		'phone'           => 'Phone',               // "33 479 38 1047"
-		// "village_name" (from village_id)         // "Areches"
-		// "village_code" (from village_id)         // "FR"
+		'hotel_name'      => 'Hotel Name',             // "Hotel Viallet"
+		'village_and_hotel_name' => 'Village and Hotel Name', // "Areches, Hotel Viallet"
+		'hotel_id'        => 'Hotel ID',               // "Viallet - Areches"
+		'village_id'      => 'Village ID',             // "Areches - FR"
+		'region'          => 'Region',                 // "TMB"
+		'proprietor_name' => 'Proprietor Name',        // "Brigitte"
+		'email'           => 'Email',                  // "contact@hotelviallet.com"
+		'phone'           => 'Phone',                  // "33 479 38 1047"
+		// "village_name" (from village_id)            // "Areches"
+		// "village_code" (from village_id)            // "FR"
 	);
 	
 	public $hotel_list = null;
@@ -103,7 +104,8 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 	 *
 	 * @return array {
 	 *      @type string|null $hotel_id        "Viallet - Areches"
-	 *      @type string|null $hotel_name      "Areches, Hotel Viallet"
+	 *      @type string|null $hotel_name      "Hotel Viallet"
+	 *      @type string|null $village_and_hotel_name "Areches, Hotel Viallet"
 	 *      @type string|null $village_id      "Areches - FR"
 	 *      @type string|null $region          "TMB"
 	 *      @type string|null $proprietor_name "Brigitte"
@@ -299,11 +301,13 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 			$row['village_name'] = $village_name;
 			$row['village_code'] = $village_code;
 			
+			/*
 			// Remove the redundant village name from the hotel name
 			$s = $village_name . ', ';
 			if ( $s ) {
 				$row['hotel_name'] = str_replace( $s, '', $row['hotel_name']);
 			}
+			*/
 		}
 		
 		// Create a list of hotels
@@ -350,6 +354,9 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 				'proprietor_name' => $row['proprietor_name'],
 				'email'           => $row['email'],
 				'phone'           => $row['phone'],
+				
+				// added 2023-09-19
+				'village_and_hotel_name'    => $row['village_and_hotel_name'],
 			);
 		}
 		
@@ -804,13 +811,15 @@ class Class_AH_Smartsheet_Sync_Hotels_And_Villages {
 		if ( $type == 'hotel' ) {
 			$village_id = $data['village_id'] ?? '';
 			$village_name = $data['village_name'] ?? '';
+			$village_post_id = $this->get_village_by_smartsheet_id( $village_id );
+			$village_and_hotel_name = $data['village_and_hotel_name'] ?? '';
+			
 			update_post_meta( $post_id, 'smartsheet_village_id', $village_id );
 			update_post_meta( $post_id, 'smartsheet_village_name', $village_name );
 			
-			$village_post_id = $this->get_village_by_smartsheet_id( $village_id );
-			
 			update_post_meta( $post_id, 'village', $village_post_id ?: '' );
 			update_post_meta( $post_id, 'hotel_name', $smartsheet_name );
+			update_post_meta( $post_id, 'village_and_hotel_name', $village_and_hotel_name ?: '' );
 			update_post_meta( $post_id, 'proprietor_name', $data['proprietor_name'] ?? '' );
 			update_post_meta( $post_id, 'email', $data['email'] ?? '' );
 			update_post_meta( $post_id, 'phone', $data['phone'] ?? '' );

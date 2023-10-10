@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: A+A - Alpine Hikers
+Plugin Name: A+A - Alpine Hikers Itineraries
 Description: Account pages, invoices, payment form, client documents, itineraries, and Smartsheet integration.
 Author: Radley Sustaire, Alchemy and Aim
-Version: 1.1.0
+Version: 1.2.0
 */
 
 define( 'AH_URL', untrailingslashit( plugin_dir_url( __FILE__ ) ) );
@@ -24,9 +24,11 @@ function AH_Plugin() {
 function AH_Cron() { return AH_Plugin()->Cron; }
 function AH_Admin() { return AH_Plugin()->Admin; }
 function AH_Editor() { return AH_Plugin()->Editor; }
+function AH_Email() { return AH_Plugin()->Email; }
 function AH_Enqueue() { return AH_Plugin()->Enqueue; }
 function AH_Rewrites() { return AH_Plugin()->Rewrites; }
 function AH_Theme() { return AH_Plugin()->Theme; }
+function AH_Users() { return AH_Plugin()->Users; }
 
 function AH_Smartsheet_API() { return AH_Plugin()->Smartsheet_API; }
 function AH_Smartsheet_Webhooks() { return AH_Plugin()->Smartsheet_Webhooks; }
@@ -65,9 +67,11 @@ class Class_AH_Plugin {
 	public Class_AH_Cron                       $Cron;
 	public Class_AH_Admin                      $Admin;
 	public Class_AH_Editor                     $Editor;
+	public Class_AH_Email                      $Email;
 	public Class_AH_Enqueue                    $Enqueue;
 	public Class_AH_Rewrites                   $Rewrites;
 	public Class_AH_Theme                      $Theme;
+	public Class_AH_Users                      $Users;
 	
 	public Class_AH_Smartsheet_API             $Smartsheet_API;
 	public Class_AH_Smartsheet_Webhooks        $Smartsheet_Webhooks;
@@ -145,6 +149,9 @@ class Class_AH_Plugin {
 		require_once( __DIR__ . '/includes/classes/editor.php' );
 		$this->Editor = new Class_AH_Editor();
 		
+		require_once( __DIR__ . '/includes/classes/email.php' );
+		$this->Email = new Class_AH_Email();
+		
 		require_once( __DIR__ . '/includes/classes/enqueue.php' );
 		$this->Enqueue = new Class_AH_Enqueue();
 		
@@ -153,6 +160,9 @@ class Class_AH_Plugin {
 		
 		require_once( __DIR__ . '/includes/classes/rewrites.php' );
 		$this->Rewrites = new Class_AH_Rewrites();
+		
+		require_once( __DIR__ . '/includes/classes/users.php' );
+		$this->Users = new Class_AH_Users();
 		
 		// ----------------------------------------
 		// 5. Smartsheet Integrations		
@@ -221,6 +231,7 @@ class Class_AH_Plugin {
 		// ----------------------------------------
 		// 8. Shortcodes
 		require_once( AH_PATH . '/includes/shortcodes/ah_accordion.php' );
+		require_once( AH_PATH . '/includes/shortcodes/ah_create_account.php' );
 		require_once( AH_PATH . '/includes/shortcodes/ah_documents.php' );
 		require_once( AH_PATH . '/includes/shortcodes/ah_invoices.php' );
 		require_once( AH_PATH . '/includes/shortcodes/ah_itineraries.php' );
@@ -258,12 +269,12 @@ class Class_AH_Plugin {
 	 */
 	public function plugin_activated() {
 		
-		// Include database so that it may add tables
-		// require_once( __DIR__ . '/includes/classes/upgrade.php' );
-		// $this->Upgrade = new Class_AH_Upgrade();
+		// Include users class
+		require_once( __DIR__ . '/includes/classes/users.php' );
+		$this->Users = new Class_AH_Users();
 		
-		// Perform upgrades
-		// $this->Upgrade->perform_upgrade();
+		// Install roles
+		$this->Users->setup_roles();
 		
 	}
 	

@@ -92,6 +92,9 @@ a.button {
 }
 
 img {
+	width: 100% !important;
+	height: auto !important;
+	max-width: none !important;
 }
 
 .pdf-page p {

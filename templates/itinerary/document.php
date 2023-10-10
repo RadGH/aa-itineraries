@@ -69,9 +69,7 @@ if ( ah_is_pdf() ) {
 				<?php
 				if ( $url ) echo '<a href="', esc_attr($url), '">';
 				
-				$img = wp_get_attachment_image( $image_id, 'document-embed' );
-				$img = ah_sanitize_mpdf_img( $img );
-				echo $img;
+				ah_display_image( $image_id );
 				
 				if ( $url ) echo '</a>';
 				?>

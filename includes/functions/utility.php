@@ -263,9 +263,10 @@ function ah_get_asset_url( $filename ) {
  *
  * @return void
  */
-function ah_display_image( $image_id, $max_w = 1055, $max_h = 815 ) {
+function ah_display_image( $image_id, $max_w = 0, $max_h = 0 ) {
 	
-	$img = wp_get_attachment_image_src( $image_id, 'full' );
+	$img = ah_get_itinerary_image_src( $image_id );
+	// $img = wp_get_attachment_image_src( $image_id, 'full' );
 	
 	$img_src = $img[0];
 	list( $img_w, $img_h ) = ah_fit_image_size( $img[1], $img[2], $max_w, $max_h );
@@ -390,6 +391,47 @@ function ah_sanitize_mpdf_img( $img_tag ) {
 	);
 	
 	return preg_replace( $removal, '', $img_tag );
+}
+
+/**
+ * Gets an array of image data for the itinerary image, width up to 2560px (pdf) or 850px (web)
+ *
+ * @param $image_id
+ *
+ * @return array
+ */
+function ah_get_itinerary_image_src( $image_id ) {
+	if ( ah_is_pdf() ) {
+		// 300dpi version for PDF (2560px wide, for 8.5" print)
+		$size = 'itinerary-pdf';
+	}else{
+		// 72dpi version for web (850px wide, for content width)
+		$size = 'itinerary-web';
+	}
+	
+	return wp_get_attachment_image_src( $image_id, $size );
+}
+
+/**
+ * Outputs an <img> tag formatted for the itinerary, width up to 2560px (pdf) or 850px (web)
+ *
+ * @param int $image_id
+ *
+ * @return string
+ */
+function ah_get_itinerary_image( $image_id ) {
+	if ( ah_is_pdf() ) {
+		// 300dpi version for PDF (2560px wide, for 8.5" print)
+		$size = 'itinerary-pdf';
+	}else{
+		// 72dpi version for web (850px wide, for content width)
+		$size = 'itinerary-web';
+	}
+	
+	$img = wp_get_attachment_image( $image_id, $size );
+	$img = ah_sanitize_mpdf_img( $img );
+
+	return $img;
 }
 
 /**

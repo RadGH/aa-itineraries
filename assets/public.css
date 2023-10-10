@@ -756,7 +756,7 @@ ul.menu-dots li {
 ul.menu-dots {
 	position: fixed;
 	top: 50%;
-	left: 10px;
+	left: 6px;
 	transform: translateY(-50%);
 }
 
@@ -791,7 +791,9 @@ ul.menu-dots span {
 }
 
 body.menu-dots-added .account-content {
-	padding-left: 12px !important;
+	width: 100%;
+	max-width: 850px; /* match image width: itinerary-web */
+	margin-left: auto;
 }
 
 ul.menu-dots {
@@ -895,3 +897,20 @@ Start: Scaled images
 /*
 End: Scaled images
 */
+
+/* Alert on front end */
+.notice {
+	margin: 20px auto 30px;
+	padding: 15px;
+	background: #f7f7f7;
+	width: fit-content;
+}
+
+/* Start: Create account shortcode */
+.ah-create-account {
+	max-width: 700px;
+	width: fit-content;
+	margin: 40px auto;
+	text-align: center;
+}
+/* End: Create account shortcode */
