@@ -302,7 +302,8 @@ End: ACF labels and tidy
 /*
 Start: Smartsheet Last Sync messages
 */
-.ah-last-sync {
+.ah-last-sync,
+.ah-description {
 	opacity: 0.5;
 }
 /*

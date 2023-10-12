@@ -745,18 +745,17 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		));
 		
 		
+		echo '<div id="sync-itinerary-controls">';
+		
 		if ( $sheet_url ) {
-			echo '<div id="sync-itinerary-controls">';
 			echo '<p>';
 			$sync_url = AH_Smartsheet_Sync()->get_sync_item_url( $post_id );
 			echo '<a href="'. esc_attr($sync_url) .'" class="button button-secondary">Run Sync</a> ';
-			
 			echo ah_create_html_link( $sheet_url, 'View Spreadsheet' );
 			echo '</p>';
 			
 			$last_sync = get_post_meta( $post_id, 'smartsheet_last_sync', true );
 			echo '<p><span class="ah-last-sync">Last sync: ' . (ah_get_relative_date_html( $last_sync ) ?: '(never)') . '</span></p>';
-			echo '</div>';
 			
 			?>
 			<script type="text/javascript">
@@ -772,8 +771,16 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 			});
 			</script>
 			<?php
+		}else{
+			
+			echo '<p>';
+			echo '<a href="#" class="button button-secondary disabled" onclick="return false;">Run Sync</a> ';
+			echo '<a href="#" class="button button-secondary disabled" onclick="return false;">View Spreadsheet <span class="dashicons dashicons-external ah-dashicon-inline"></span></a> ';
+			echo '</p>';
+			echo '<p><span class="ah-description">To enable sync, select a spreadsheet, then save the itinerary.</span></p>';
 		}
 		
+		echo '</div>';
 	}
 	
 	// Save meta box fields
