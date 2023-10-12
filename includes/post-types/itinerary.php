@@ -151,12 +151,25 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 	 * @return void
 	 */
 	public function load_from_template() {
-		$action = $_POST['ah_action'] ?? false;
+		$action = $_REQUEST['ah_action'] ?? false;
 		if ( $action != 'load_itinerary_template' ) return;
 		
-		$itinerary_id = (int) $_POST['itinerary_id'];
-		$template_id = (int) $_POST['template_id'];
-		if ( ! $itinerary_id || ! $template_id ) return;
+		$template_id = (int) $_REQUEST['template_id'];
+		if ( ! $template_id ) return;
+		
+		$itinerary_id = isset($_REQUEST['itinerary_id']) ? stripslashes($_REQUEST['itinerary_id']) : false;
+		if ( ! $itinerary_id ) return;
+		
+		if ( $itinerary_id === 'new' ) {
+			// Create a new itinerary
+			$args = array(
+				'post_type' => $this->get_post_type(),
+				'post_status' => 'draft',
+			);
+			
+			$itinerary_id = wp_insert_post( $args );
+			if ( ! $itinerary_id ) wp_die('Could not create new itinerary');
+		}
 		
 		// Check if both are valid
 		if (
@@ -199,12 +212,19 @@ class Class_Itinerary_Post_Type extends Class_Abstract_Post_Type {
 		if ( get_post_status( $itinerary_id ) != 'publish' ) {
 			$args['post_status'] = 'draft';
 		}
-		
 		$this->toggle_save_post_hooks(false);
 		wp_update_post( $args );
 		$this->toggle_save_post_hooks(true);
 		
+		// Save the template ID to the itinerary as a back-reference
+		update_post_meta( $itinerary_id, 'itinerary_template_id', $template_id );
+
+		// Redirect to the itinerary with a notice that it was loaded from a template
 		$link = admin_url( 'post.php?post='. $itinerary_id .'&action=edit' );
+		$link = add_query_arg( array(
+			'ah_notice' => 'itinerary_loaded_from_template',
+			'ah_notice_data' => array( 'template_id' => $template_id ),
+		), $link );
 		
 		wp_redirect( $link );
 		exit;

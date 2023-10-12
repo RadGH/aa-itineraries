@@ -246,14 +246,29 @@ class Class_AH_Admin {
 		if ( ! isset($_GET['ah_notice']) ) return;
 		
 		$notice = stripslashes($_GET['ah_notice']);
-		$data = isset($_GET['ah_notice_data']) ? stripslashes($_GET['ah_notice_data']) : false;
-		if ( $data ) $data = json_decode($data, true);
+		
+		$data = isset($_GET['ah_notice_data']) ? stripslashes_deep($_GET['ah_notice_data']) : false;
+		if ( $data && is_string($data) ) {
+			$d = json_decode($data, true);
+			if ( $d !== null ) $data = $d;
+		}
 		
 		switch($notice) {
 			
 			// Sync (generic)
 			case 'sync_item_success':
 				$this->add_notice( 'success', 'Sync data updated successfully.', null, null, true );
+				break;
+				
+			// Itinerary
+			case 'itinerary_loaded_from_template':
+				$template_id = $data['template_id'] ?? 0;
+				$template_link = sprintf(
+					'<a href="%s" target="_blank">%s</a>',
+					get_edit_post_link( $template_id ),
+					get_the_title( $template_id )
+				);
+				$this->add_notice( 'success', 'This itinerary has been loaded from template: ' . $template_link, null, null, true );
 				break;
 				
 			// Villages and Hotels

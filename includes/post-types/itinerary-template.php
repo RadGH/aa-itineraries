@@ -15,6 +15,9 @@ class Class_Itinerary_Template_Post_Type extends Class_Abstract_Post_Type {
 		// Custom page template
 		add_filter( 'single_template', array( $this, 'replace_page_template' ) );
 		
+		// Add a custom meta box with a button to create a new itinerary from the template
+		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 8 );
+		
 	}
 	
 	/**
@@ -125,5 +128,50 @@ class Class_Itinerary_Template_Post_Type extends Class_Abstract_Post_Type {
 		}
 	}
 	*/
+	
+	/**
+	 * Add a custom meta box with a button to create a new itinerary from the template
+	 *
+	 * @return void
+	 */
+	public function add_meta_boxes() {
+		add_meta_box(
+			'itinerary-template',
+			'Itinerary Template',
+			array( $this, 'render_meta_box' ),
+			$this->get_post_type(),
+			'side',
+			'default'
+		);
+	}
+	
+	public function render_meta_box() {
+		global $post;
+		
+		$itinerary_id = get_field( 'itinerary_id', $post->ID );
+		
+		if ( $itinerary_id ) {
+			$itinerary = get_post( $itinerary_id );
+			
+			if ( $itinerary ) {
+				$itinerary_url = get_permalink( $itinerary );
+				
+				echo '<p><a href="' . $itinerary_url . '" target="_blank" class="button button-primary">View Itinerary</a></p>';
+			}
+		}
+		
+		//template_id
+		
+		$url = admin_url( 'post-new.php' );
+		
+		$url = add_query_arg(array(
+			'post_type' => AH_Itinerary()->get_post_type(),
+			'ah_action' => 'load_itinerary_template',
+			'template_id' => get_the_ID(),
+			'itinerary_id' => 'new',
+		), $url);
+		
+		echo '<p><a href="' . esc_attr($url) . '" class="button">Create itinerary from template</a></p>';
+	}
 	
 }
