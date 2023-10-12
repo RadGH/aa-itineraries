@@ -25,6 +25,9 @@ class Class_AH_Admin {
 		// Loads notices from the query arg "ah_notice"
 		add_action( 'admin_init', array( $this, 'prepare_url_notices' ) );
 		
+		// Ajax: Search smartsheet spreadsheets
+		add_action( 'wp_ajax_ah_search_spreadsheets', array( $this, 'ajax_ah_search_spreadsheets' ) );
+		
 	}
 	
 	public function register_admin_menus() {
@@ -308,17 +311,30 @@ class Class_AH_Admin {
 			
 			// Rooms
 			case 'room_list_updated':
-				$this->add_notice( 'success', 'Rooms and Meals settings have been updated. Remember to run the sync next!', null, null, true );
+				$this->add_notice( 'success', 'Rooms settings have been updated. Remember to run the sync next!', null, null, true );
+				break;
+				
+			// Meals
+			case 'meals_list_updated':
+				$this->add_notice( 'success', 'Meals settings have been updated. Remember to run the sync next!', null, null, true );
 				break;
 			
 			case 'sync_rooms_success':
 				$rooms_count = $data['rooms'] ?? 0;
+				$this->add_notice( 'success', 'Sync complete. Found ' . $rooms_count . ' room types.', null, null, true );
+				break;
+				
+			case 'sync_meals_success':
 				$meals_count = $data['meals'] ?? 0;
-				$this->add_notice( 'success', 'Sync complete. Found ' . $rooms_count . ' room types and '. $meals_count .' meal types.', null, null, true );
+				$this->add_notice( 'success', 'Sync complete. Found '. $meals_count .' meal types.', null, null, true );
 				break;
 			
 			case 'sync_rooms_failed':
-				$this->add_notice( 'success', 'Failed to sync room and meal information from the spreadsheet.', null, null, true );
+				$this->add_notice( 'success', 'Failed to sync room information from the spreadsheet.', null, null, true );
+				break;
+				
+			case 'sync_meals_failed':
+				$this->add_notice( 'success', 'Failed to sync meal information from the spreadsheet.', null, null, true );
 				break;
 			
 			// Sync, generic
@@ -336,6 +352,83 @@ class Class_AH_Admin {
 				break;
 				
 		}
+		
 	}
+	
+	/**
+	 * Ajax: Search smartsheet spreadsheets
+	 * See admin.js -> setup_spreadsheet_finder() -> search_spreadsheets()
+	 *
+	 * @return void
+	 */
+	/*
+	public function ajax_ah_search_spreadsheets() {
+		$search_term = stripslashes($_POST['search']);
+		if ( empty($search_term) ) {
+			echo '';
+			exit;
+		}
+		
+		$sheet_list = AH_Smartsheet_Sync_Sheets()->get_stored_sheet_list();
+		
+		$found_sheets = array();
+		
+		foreach( $sheet_list as $sheet ) {
+			$sheet_name = $sheet['name'];
+			$sheet_id = $sheet['id'];
+			$sheet_url = $sheet['permalink'];
+			
+			// Returns the number of matching characters
+			$similarity = similar_text( $sheet_name, $search_term );
+			
+			// If the search term is found in the title exactly, add bonus points to the similarity
+			if ( stripos($sheet_name, $search_term) ) {
+				$similarity = $similarity + strlen($search_term);
+			}
+			
+			if ( $similarity > 0 ) {
+				$found_sheets[] = array(
+					'id' => $sheet_id,
+					'name' => $sheet_name,
+					'url' => $sheet_url,
+					'similarity' => $similarity,
+				);
+			}
+		}
+		
+		if ( ! $found_sheets ) {
+			echo '<p>No sheets found with the title "'. esc_html($search_term) .'".</p>';
+			exit;
+		}
+		
+		// Order by "similarity" property
+		usort( $found_sheets, function( $a, $b ) {
+			return $b['similarity'] - $a['similarity'];
+		});
+		
+		echo '<div class="sheet-list">';
+		
+		// Display a list of sheets. Each with a button to select it.
+		foreach( $found_sheets as $i => $sheet ) {
+			?>
+			<div class="sheet-item">
+				<div class="sheet-title"><?php echo esc_html($sheet['name']); ?></div>
+				<div class="sheet-button">
+					<a href="#" class="button button-small button-primary ah-select-sheet" data-sheet-id="<?php echo esc_attr($sheet['id']); ?>">Select</a>
+					<a href="<?php echo esc_attr($sheet['url']); ?>" class="button button-small button-secondary" target="_blank">Open&nbsp;<span class="dashicons dashicons-external"></span></a>
+				</div>
+			</div>
+			<?php
+			
+			if ( $i > 29 ) {
+				break;
+			}
+		}
+		
+		echo '</div>';
+		
+		exit;
+	}
+	*/
 	
 }

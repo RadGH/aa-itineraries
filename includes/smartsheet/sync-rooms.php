@@ -1,20 +1,15 @@
 <?php
 
-class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
+class Class_AH_Smartsheet_Sync_Rooms {
 	
 	public $columns = array(
 		'room_code'       => 'Room Code',
 		'room_name'       => 'Room Name',
 		
-		'meal_code'       => 'Meal Code',
-		'meal_name_short' => 'Meal Name (Short)',
-		'meal_name_full'  => 'Meal Name (Full)',
-		// Each room and meal item also includes "smartsheet_row_id" which is not displayed
-		// Rooms and Meals can share a row ID
+		// Each room item also includes "smartsheet_row_id" which is not displayed
 	);
 	
 	public $room_list = null; // keys: room_code, room_name
-	public $meal_list = null; // keys: meal_code, meal_name_short, meal_name_full
 	
 	public function __construct() {
 		
@@ -25,27 +20,27 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 		add_action( 'admin_init', array( $this, 'save_admin_menu_settings' ) );
 		
 		// Sync rooms button from the settings page
-		add_action( 'admin_init', array( $this, 'process_rooms_and_meals_sync' ) );
+		add_action( 'admin_init', array( $this, 'process_rooms_sync' ) );
 		
 	}
 	
 	public function register_admin_menus() {
 		if ( function_exists('acf_add_options_page') ) {
-			// Smartsheet Settings -> Sync Rooms and Meals
+			// Smartsheet Settings -> Sync Rooms
 			// NOTE: Must be defined by ACF first, then override with a WP submenu page
 			acf_add_options_sub_page( array(
 				'parent_slug' => 'acf-ah-settings-parent',
-				'page_title'  => 'Sync Rooms and Meals',
-				'menu_title'  => 'Sync Rooms and Meals',
+				'page_title'  => 'Sync Rooms',
+				'menu_title'  => 'Sync Rooms',
 				'capability' => 'manage_options',
-				'menu_slug'   => 'ah-smartsheet-rooms-and-meals',
+				'menu_slug'   => 'ah-smartsheet-rooms',
 			) );
 			add_submenu_page(
 				null,
-				'Sync Rooms and Meals',
-				'Sync Rooms and Meals',
+				'Sync Rooms',
+				'Sync Rooms',
 				'manage_options',
-				'ah-smartsheet-rooms-and-meals',
+				'ah-smartsheet-rooms',
 				array( $this, 'display_admin_page' )
 			);
 			
@@ -53,7 +48,7 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 	}
 	
 	public function display_admin_page() {
-		include( AH_PATH . '/templates/admin/smartsheet-rooms-and-meals.php' );
+		include( AH_PATH . '/templates/admin/smartsheet-rooms.php' );
 	}
 	
 	public function save_admin_menu_settings() {
@@ -64,11 +59,11 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 		
 		// Sheet ID
 		$sheet_id = $data['sheet_id'];
-		update_option( 'ah_rooms_and_meals_sheet_id', $sheet_id, false );
+		update_option( 'ah_rooms_sheet_id', $sheet_id, false );
 		
 		// Column IDs
 		$column_ids = ah_prepare_columns( $this->columns,  $data['column_ids'] );
-		update_option( 'ah_rooms_and_meals_column_ids', $column_ids, false );
+		update_option( 'ah_rooms_column_ids', $column_ids, false );
 		
 		// Reload the form (to clear post data from browser history)
 		wp_redirect(add_query_arg(array('ah_notice' => 'room_list_updated')));
@@ -76,11 +71,11 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 	}
 	
 	public function get_sheet_id() {
-		return get_option( 'ah_rooms_and_meals_sheet_id' );
+		return get_option( 'ah_rooms_sheet_id' );
 	}
 	
 	public function get_column_ids() {
-		$column_ids = get_option( 'ah_rooms_and_meals_column_ids' );
+		$column_ids = get_option( 'ah_rooms_column_ids' );
 		
 		$column_ids = ah_prepare_columns( $this->columns,  $column_ids );
 		
@@ -109,7 +104,6 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 	 * @return array {
 	 *      @type int $smartsheet_row_id
 	 *      @type string $room_code
-	 *      @type string $meal_name
 	 * }
 	 */
 	public function get_stored_room_list() {
@@ -117,18 +111,6 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 		if ( empty($room_list) ) $room_list = array();
 		
 		return $room_list;
-	}
-	
-	/**
-	 * Get an array of meals used by the room list. Returns just the meal names.
-	 *
-	 * @return string[]
-	 */
-	public function get_stored_meal_list() {
-		$meal_list = get_option( 'ah_meal_list' );
-		if ( empty($meal_list) ) $meal_list = array();
-		
-		return $meal_list;
 	}
 	
 	/**
@@ -141,7 +123,7 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 	 * }
 	 */
 	public function get_stored_sheet_data() {
-		$sheet_data = get_option( 'ah_meals_and_rooms_sheet' );
+		$sheet_data = get_option( 'ah_rooms_sheet' );
 		if ( empty($sheet_data) ) $sheet_data = false;
 		
 		return $sheet_data;
@@ -158,11 +140,11 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 	}
 	
 	/**
-	 * Get a list of room and meal names from the master room spreadsheet
+	 * Get a list of room names from the master room spreadsheet
 	 *
 	 * @return array|false
 	 */
-	public function sync_rooms_and_meals_from_smartsheet() {
+	public function sync_rooms_from_smartsheet() {
 		// Get information about the sheet
 		$sheet = AH_Smartsheet_Sync_Sheets()->get_sheet_data( $this->get_sheet_id() );
 		if ( ! $sheet ) return false;
@@ -171,16 +153,16 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 		$column_ids = $this->get_column_ids();
 		if ( ! $column_ids ) return false;
 		
-		update_option( 'ah_meals_and_rooms_sheet', $sheet, false );
+		
+		update_option( 'ah_rooms_sheet', $sheet, false );
 		
 		// Get rows from the sheet
 		$rows = AH_Smartsheet_API()->get_rows_from_sheet( $sheet['sheet_id'] );
 		
-		// Get each room and meal
+		// Get each room's code and name
 		$room_list = array();
-		$meal_list = array();
 		
-		// [1/2] Loop through each row to get room codes and names
+		// Loop through each row to get room codes and names
 		if ( $rows ) foreach( $rows as $row ) {
 			// $row keys = id, rowNumber, cells
 		
@@ -202,64 +184,33 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 			}
 		}
 		
-		// [1/2] Loop through each row to get meal codes, short names, and full names
-		if ( $rows ) foreach( $rows as $row ) {
-			// $row keys = id, rowNumber, cells
-		
-			// Get meal code and name from the row
-			$meal_code_cell = ah_find_in_array( $row['cells'], 'columnId', $column_ids['meal_code'] );
-			$meal_code = $meal_code_cell['value'] ?? false;
-			
-			$meal_name_short_cell = ah_find_in_array( $row['cells'], 'columnId', $column_ids['meal_name_short'] );
-			$meal_name_short = $meal_name_short_cell['value'] ?? false;
-			
-			$meal_name_full_cell = ah_find_in_array( $row['cells'], 'columnId', $column_ids['meal_name_full'] );
-			$meal_name_full = $meal_name_full_cell['value'] ?? false;
-			
-			if (
-				AH_Smartsheet_Sync()->is_cell_valid( $meal_code )
-				&& AH_Smartsheet_Sync()->is_cell_valid( $meal_name_short )
-				&& AH_Smartsheet_Sync()->is_cell_valid( $meal_name_full )
-			) {
-				$meal_list[ $meal_code ] = array(
-					'meal_code' => $meal_code,
-					'meal_name_short' => $meal_name_short,
-					'meal_name_full' => $meal_name_full,
-				);
-			}
-		}
-		
 		// Save the values if successful
 		if ( $room_list ) {
 			update_option( 'ah_room_list', $room_list, false );
 		}
 		
-		if ( $meal_list ) {
-			update_option( 'ah_meal_list', $meal_list, false );
-		}
-		
 		// Save the last sync date
-		update_option( 'ah_rooms_and_meals_last_sync', current_time('Y-m-d H:i:s'), false );
+		update_option( 'ah_rooms_last_sync', current_time('Y-m-d H:i:s'), false );
 		
-		return array( 'room_list' => $room_list, 'meal_list' => $meal_list );
+		return $room_list;
 	}
 	
 	/**
-	 * When visiting the link to sync from the Sync Rooms and Meals page, triggers the sync and does a redirect when successful
+	 * When visiting the link to sync from the Sync Rooms page, triggers the sync and does a redirect when successful
 	 *
 	 * @return void
 	 */
-	public function process_rooms_and_meals_sync() {
-		if ( ! isset($_GET['ah_sync_rooms_and_meals']) ) return;
+	public function process_rooms_sync() {
+		if ( ! isset($_GET['ah_sync_rooms']) ) return;
 		
-		$url = remove_query_arg('ah_sync_rooms_and_meals');
+		$url = remove_query_arg('ah_sync_rooms');
 		
 		// Perform the sync with Smartsheet's API
-		$result = $this->sync_rooms_and_meals_from_smartsheet();
+		$result = $this->sync_rooms_from_smartsheet();
 		
 		if ( $result === false ) {
 			// The sync did not complete
-			ah_add_alert( 'error', 'Room and Meal Sync Failed', 'Syncing room information from smartsheet did not complete successfully. The previously stored room and meal information will be preserved.' );
+			ah_add_alert( 'error', 'Room Sync Failed', 'Syncing room information from smartsheet did not complete successfully. The previously stored room information will be preserved.' );
 			$url = add_query_arg(array('ah_notice' => 'sync_rooms_failed'), $url);
 			wp_redirect($url);
 			exit;
@@ -267,8 +218,7 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 		
 		// Data to send in the URL, used in the notice popup
 		$data = array(
-			'rooms' => count($result['room_list']),
-			'meals' => count($result['meal_list']),
+			'rooms' => count($result),
 		);
 		
 		// Build URL to redirect to
@@ -279,29 +229,6 @@ class Class_AH_Smartsheet_Sync_Rooms_And_Meals {
 		
 		wp_redirect($url);
 		exit;
-	}
-	
-	/**
-	 * Get a meal by meal code. Optionally a specific field for that meal (meal_code, meal_name_short, meal_name_full)
-	 *
-	 * @param $meal_code
-	 * @param $field_name
-	 *
-	 * @return string|array
-	 */
-	public function get_meal( $meal_code, $field_name = null ) {
-		$list = $this->get_stored_meal_list();
-		// meal_code
-		// meal_name_short
-		// meal_name_full
-		
-		$meal = $list[$meal_code] ?? null;
-		
-		if ( $field_name && $meal ) {
-			return $meal[$field_name] ?? null;
-		}else{
-			return $meal;
-		}
 	}
 	
 	/**

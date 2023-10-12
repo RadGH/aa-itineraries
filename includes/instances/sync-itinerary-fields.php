@@ -158,20 +158,10 @@ class Class_Sync_Itinerary_Fields {
 		return ah_find_in_array( $this->fields, 'meta_key', $meta_key );
 	}
 	
-	// Warning system to show when a village/hike/etc from smartsheet is not present on the website, or other issues
-	private $warnings = array();
-	
-	private function add_warning( $message, $data = null ) {
-		$this->warnings[] = array(
-			'message' => $message,
-			'data' => $data
-		);
+	/** Add a sync warning */
+	public function add_warning( $message, $data = null ) {
+		AH_Smartsheet_Warnings()->add_warning( $message, $data );
 	}
-	
-	public function get_warnings() {
-		return $this->warnings;
-	}
-	// End warning system
 	
 	/**
 	 * Get each meta key from $this->fields for the provided post (itinerary id)
@@ -287,7 +277,7 @@ class Class_Sync_Itinerary_Fields {
 			if ( $start_village['hotel_name'] ) {
 				$this->add_warning( '[Subtitle] Start hotel does not exist on the site: "'. $end_hotel['hotel_name'] . '". Try <a href="admin.php?page=ah-smartsheet-villages-and-hotels">syncing the hotel</a> first.', $end_hotel['village_id'] );
 			}else{
-				$this->add_warning( '[Subtitle] Start hotel name is invalid', $end_hotel['village_id'] );
+				$this->add_warning( '[Subtitle] Start hotel name is invalid', array( 'village_id' => $end_hotel['village_id'] ) );
 			}
 			$this->add_warning( '[Subtitle] Start hotel not found', $start_hotel['village_id'] );
 			$start_village = $start_hotel['village_name'];
@@ -412,7 +402,7 @@ class Class_Sync_Itinerary_Fields {
 		
 		// breakfast & dinner included
 		$meal_code = $hotel['meal']; // BD/B&B -> breakfast included
-		$meal_name = AH_Smartsheet_Sync_Rooms_And_Meals()->get_meal( $meal_code, 'meal_name_full' );
+		$meal_name = AH_Smartsheet_Sync_Meals()->get_meal( $meal_code, 'meal_name_full' );
 		if ( $meal_name ) {
 			$output[] = $meal_name;
 		}else{
@@ -421,13 +411,13 @@ class Class_Sync_Itinerary_Fields {
 		
 		// 1 double room
 		$room_code = $hotel['room']; // 1 Db -> 1 double room
-		$room_name = AH_Smartsheet_Sync_Rooms_And_Meals()->get_room( $room_code, 'room_name' );
+		$room_name = AH_Smartsheet_Sync_Rooms()->get_room( $room_code, 'room_name' );
 		if ( $room_name ) {
 			$output[] = $room_name;
 		}else if ( $room_code ) {
 			// Allow custom room text if it does not match a room code.
 			$output[] = $room_code;
-			$this->add_warning( '[Schedule]['. $i .'][Column 2] The room code "'. $room_code .'" will be preserved as-written because it does not match the <a href="admin.php?page=ah-smartsheet-rooms-and-meals">room code spreadsheet</a>.' );
+			$this->add_warning( '[Schedule]['. $i .'][Column 2] The room code "'. $room_code .'" will be preserved as-written because it does not match the <a href="admin.php?page=ah-smartsheet-rooms">room code spreadsheet</a>.' );
 		}else{
 			$this->add_warning( '[Schedule]['. $i .'][Column 2] No rooms entered for hotel "'. $hotel['hotel_name'] .'"' );
 		}

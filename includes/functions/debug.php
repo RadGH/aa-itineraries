@@ -99,6 +99,9 @@ if ( ! function_exists( 'aa_get_backtrace' ) ) {
 		
 		$formatted_backtrace = array();
 		
+		// The first item is always removed, so if the limit is present, add one more.
+		if ( $limit > 0 ) $limit += 1;
+		
 		// note: it is important we do not include DEBUG_BACKTRACE_PROVIDE_OBJECT or else this can cause infinite loops.
 		$backtraces = debug_backtrace( 0, $limit );
 		

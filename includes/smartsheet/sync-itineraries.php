@@ -18,8 +18,8 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 	public $column_arrival;
 	public $column_location;
 	public $column_hotel;
-	public $column_luggage;
 	public $column_departure;
+	public $column_luggage;
 	public $column_hike;
 	public $column_outdooractive;
 	public $column_region;
@@ -44,6 +44,10 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		
 		$columns = $column_info['data'];
 		
+		foreach( $this->columns as $i => &$c ) {
+			$c['index'] = $i;
+		}
+		
 		$this->columns = $columns;
 		
 		// $columns[0] = !!! (Checkboxes)
@@ -53,7 +57,7 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		// Restaurant1 ... Restaurant3
 		// Hike1 ... Hike10
 		// Travel Details, Arrival:, Departure:
-		$this->column_task = $columns[1];
+		$this->column_task = $this->locate_column( $columns, 'Task', 1 );
 		
 		// $columns[2] = Task Detail/Comments
 		
@@ -62,51 +66,77 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		// task | room | meal
 		// Hotel1 | 1 Db | HB
 		// Hotel2 | 1 Db-for-Sg | BD/B&B
-		$this->column_room = $columns[3];
-		$this->column_meal = $columns[4];
+		$this->column_room = $this->locate_column( $columns, 'Rooms', 3 );
+		
+		$this->column_meal = $this->locate_column( $columns, 'Meals', 4 );
 		
 		// $columns[5] = Em (Checkboxes)
 		// $columns[6] = Done (Checkboxes)
 		
 		// Arrival dates are used for hotels and restaurants (mm/dd/yy format)
 		// Arrival and departure dates are stored where Task column is: Travel Details -> "Arrival:" and "Departure:"
-		$this->column_arrival = $columns[7];
+		$this->column_arrival = $this->locate_column( $columns, 'Arrive', 7 );
 		
 		// $columns[8] = Nts (numbers)
 		
 		// Location column stores the village/country for each hotel and restaurant (WP Village ID)
 		// Schwarzwaldalp - CH
 		// Grindelwald - CH
-		$this->column_location = $columns[9];
+		$this->column_location = $this->locate_column( $columns, 'Location', 9 );
 		
 		// Hotel column stores the hotel code (WP Hotel ID)
-		$this->column_hotel = $columns[10];
+		$this->column_hotel = $this->locate_column( $columns, 'Hotel/Vendor', 10 );
 		
 		// Departure column is similar to Arrival column. Not used for restaurants.
-		$this->column_departure = $columns[11];
+		$this->column_departure = $this->locate_column( $columns, 'Depart', 11 );
 		
 		// Luggage checkboxes
-		$this->column_luggage = $columns[12];
+		$this->column_luggage = $this->locate_column( $columns, 'luggage', 12 );
 		
 		// $columns[13] = Assigned To
 		
 		// Hike list is the name of a hike
-		$this->column_hike = $columns[14];
+		//$this->column_hike = $columns[14];
+		$this->column_hike = $this->locate_column( $columns, 'Hike list', 14 );
 		
 		// $columns[15] = Due date
 		// $columns[16] = Em to Client
 		// $columns[17] = Due Date Override
 		
 		// Outdoor active links for each hike (only one link?)
-		$this->column_outdooractive = $columns[18];
+		$this->column_outdooractive = $this->locate_column( $columns, 'Outdooractive', 20 ); // or 18 previously
 		
 		// $columns[19] = Signup Date
 		// $columns[20] = Tags
 		// $columns[21] = Print Pages Lookup
-		
-		$this->column_region = $columns[22];
+
+		$this->column_region = $this->locate_column( $columns, 'Region', 22 );
 		
 		// Columns 23+ are removed from the result in $this->rows in $this->load_rows
+	}
+	
+	/**
+	 * Look for a column with the given title and return its index if it matches.
+	 *
+	 * @param array[] $columns
+	 * @param string $title             Regex pattern such as: '/^.*' . preg_quote("Task") . '.*$/i'
+	 * @param int|null $default_index   Default: null. If no match is found, use this column index.
+	 *
+	 * @return array|false
+	 */
+	public function locate_column( $columns, $title, $default_index = null ) {
+		foreach( $columns as $i => $c ) {
+			if ( isset($c['title']) && $c['title'] == $title ) {
+				return $c;
+			}
+		}
+		
+		if ( $default_index !== null && isset($columns[$default_index]) ) {
+			$this->add_warning( '[Spreadsheet] Column not found with title "' . esc_html($title) . '". Using fallback column index "' . $default_index .'" with title "'. esc_html($columns[$default_index]['title'] ?? '(no title)') .'"' );
+			return $columns[$default_index];
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -393,6 +423,9 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 			
 		}
 		
+		// Update the last sync date
+		update_post_meta( $post_id, 'smartsheet_last_sync', current_time('Y-m-d H:i:s') );
+		
 	}
 	
 	/**
@@ -634,6 +667,11 @@ class Class_AH_Smartsheet_Sync_Itineraries {
 		}
 		
 		return $hikes;
+	}
+	
+	/** Add a sync warning */
+	public function add_warning( $message, $data = null ) {
+		AH_Smartsheet_Warnings()->add_warning( $message, $data );
 	}
 	
 }

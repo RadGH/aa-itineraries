@@ -358,3 +358,50 @@ input#ah_invite_email {
 /*
 End: Itinerary invitations
 */
+
+abbr.ah-tooltip {
+	cursor: pointer;
+}
+
+/*
+Start: Spreadsheet search list
+*/
+
+.sheet-list {
+	display: grid;
+	gap: 10px;
+	width: fit-content;
+}
+
+.sheet-list .sheet-item {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 20px;
+}
+
+.sheet-list .dashicons {
+	font-size: 15px;
+	line-height: inherit;
+	vertical-align: inherit;
+	text-decoration: inherit;
+}
+
+.ah-spreadsheet-finder-results {
+	position: relative;
+	overflow: auto;
+	max-height: 200px;
+	resize: both;
+	width: fit-content;
+	border: 1px solid #c4c4c4;
+	margin: 5px 1px 10px;
+	border-radius: 5px;
+	padding: 10px;
+	background: #f8f8f8;
+}
+
+.ah-spreadsheet-finder-results .button.button-secondary {
+	background-color: #fff;
+}
+/*
+End: Spreadsheet search list
+*/

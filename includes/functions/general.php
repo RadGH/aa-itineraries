@@ -159,15 +159,21 @@ function ah_get_hike_summary( $itinerary_id ) {
 		
 		<?php
 		if ( ! ah_is_array_recursively_empty( $links ) ) {
+			
+			echo '<ul class="hike-list">';
+			
 			foreach( $links as $l ) {
 				$label = $l['label'];
 				$url = $l['url'];
-				?>
-				<ul class="hike-list">
-					<li><?php echo esc_html($label); ?>:<br><a href="<?php echo esc_attr($url); ?>"><?php echo esc_html($url); ?></a></li>
-				</ul>
-				<?php
+				
+				echo '<li>';
+				if ( $label ) echo esc_html($label) . ':' . '<br>';
+				echo '<a href="'. esc_attr($url) .'">'. esc_html($url) .'</a>';
+				echo '</li>';
 			}
+			
+			echo '</ul>';
+			
 		}
 		?>
 		

@@ -305,6 +305,8 @@ if ( ! function_exists('ah_list_hike_items') ) {
 							
 							<p>For instructions on how to get the Sheet and Column IDs, refer to the <a href="admin.php?page=acf-ah-smartsheet">Smartsheet Settings</a> page.</p>
 							
+							<div class="ah-spreadsheet-finder"></div>
+							
 							<!-- Sheet ID -->
 							<div class="ah-admin-field">
 								<div class="ah-label">

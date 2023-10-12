@@ -38,8 +38,11 @@ function AH_Smartsheet_Sync() { return AH_Plugin()->Smartsheet_Sync; }
 function AH_Smartsheet_Sync_Hikes() { return AH_Plugin()->Smartsheet_Sync_Hikes; }
 function AH_Smartsheet_Sync_Hotels_And_Villages() { return AH_Plugin()->Smartsheet_Sync_Hotels_And_Villages; }
 function AH_Smartsheet_Sync_Itineraries() { return AH_Plugin()->Smartsheet_Sync_Itineraries; }
-function AH_Smartsheet_Sync_Rooms_And_Meals() { return AH_Plugin()->Smartsheet_Sync_Rooms_And_Meals; }
+// function AH_Smartsheet_Sync_Rooms_And_Meals() { return AH_Plugin()->Smartsheet_Sync_Rooms_And_Meals; }
+function AH_Smartsheet_Sync_Meals() { return AH_Plugin()->Smartsheet_Sync_Meals; }
+function AH_Smartsheet_Sync_Rooms() { return AH_Plugin()->Smartsheet_Sync_Rooms; }
 function AH_Smartsheet_Sync_Sheets() { return AH_Plugin()->Smartsheet_Sync_Sheets; }
+function AH_Smartsheet_Warnings() { return AH_Plugin()->Smartsheet_Warnings; }
 
 function AH_Account_Page() { return AH_Plugin()->Account_Page; }
 function AH_Document() { return AH_Plugin()->Document; }
@@ -81,8 +84,11 @@ class Class_AH_Plugin {
 	public Class_AH_Smartsheet_Sync_Hikes                $Smartsheet_Sync_Hikes;
 	public Class_AH_Smartsheet_Sync_Hotels_And_Villages  $Smartsheet_Sync_Hotels_And_Villages;
 	public Class_AH_Smartsheet_Sync_Itineraries          $Smartsheet_Sync_Itineraries;
-	public Class_AH_Smartsheet_Sync_Rooms_And_Meals      $Smartsheet_Sync_Rooms_And_Meals;
+	// public Class_AH_Smartsheet_Sync_Rooms_And_Meals      $Smartsheet_Sync_Rooms_And_Meals;
+	public Class_AH_Smartsheet_Sync_Meals                $Smartsheet_Sync_Meals;
+	public Class_AH_Smartsheet_Sync_Rooms                $Smartsheet_Sync_Rooms;
 	public Class_AH_Smartsheet_Sync_Sheets               $Smartsheet_Sync_Sheets;
+	public Class_AH_Smartsheet_Warnings             $Smartsheet_Warnings;
 	
 	public Class_Account_Page_Post_Type        $Account_Page;
 	public Class_Document_Post_Type            $Document;
@@ -188,11 +194,20 @@ class Class_AH_Plugin {
 		require_once( __DIR__ . '/includes/smartsheet/sync-itineraries.php' );
 		$this->Smartsheet_Sync_Itineraries = new Class_AH_Smartsheet_Sync_Itineraries();
 		
-		require_once( __DIR__ . '/includes/smartsheet/sync-rooms-and-meals.php' );
-		$this->Smartsheet_Sync_Rooms_And_Meals = new Class_AH_Smartsheet_Sync_Rooms_And_Meals();
+		// require_once( __DIR__ . '/includes/smartsheet/sync-rooms-and-meals.php' );
+		// $this->Smartsheet_Sync_Rooms_And_Meals = new Class_AH_Smartsheet_Sync_Rooms_And_Meals();
+		
+		require_once( __DIR__ . '/includes/smartsheet/sync-meals.php' );
+		$this->Smartsheet_Sync_Meals = new Class_AH_Smartsheet_Sync_Meals();
+		
+		require_once( __DIR__ . '/includes/smartsheet/sync-rooms.php' );
+		$this->Smartsheet_Sync_Rooms = new Class_AH_Smartsheet_Sync_Rooms();
 		
 		require_once( __DIR__ . '/includes/smartsheet/sync-sheets.php' );
 		$this->Smartsheet_Sync_Sheets = new Class_AH_Smartsheet_Sync_Sheets();
+		
+		require_once( __DIR__ . '/includes/smartsheet/warnings.php' );
+		$this->Smartsheet_Warnings = new Class_AH_Smartsheet_Warnings();
 		
 		// ----------------------------------------
 		// 6. Custom post types controllers

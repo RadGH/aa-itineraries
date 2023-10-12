@@ -104,51 +104,7 @@ class Class_Compare_Field_Values {
 			<input type="hidden" name="ah[values]" value="<?php echo esc_attr(json_encode( $this->new_values )); ?>">
 		
 			<?php
-			// Display any warnings
-			if ( $warnings = $this->fields->get_warnings() ) {
-				?>
-				<div class="postbox compare-warnings">
-					<div class="inside">
-						<h3>Warnings:</h3>
-						
-						<?php
-						foreach( $warnings as $warning ) {
-							echo '<div class="compare-warning">';
-							
-							echo wpautop($warning['message']);
-							
-							if ( $warning['data'] !== null ) {
-								echo '<pre class="compare-data">';
-								echo esc_html( print_r( $warning['data'], true ) );
-								echo '</pre>';
-							}
-							
-							echo '</div>';
-						}
-						?>
-						
-						<?php if ( $debug_info ) { ?>
-						<div class="ah-accordion ah-collapsed" id="debugging-information">
-							<div class="ah-handle">
-								<a href="#debugging-information">Debugging Information</a>
-							</div>
-							<div class="ah-content">
-								<?php
-								foreach( $debug_info as $key => $data ) {
-									echo '<h3>', esc_html($key), '</h3>';
-									echo '<pre>';
-									echo esc_html( print_r( $data, true ) );
-									echo '</pre>';
-								}
-								?>
-							</div>
-						</div>
-						<?php } ?>
-						
-					</div>
-				</div>
-				<?php
-			}
+			AH_Smartsheet_Warnings()->display_warnings( $debug_info );
 			?>
 			
 			<div class="postbox">
@@ -443,5 +399,10 @@ class Class_Compare_Field_Values {
 		pre_dump($new_value);
 	}
 	*/
+	
+	/** Add a sync warning */
+	public function add_warning( $message, $data = null ) {
+		AH_Smartsheet_Warnings()->add_warning( $message, $data );
+	}
 	
 }

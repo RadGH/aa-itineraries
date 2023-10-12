@@ -36,6 +36,12 @@ window.AH_Admin = new (function() {
 
 		}
 
+		// Create a spreadsheet/column lookup tool for every instance of ".ah-spreadsheet-finder"
+		// Used on master sheet settings pages, to streamline looking up the sheet and column IDs
+		jQuery('.ah-spreadsheet-finder').each(function() {
+			o.setup_spreadsheet_finder( jQuery(this) );
+		});
+
 	};
 
 	/**
@@ -578,6 +584,131 @@ window.AH_Admin = new (function() {
 			}
 
 		});
+
+	};
+
+	/**
+	 * Create a spreadsheet/column lookup tool for every instance of ".ah-spreadsheet-finder"
+	 */
+	o.setup_spreadsheet_finder = function( $container ) {
+
+		/*
+		// Create a search box and results container to identify the spreadsheet.
+		let $search = jQuery('<input type="text" placeholder="Search for a spreadsheet">');
+		let $results = jQuery('<div class="ah-spreadsheet-finder-results" style="display: none;"></div>');
+		let $errors = jQuery('<div class="ah-spreadsheet-finder-errors" style="display: none;"></div>');
+		let $reset_search = jQuery('<a href="#" class="button button-secondary reset-results">Reset Search</a>');
+
+		let is_searching = false;
+		let queue_next_search = false;
+		let search_stopped = false;
+		let prev_search_term = '';
+
+		const show_error = function( message ) {
+			if ( message ) {
+				$errors.html( '<p><strong>Error:</strong> ' + message + '</p>' ).css('display', '');
+			}else{
+				$errors.html('').css('display', 'none');
+			}
+		};
+
+		const clear_error = function() {
+			show_error('');
+		};
+
+		const clear_results = function() {
+			$results.html('').css('display', 'none');
+		};
+
+		const search_spreadsheets = function() {
+			let search_term = $search.val().trim();
+			if ( ! search_term ) return;
+
+			if ( search_term === prev_search_term ) {
+				return;
+			}else{
+				prev_search_term = search_term;
+			}
+
+			search_stopped = false;
+			is_searching = true;
+			queue_next_search = false;
+
+			jQuery.ajax({
+				url: AH_API.get_setting('admin', 'ajaxurl'),
+				method: 'POST',
+				data: {
+					action: 'ah_search_spreadsheets',
+					search: search_term
+				},
+				success: function( response, textStatus, jqXHR ) {
+					if ( search_stopped ) {
+						return; // ignore the results if the search was stopped early
+					}
+
+					if ( ! response || response === "0" || typeof response !== 'string' ) {
+						// show_error('Ajax response failed when searching for spreadsheets. See console for details.');
+						ah_log( 'Ajax response had no results when searching spreadsheets.', {response:response, textStatus:textStatus, jqXHR:jqXHR} );
+						return;
+					}
+
+
+					clear_error();
+
+					if ( response ) {
+						$results.html( response ).css('display', '');
+
+						// Scroll to the top of the results container
+						$results[0].scrollTop = 0;
+					}else{
+						$results.html( '<p>No results found</p>' ).css('display', '');
+					}
+				},
+				error: function( jqXHR, textStatus, errorThrown ) {
+					show_error( 'Error searching for spreadsheets: ' + errorThrown );
+					ah_log( 'Error searching for spreadsheets: ', {jqXHR:jqXHR, textStatus:textStatus, errorThrown:errorThrown} );
+				},
+				complete: function() {
+					is_searching = false;
+
+					if ( queue_next_search ) {
+						queue_next_search = false;
+						ah_log( 'Spreadsheet search completed. Searching again because queue_next_search is true.' );
+						search_spreadsheets();
+					}else{
+						ah_log( 'Spreadsheet search completed' );
+					}
+				}
+			});
+		};
+
+		// When the search box is changed, search for spreadsheets using ajax
+		$search.on('keyup', function() {
+			if ( is_searching ) {
+				queue_next_search = true;
+			}else{
+				search_spreadsheets();
+			}
+		});
+
+		// When the reset button is clicked, clear the search box and results
+		$reset_search.on('click', function(e) {
+			queue_next_search = false;
+			search_stopped = true;
+			e.preventDefault();
+			e.stopPropagation();
+			$search.val('');
+			clear_results();
+			clear_error();
+		});
+
+		// Append elements to container
+		$container.append( $errors );
+		$container.append( $search ).append(' ');
+		$container.append( $reset_search );
+		$container.append( $results );
+
+		*/
 
 	};
 
