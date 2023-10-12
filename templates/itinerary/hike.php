@@ -18,9 +18,7 @@ $topographic_map = get_field( 'topographic_map', $post_id, false );
 $content = get_field( 'content', $post_id );
 
 $links_title = get_field( 'link_title', $post_id );
-$link_items = get_field( 'link_links', $post_id );
-// Remove empty links
-if ( $link_items ) foreach( $link_items as $k => $l ) if ( empty($l['url']) ) unset($link_items[$k]);
+$link_list = ah_get_links_list_html( get_field( 'link_links', $post_id ) );
 
 // Topographic map image from WP media library
 $t = $topographic_map ? wp_get_attachment_image_src( $topographic_map, 'full' ) : false;
@@ -114,7 +112,7 @@ if ( ah_is_pdf() ) {
 <section id="<?php echo esc_attr($html_id); ?>" class="hike hike-<?php echo esc_attr($slug); ?> hike-id-<?php echo $post_id; ?>">
 	
 	<?php
-	$show_hike_page = ( $summary || $link_items || $elevation_diagram || $content );
+	$show_hike_page = ( $summary || $link_list || $elevation_diagram || $content );
 	if ( $show_hike_page ) {
 	?>
 	<div class="pdf-page page-hike" id="page-hike-main-<?php echo esc_attr($slug); ?>">
@@ -137,28 +135,12 @@ if ( ah_is_pdf() ) {
 			</div>
 		<?php } ?>
 		
-		<?php if ( $link_items ) { ?>
+		<?php if ( $link_list ) { ?>
 			<div class="section-content hike-links">
 				<?php if ( $links_title ) echo '<h3>', $links_title, '</h3>'; ?>
 				
-				<ul class="hike-link-list">
-					<?php
-					foreach( $link_items as $l ) {
-						$url = $l['url'];
-						$label = $l['label'];
-						if ( ! $label ) $label = $url;
-						
-						echo '<li>';
-						
-						echo sprintf(
-							'<a href="%s" target="_blank" rel="external">%s</a>',
-							esc_attr($url),
-							esc_html($label)
-						);
-						
-						echo '</li>';
-					}
-					?>
+				<ul class="link-list hike-link-list">
+					<?php echo $link_list; ?>
 				</ul>
 			</div>
 		<?php } ?>

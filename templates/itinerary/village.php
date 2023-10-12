@@ -18,6 +18,9 @@ $title = get_field( 'village_name', $village_id ) ?: get_the_title( $village_id 
 $intro = get_field( 'village_intro', $village_id );
 $details = get_field( 'around_the_village', $village_id );
 
+$village_links_title = get_field( 'link_title', $village_id );
+$village_link_list = ah_get_links_list_html( get_field( 'link_links', $village_id ) );
+
 // Image ID now belongs to the village
 // $village_map_id = get_field( 'image', $village_id, false );
 
@@ -25,10 +28,14 @@ if ( AH_Hotel()->is_valid( $hotel_id ) ) {
 	$hotel_name = get_field( 'hotel_name', $hotel_id );
 	$hotel_description = get_field( 'description', $hotel_id );
 	$village_map_id = get_field( 'village_map', $hotel_id, false );
+	$hotel_links_title = get_field( 'link_title', $hotel_id );
+	$hotel_link_list = ah_get_links_list_html( get_field( 'link_links', $hotel_id ) );
 }else{
 	$hotel_name = false;
 	$hotel_description = false;
 	$village_map_id = false;
+	$hotel_links_title = false;
+	$hotel_link_list = false;
 }
 ?>
 
@@ -87,26 +94,45 @@ if ( ah_is_pdf() ) {
 	</div>
 	<?php } ?>
 	
-	<?php if ( $hotel_description ) { ?>
-	<div class="section-content hotel-description">
-		<?php if ( $hotel_name ) echo '<h3>', $hotel_name, '</h3>'; ?>
-		<?php echo wpautop( $hotel_description ); ?>
-	</div>
+	<?php if ( $village_link_list ) { ?>
+		<div class="section-content village-links">
+			<?php if ( $village_links_title ) echo '<h3>', $village_links_title, '</h3>'; ?>
+			
+			<ul class="link-list village-link-list">
+				<?php echo $village_link_list; ?>
+			</ul>
+		</div>
+	<?php } ?>
+	
+	<?php if ( $hotel_description || $hotel_link_list ) { ?>
+		<div class="section-content hotel-description">
+			<?php if ( $hotel_name ) echo '<h3>', $hotel_name, '</h3>'; ?>
+			
+			<?php if ( $hotel_description ) echo wpautop( trim($hotel_description) ); ?>
+			
+			<?php if ( $hotel_link_list ) { ?>
+				<?php if ( $hotel_links_title ) echo '<h3>', $hotel_links_title, '</h3>'; ?>
+				
+				<ul class="link-list hotel-link-list">
+					<?php echo $hotel_link_list; ?>
+				</ul>
+			<?php } ?>
+		</div>
 	<?php } ?>
 	
 	<?php if ( $details ) { ?>
-	<div class="section-content around-the-village">
-		<?php echo '<h2 class="pdf-subtitle">In and Around ', $title, '</h2>'; ?>
-		
-		<?php echo wpautop( $details ); ?>
-		
-		<?php
-		if ( $additional_content ) {
-			echo wpautop( $additional_content );
-		}
-		?>
-		
-	</div>
+		<div class="section-content around-the-village">
+			<?php echo '<h2 class="pdf-subtitle">In and Around ', $title, '</h2>'; ?>
+			
+			<?php echo wpautop( $details ); ?>
+			
+			<?php
+			if ( $additional_content ) {
+				echo wpautop( $additional_content );
+			}
+			?>
+			
+		</div>
 	<?php } ?>
 	
 	</div>

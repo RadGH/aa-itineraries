@@ -808,3 +808,57 @@ function ah_get_itinerary_post_types() {
 		'ah_village',
 	);
 }
+
+
+/**
+ * Display a list of links for use on the itinerary and pdf
+ *
+ * @param array[] $links {
+ *
+ *     @type string label
+ *     @type string url
+ *                              }
+ *
+ * @param bool|null $full_links If true, the label will appear on its own line and the full URL will be displayed on its own line.
+ *                              If null (default), automatically enabled for PDFs and disabled for web.
+ *
+ * @return string|false
+ */
+function ah_get_links_list_html( $links, $full_links = null ) {
+	// Remove empty links
+	if ( $links ) foreach( $links as $k => $l ) {
+		if ( empty($l['url']) ) unset($links[$k]);
+	}
+	
+	// Return false if no valid links to display
+	if ( empty($links) ) return false;
+	
+	// Use full links on PDF view, unless specified
+	if ( $full_links === null ) $full_links = ah_is_pdf();
+	
+	// Output the links
+	$html = '';
+	
+	if ( $links ) foreach( $links as $l ) {
+		$url = $l['url'];
+		$label = $l['label'];
+		if ( ! $label ) $label = $url;
+		
+		$html .= '<li>';
+		
+		if ( $full_links ) {
+			if ( $label ) $html .=  esc_html($label) . ':' . '<br>';
+			$html .=  '<a href="'. esc_attr($url) .'" target="_blank" rel="external">'. esc_html($url) .'</a>';
+		}else{
+			$html .= sprintf(
+				'<a href="%s" target="_blank" rel="external">%s</a>',
+				esc_attr($url),
+				esc_html($label)
+			);
+		}
+		
+		$html .= '</li>' . "\n";
+	}
+	
+	return $html;
+}

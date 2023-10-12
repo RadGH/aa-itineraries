@@ -124,7 +124,7 @@
 
 /* Start: Hike List */
 @media ( max-width: 650px ) {
-	.itinerary-hike-summary ul.hike-list li a {
+	.itinerary-hike-summary ul.link-list li a {
 		display: block;
 		overflow: auto;
 		padding: 0 0 8px;

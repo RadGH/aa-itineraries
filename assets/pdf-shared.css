@@ -259,16 +259,24 @@ table.directory-table .column-2 {
 }
 
 .itinerary-hike-summary h3,
-.itinerary-hike-summary ul.hike-list {
+.itinerary-hike-summary ul.link-list {
 	margin: 0 0 15px;
 }
 /* End: Hike List */
 
-/* Start: Hikes */
-ul.hike-link-list {
+/* Start: List of links (Hotels, hikes, villages) */
+ul.link-list {
 	margin: 10px 0;
 }
-/* End: Hikes */
+
+h3 + ul.link-list {
+	margin-bottom: 30px;
+}
+
+ul.link-list a {
+	text-decoration: underline;
+}
+/* End: List of links (Hotels, hikes, villages) */
 
 /* Start: Documents */
 .pdf-page .section-document {

@@ -151,32 +151,15 @@ function ah_get_hike_summary( $itinerary_id ) {
 	foreach( $hikes as $i => $s ) {
 		$hike_id = (int) $s['hike'];
 		$title = get_field( 'hike_name', $hike_id ) ?: get_the_title( $hike_id );
-		$links = get_field( 'link_links', $hike_id );
 		$slug = get_post_field( 'post_name', $hike_id );
 		
+		$link_list = ah_get_links_list_html( get_field( 'link_links', $hike_id ), true );
 		?>
 		<h3><a href="#hike-<?php echo esc_attr($slug); ?>"><?php echo $title; ?></a></h3>
 		
-		<?php
-		if ( ! ah_is_array_recursively_empty( $links ) ) {
-			
-			echo '<ul class="hike-list">';
-			
-			foreach( $links as $l ) {
-				$label = $l['label'];
-				$url = $l['url'];
-				
-				echo '<li>';
-				if ( $label ) echo esc_html($label) . ':' . '<br>';
-				echo '<a href="'. esc_attr($url) .'">'. esc_html($url) .'</a>';
-				echo '</li>';
-			}
-			
-			echo '</ul>';
-			
-		}
-		?>
-		
+		<ul class="link-list hotel-link-list">
+			<?php echo $link_list; ?>
+		</ul>
 		<?php
 	}
 	
