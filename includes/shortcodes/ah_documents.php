@@ -38,13 +38,19 @@ function shortcode_ah_documents( $atts, $content = '', $shortcode_name = 'ah_doc
 	?>
 	
 	<table class="ah-table ah-table-responsive ah-document-table" cellspacing="0">
+		<?php
+		/*
+		?>
 		<thead>
 			<tr>
 				<th class="col col-name">Name</th>
 				<th class="col col-preview">&nbsp;</th>
-				<th class="col col-date">Date</th>
+				<?php // <th class="col col-date">Date</th> ?>
 			</tr>
 		</thead>
+		<?php
+		*/
+		?>
 		
 		<tbody>
 			<?php
@@ -91,7 +97,9 @@ function shortcode_ah_documents( $atts, $content = '', $shortcode_name = 'ah_doc
 						}
 					?></td>
 					
+					<?php /*
 					<td class="col col-date" data-mobile-label="Date"><?php echo $date; ?></td>
+					*/ ?>
 					
 				</tr>
 				<?php
